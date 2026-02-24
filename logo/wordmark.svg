@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 160" width="740" height="160">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a2744"/>
+      <stop offset="100%" stop-color="#090e1c"/>
+    </linearGradient>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#93c5fd"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+    <linearGradient id="mid" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="bot" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="text-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="sub-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#6366f1" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background pill -->
+  <rect width="740" height="160" rx="24" fill="url(#bg)"/>
+
+  <!-- Icon: three arcs scaled to fit 160×160 area with 10px padding -->
+  <!-- Scale factor: icon is 512→140px = 0.273×, origin shift: +10px -->
+  <!-- Bottom arc  original: M68 415 Q256 265 444 415  → ×0.273 +10 -->
+  <path
+    d="M 28.6 123.3 Q 79.9 82.3 131.2 123.3"
+    stroke="url(#bot)" stroke-width="12" fill="none" stroke-linecap="round"
+    filter="url(#glow)"
+  />
+  <!-- Middle arc original: M118 338 Q256 202 394 338 -->
+  <path
+    d="M 42.2 102.3 Q 79.9 65.1 117.6 102.3"
+    stroke="url(#mid)" stroke-width="12" fill="none" stroke-linecap="round"
+    filter="url(#glow)"
+  />
+  <!-- Top arc original: M168 262 Q256 142 344 262 -->
+  <path
+    d="M 55.9 81.5 Q 79.9 48.8 103.9 81.5"
+    stroke="url(#top)" stroke-width="12" fill="none" stroke-linecap="round"
+    filter="url(#glow)"
+  />
+
+  <!-- Wordmark: "stacknest" -->
+  <text
+    x="160" y="98"
+    font-family="'Segoe UI', 'Inter', 'SF Pro Display', system-ui, sans-serif"
+    font-size="62"
+    font-weight="700"
+    letter-spacing="-1"
+    fill="url(#text-grad)"
+  >stacknest</text>
+
+  <!-- Tagline -->
+  <text
+    x="162" y="128"
+    font-family="'Segoe UI', 'Inter', system-ui, sans-serif"
+    font-size="18"
+    font-weight="400"
+    letter-spacing="3"
+    fill="url(#sub-grad)"
+  >LOCAL DEV STACK MANAGER</text>
+</svg>

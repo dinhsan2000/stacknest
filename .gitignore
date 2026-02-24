@@ -1,0 +1,55 @@
+# ─── Go ───────────────────────────────────────────────────────────────────────
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.work.sum
+
+# ─── Wails build output ───────────────────────────────────────────────────────
+# build/bin/ = compiled app; build/ itself contains manifest/icons (keep)
+build/bin/
+
+# ─── Frontend ─────────────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ─── Stacknest runtime directories ────────────────────────────────────────────
+# Created at the project root during `wails dev` (RootPath = cwd).
+# Downloaded binaries, generated data, logs — not source code.
+/bin/
+/data/
+/logs/
+/ssl/
+/vhosts/
+/.config_backups/
+/vhosts.json
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ─── dotenv ───────────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Temp / misc ──────────────────────────────────────────────────────────────
+.temp
+.tmp
+*.pid
+*.pid.lock
+*.seed
