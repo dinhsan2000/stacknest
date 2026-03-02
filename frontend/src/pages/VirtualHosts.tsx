@@ -19,8 +19,9 @@ interface CertInfo {
 
 export default function VirtualHosts() {
   const { vhosts, fetchVHosts, addVHost, removeVHost } = useServiceStore()
-  const [form, setForm]       = useState({ name: '', domain: '', root: '', ssl: false })
-  const [error, setError]     = useState('')
+  const [form, setForm]         = useState({ name: '', domain: '', root: '', server: 'apache', ssl: false })
+  const [error, setError]       = useState('')
+  const [confirmDomain, setConfirmDomain] = useState<string | null>(null)
 
   // SSL state
   const [caInstalled, setCAInstalled] = useState(false)
@@ -55,8 +56,8 @@ export default function VirtualHosts() {
       return
     }
     try {
-      await addVHost(form.name || form.domain, form.domain, form.root, form.ssl)
-      setForm({ name: '', domain: '', root: '', ssl: false })
+      await addVHost(form.name || form.domain, form.domain, form.root, form.server, form.ssl)
+      setForm({ name: '', domain: '', root: '', server: 'apache', ssl: false })
       setError('')
     } catch (e: any) {
       setError(e.toString())
@@ -178,7 +179,24 @@ export default function VirtualHosts() {
           </button>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
+          {/* Server toggle */}
+          <div className="flex items-center gap-1 bg-[#0f1420] border border-[#2a3347] rounded-lg p-0.5">
+            {(['apache', 'nginx'] as const).map(srv => (
+              <button
+                key={srv}
+                onClick={() => setForm(f => ({ ...f, server: srv }))}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors capitalize ${
+                  form.server === srv
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {srv}
+              </button>
+            ))}
+          </div>
+
           <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
             <input
               type="checkbox"
@@ -215,8 +233,15 @@ export default function VirtualHosts() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-white font-medium">{vh.domain}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                    vh.server === 'nginx'
+                      ? 'bg-green-500/20 text-green-400'
+                      : 'bg-orange-500/20 text-orange-400'
+                  }`}>
+                    {vh.server ?? 'apache'}
+                  </span>
                   {vh.ssl && (
-                    <span className="text-xs bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">SSL</span>
+                    <span className="text-xs bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">SSL</span>
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">{vh.root}</p>
@@ -244,19 +269,37 @@ export default function VirtualHosts() {
                 )}
               </div>
 
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2 flex-shrink-0 items-center">
                 <a
                   href={`http${vh.ssl ? 's' : ''}://${vh.domain}`}
                   className="px-3 py-1.5 rounded-lg text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
                 >
                   Open
                 </a>
-                <button
-                  onClick={() => removeVHost(vh.domain)}
-                  className="px-3 py-1.5 rounded-lg text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-                >
-                  Remove
-                </button>
+                {confirmDomain === vh.domain ? (
+                  <>
+                    <span className="text-xs text-red-400">Remove this host?</span>
+                    <button
+                      onClick={() => { removeVHost(vh.domain); setConfirmDomain(null) }}
+                      className="px-3 py-1.5 rounded-lg text-xs bg-red-500 text-white hover:bg-red-600 transition-colors"
+                    >
+                      Yes, remove
+                    </button>
+                    <button
+                      onClick={() => setConfirmDomain(null)}
+                      className="px-3 py-1.5 rounded-lg text-xs bg-[#2a3347] text-gray-300 hover:bg-[#334060] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDomain(vh.domain)}
+                    className="px-3 py-1.5 rounded-lg text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             </div>
           )

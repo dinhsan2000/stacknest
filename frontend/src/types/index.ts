@@ -19,6 +19,7 @@ export interface VirtualHost {
   root: string
   ssl: boolean
   active: boolean
+  server: string
 }
 
 export interface ServiceConfig {

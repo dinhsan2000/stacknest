@@ -37,7 +37,12 @@ type App struct {
 }
 
 func NewApp() *App {
-	cfg, _ := config.Load()
+	cfg, err := config.Load()
+	if err != nil {
+		// Config rơi về defaults; app vẫn chạy được nhưng cần thông báo.
+		// ctx chưa có ở đây nên dùng stderr.
+		fmt.Fprintf(os.Stderr, "[stacknest] config warning: %v\n", err)
+	}
 	downloader.InitCatalog(cfg.RootPath)
 	return &App{
 		cfg:         cfg,
@@ -348,9 +353,9 @@ func (a *App) GetVirtualHosts() []vhost.VirtualHost {
 	return a.vhostMgr.GetAll()
 }
 
-// AddVirtualHost thêm virtual host mới
-func (a *App) AddVirtualHost(name, domain, root string, ssl bool) error {
-	return a.vhostMgr.Add(name, domain, root, ssl)
+// AddVirtualHost thêm virtual host mới. server là "apache" hoặc "nginx".
+func (a *App) AddVirtualHost(name, domain, root, server string, ssl bool) error {
+	return a.vhostMgr.Add(name, domain, root, server, ssl)
 }
 
 // RemoveVirtualHost xóa virtual host
@@ -708,6 +713,9 @@ func (a *App) ensureNginxConfig(force bool) {
 	wwwPath := filepath.ToSlash(a.cfg.WWWPath)
 	accessLog := filepath.ToSlash(filepath.Join(a.cfg.LogPath, "nginx", "access.log"))
 	errorLog := filepath.ToSlash(filepath.Join(a.cfg.LogPath, "nginx", "error.log"))
+	// Vhosts Nginx: {rootPath}/vhosts/nginx/*.conf
+	vhostsNginxDir := filepath.ToSlash(filepath.Join(a.cfg.RootPath, "vhosts", "nginx"))
+	os.MkdirAll(filepath.Join(a.cfg.RootPath, "vhosts", "nginx"), 0755)
 	port := a.cfg.Nginx.Port
 	if port == 0 {
 		port = 8080
@@ -755,8 +763,11 @@ http {
             root   html;
         }
     }
+
+    # Virtual hosts được quản lý bởi Stacknest
+    include %s/*.conf;
 }
-`, accessLog, errorLog, port, wwwPath)
+`, accessLog, errorLog, port, wwwPath, vhostsNginxDir)
 
 	os.WriteFile(confPath, []byte(conf), 0644) //nolint:errcheck
 }

@@ -10,6 +10,7 @@ import {
   SaveConfigFile,
   GetConfigBackups,
   RestoreConfigBackup,
+  RestartService,
 } from '../../wailsjs/go/main/App'
 import { Code2, Database, Layers, Server, Zap } from 'lucide-react'
 import { ServiceIcon } from '../components/ServiceIcon'
@@ -57,10 +58,11 @@ export default function ConfigEditor() {
   const [savedContent, setSavedContent] = useState('')
   const [backups, setBackups]         = useState<BackupInfo[]>([])
   const [showBackups, setShowBackups] = useState(false)
-  const [loading, setLoading]         = useState(false)
-  const [saving, setSaving]           = useState(false)
-  const [error, setError]             = useState('')
-  const [success, setSuccess]         = useState('')
+  const [loading, setLoading]           = useState(false)
+  const [saving, setSaving]             = useState(false)
+  const [restarting, setRestarting]     = useState(false)
+  const [error, setError]               = useState('')
+  const [success, setSuccess]           = useState('')
 
   const isDirty = content !== savedContent
 
@@ -109,13 +111,39 @@ export default function ConfigEditor() {
       await SaveConfigFile(selected.path, content)
       setSavedContent(content)
       setSuccess('Saved successfully')
-      // Refresh backups list
       const bups = await GetConfigBackups(selected.path)
       setBackups((bups || []) as BackupInfo[])
     } catch (e: any) {
       setError(e?.toString() ?? 'Failed to save')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleSaveAndRestart = async () => {
+    if (!selected || !selected.writable) return
+    setSaving(true)
+    setError('')
+    setSuccess('')
+    try {
+      await SaveConfigFile(selected.path, content)
+      setSavedContent(content)
+      const bups = await GetConfigBackups(selected.path)
+      setBackups((bups || []) as BackupInfo[])
+    } catch (e: any) {
+      setError(e?.toString() ?? 'Failed to save')
+      setSaving(false)
+      return
+    }
+    setSaving(false)
+    setRestarting(true)
+    try {
+      await RestartService(service)
+      setSuccess(`Saved and restarted ${service}`)
+    } catch (e: any) {
+      setError(e?.toString() ?? `Failed to restart ${service}`)
+    } finally {
+      setRestarting(false)
     }
   }
 
@@ -226,10 +254,17 @@ export default function ConfigEditor() {
                 </button>
                 <button
                   onClick={handleSave}
-                  disabled={saving || !isDirty || !selected.writable}
-                  className="px-4 py-1.5 text-xs rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors disabled:opacity-40"
+                  disabled={saving || restarting || !isDirty || !selected.writable}
+                  className="px-4 py-1.5 text-xs rounded-lg bg-[#1e2535] border border-[#2a3347] text-gray-300 hover:text-white font-medium transition-colors disabled:opacity-40"
                 >
                   {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  onClick={handleSaveAndRestart}
+                  disabled={saving || restarting || !isDirty || !selected.writable}
+                  className="px-4 py-1.5 text-xs rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors disabled:opacity-40"
+                >
+                  {restarting ? 'Restarting...' : saving ? 'Saving...' : 'Save & Restart'}
                 </button>
               </div>
             </div>

@@ -53,6 +53,9 @@ func (m *Manager) GetConfigFiles(service string) []ConfigFile {
 
 // ReadFile đọc nội dung file
 func (m *Manager) ReadFile(path string) (string, error) {
+	if !m.isAllowedPath(path) {
+		return "", fmt.Errorf("access denied: path outside allowed config directories")
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("cannot read %s: %w", path, err)
@@ -62,6 +65,10 @@ func (m *Manager) ReadFile(path string) (string, error) {
 
 // SaveFile lưu nội dung file (tự tạo backup trước)
 func (m *Manager) SaveFile(path, content string) error {
+	if !m.isAllowedPath(path) {
+		return fmt.Errorf("access denied: path outside allowed config directories")
+	}
+
 	// Tạo backup trước khi ghi
 	if _, err := os.Stat(path); err == nil {
 		_ = m.createBackup(path)
@@ -108,6 +115,17 @@ func (m *Manager) GetBackups(path string) []BackupInfo {
 
 // RestoreBackup khôi phục từ backup
 func (m *Manager) RestoreBackup(backupPath, targetPath string) error {
+	// backupPath phải nằm trong thư mục backup của rootPath
+	backupRoot := filepath.Clean(filepath.Join(m.rootPath, ".config_backups"))
+	cleanBackup := filepath.Clean(backupPath)
+	if !strings.HasPrefix(cleanBackup, backupRoot+string(filepath.Separator)) {
+		return fmt.Errorf("access denied: backup path outside .config_backups directory")
+	}
+	// targetPath phải là config path hợp lệ
+	if !m.isAllowedPath(targetPath) {
+		return fmt.Errorf("access denied: target path outside allowed config directories")
+	}
+
 	data, err := os.ReadFile(backupPath)
 	if err != nil {
 		return err
@@ -116,6 +134,45 @@ func (m *Manager) RestoreBackup(backupPath, targetPath string) error {
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
+
+// isAllowedPath kiểm tra path có nằm trong thư mục được phép không.
+// Ngăn path traversal (../../ etc.) ra ngoài rootPath hoặc system config dirs.
+func (m *Manager) isAllowedPath(path string) bool {
+	if !filepath.IsAbs(path) {
+		return false
+	}
+	clean := filepath.Clean(path)
+
+	// Cho phép bất kỳ file nào trong rootPath (bin/, vhosts/, .config_backups/...)
+	rootClean := filepath.Clean(m.rootPath)
+	if strings.HasPrefix(clean, rootClean+string(filepath.Separator)) || clean == rootClean {
+		return true
+	}
+
+	// Cho phép system config paths trên non-Windows
+	if runtime.GOOS != "windows" {
+		systemPrefixes := []string{
+			"/etc/apache2/",
+			"/etc/httpd/",
+			"/usr/local/etc/httpd/",
+			"/opt/homebrew/etc/httpd/",
+			"/etc/nginx/",
+			"/usr/local/etc/nginx/",
+			"/opt/homebrew/etc/nginx/",
+			"/etc/mysql/",
+			"/usr/local/etc/",
+			"/opt/homebrew/etc/",
+			"/etc/php/",
+		}
+		for _, prefix := range systemPrefixes {
+			if strings.HasPrefix(clean, prefix) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
 
 func (m *Manager) createBackup(path string) error {
 	data, err := os.ReadFile(path)

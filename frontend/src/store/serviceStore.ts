@@ -35,7 +35,7 @@ interface ServiceStore {
   stopAll: () => void
 
   fetchVHosts: () => Promise<void>
-  addVHost: (name: string, domain: string, root: string, ssl: boolean) => Promise<void>
+  addVHost: (name: string, domain: string, root: string, server: string, ssl: boolean) => Promise<void>
   removeVHost: (domain: string) => Promise<void>
 
   fetchConfig: () => Promise<void>
@@ -104,8 +104,8 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
     set({ vhosts: vhosts || [] })
   },
 
-  addVHost: async (name, domain, root, ssl) => {
-    await AddVirtualHost(name, domain, root, ssl)
+  addVHost: async (name, domain, root, server, ssl) => {
+    await AddVirtualHost(name, domain, root, server, ssl)
     await get().fetchVHosts()
   },
 

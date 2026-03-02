@@ -12,7 +12,7 @@ import {vhost} from '../models';
 
 export function AddPHPPath(arg1:string):Promise<void>;
 
-export function AddVirtualHost(arg1:string,arg2:string,arg3:string,arg4:boolean):Promise<void>;
+export function AddVirtualHost(arg1:string,arg2:string,arg3:string,arg4:string,arg5:boolean):Promise<void>;
 
 export function CheckAllPortConflicts():Promise<Array<portcheck.ConflictInfo>>;
 

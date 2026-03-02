@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // State lưu trạng thái PHP versions đã biết
@@ -77,9 +79,13 @@ func (s *Switcher) Switch(phpPath string) error {
 		return err
 	}
 
-	// Trên Windows: cập nhật symlink trong thư mục bin nếu có
+	// Trên Windows: cập nhật symlink/junction "current" → PHP dir.
+	// Không fatal nếu thất bại — switch vẫn thành công qua ActivePath.
 	if runtime.GOOS == "windows" {
-		_ = s.updateWindowsSymlink(phpPath)
+		if err := s.updateWindowsSymlink(phpPath); err != nil {
+			// Junction/symlink là tiện ích PATH, không ảnh hưởng hoạt động chính.
+			_ = err
+		}
 	}
 
 	return nil
@@ -106,18 +112,37 @@ func (s *Switcher) ActivePHPPath() string {
 
 // ─── Windows symlink helper ───────────────────────────────────────────────────
 
-// updateWindowsSymlink cập nhật symlink "current" trong thư mục php
-// Ví dụ: C:\laragon\bin\php\current → C:\laragon\bin\php\php8.2.10
+// updateWindowsSymlink cập nhật symlink/junction "current" → PHP dir.
+// Ví dụ: {bin}\php\current → {bin}\php\php-8.2.10
+//
+// Thử theo thứ tự:
+//  1. os.Symlink (cần admin hoặc Developer Mode)
+//  2. mklink /J (directory junction — không cần admin)
 func (s *Switcher) updateWindowsSymlink(phpExe string) error {
 	phpDir := filepath.Dir(phpExe)
 	parentDir := filepath.Dir(phpDir)
 	linkPath := filepath.Join(parentDir, "current")
 
-	// Xóa symlink cũ
+	// Xóa symlink/junction cũ (bỏ qua lỗi nếu không tồn tại)
 	_ = os.Remove(linkPath)
+	// os.Remove không xóa được junction — dùng RemoveAll để chắc
+	_ = os.RemoveAll(linkPath)
 
-	// Tạo symlink mới (cần admin trên Windows, nên ignore error)
-	return os.Symlink(phpDir, linkPath)
+	// 1. Thử symbolic link (cần admin hoặc Developer Mode)
+	if err := os.Symlink(phpDir, linkPath); err == nil {
+		return nil
+	}
+
+	// 2. Fallback: directory junction (không cần admin)
+	out, err := exec.Command("cmd", "/C", "mklink", "/J",
+		filepath.FromSlash(linkPath),
+		filepath.FromSlash(phpDir),
+	).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("cannot create PHP junction %s → %s: %w — %s",
+			linkPath, phpDir, err, strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
