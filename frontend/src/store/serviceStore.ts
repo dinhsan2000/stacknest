@@ -15,6 +15,8 @@ import {
   StartBinaryDownload,
   SetActiveVersion,
   SetServiceEnabled,
+  CancelBinaryDownload,
+  DeleteBinary,
 } from '../../wailsjs/go/main/App'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 
@@ -26,6 +28,8 @@ interface ServiceStore {
   binaryStatus: ServiceVersionStatus[]
   // key: "service@version", value: download progress 0-100
   downloadProgress: Record<string, number>
+  // key: "service@version", value: error message
+  downloadErrors: Record<string, string>
 
   fetchServices: () => Promise<void>
   startService: (name: string) => Promise<void>
@@ -41,8 +45,11 @@ interface ServiceStore {
   fetchConfig: () => Promise<void>
   fetchBinaryStatus: () => Promise<void>
   downloadBinary: (service: string, version: string) => void
+  cancelDownload: (service: string, version: string) => void
+  deleteBinary: (service: string, version: string) => Promise<void>
   setActiveVersion: (service: string, version: string) => Promise<void>
   setServiceEnabled: (name: string, enabled: boolean) => Promise<void>
+  dismissDownloadError: (key: string) => void
   initEventListeners: () => void
 }
 
@@ -53,6 +60,7 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
   loading: {},
   binaryStatus: [],
   downloadProgress: {},
+  downloadErrors: {},
 
   fetchServices: async () => {
     const services = await GetServices()
@@ -126,13 +134,31 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
 
   downloadBinary: (service, version) => {
     const key = `${service}@${version}`
-    set(s => ({ downloadProgress: { ...s.downloadProgress, [key]: 0 } }))
+    // Clear previous error for this key
+    set(s => ({
+      downloadProgress: { ...s.downloadProgress, [key]: 0 },
+      downloadErrors: { ...s.downloadErrors, [key]: undefined } as any,
+    }))
     StartBinaryDownload(service, version).catch(() => {
       set(s => {
         const { [key]: _, ...rest } = s.downloadProgress
         return { downloadProgress: rest }
       })
     })
+  },
+
+  cancelDownload: (service, version) => {
+    const key = `${service}@${version}`
+    CancelBinaryDownload(service, version)
+    set(s => {
+      const { [key]: _, ...rest } = s.downloadProgress
+      return { downloadProgress: rest }
+    })
+  },
+
+  deleteBinary: async (service, version) => {
+    await DeleteBinary(service, version)
+    await get().fetchBinaryStatus()
   },
 
   setActiveVersion: async (service, version) => {
@@ -145,7 +171,18 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
     await get().fetchServices()
   },
 
+  dismissDownloadError: (key: string) => {
+    set(s => {
+      const { [key]: _, ...rest } = s.downloadErrors
+      return { downloadErrors: rest }
+    })
+  },
+
   initEventListeners: () => {
+    // Prevent duplicate registration (React StrictMode calls useEffect twice)
+    if ((window as any).__stacknest_events_init) return
+      ; (window as any).__stacknest_events_init = true
+
     EventsOn('services:updated', (services: unknown[]) => {
       set({ services: (services || []) as ServiceInfo[] })
     })
@@ -159,7 +196,10 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
       const key = `${data.service}@${data.version}`
       set(s => {
         const { [key]: _, ...rest } = s.downloadProgress
-        return { downloadProgress: rest }
+        const errors = data.error
+          ? { ...s.downloadErrors, [key]: data.error }
+          : s.downloadErrors
+        return { downloadProgress: rest, downloadErrors: errors }
       })
       get().fetchBinaryStatus()
     })
