@@ -10,12 +10,20 @@ export function AddVirtualHost(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['AddVirtualHost'](arg1, arg2, arg3, arg4, arg5);
 }
 
+export function CancelBinaryDownload(arg1, arg2) {
+  return window['go']['main']['App']['CancelBinaryDownload'](arg1, arg2);
+}
+
 export function CheckAllPortConflicts() {
   return window['go']['main']['App']['CheckAllPortConflicts']();
 }
 
 export function CheckPortConflict(arg1) {
   return window['go']['main']['App']['CheckPortConflict'](arg1);
+}
+
+export function DeleteBinary(arg1, arg2) {
+  return window['go']['main']['App']['DeleteBinary'](arg1, arg2);
 }
 
 export function GenerateSSLCert(arg1) {

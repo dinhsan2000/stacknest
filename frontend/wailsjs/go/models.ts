@@ -301,11 +301,11 @@ export namespace vhost {
 	    ssl: boolean;
 	    active: boolean;
 	    server: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new VirtualHost(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
@@ -313,7 +313,7 @@ export namespace vhost {
 	        this.root = source["root"];
 	        this.ssl = source["ssl"];
 	        this.active = source["active"];
-	        this.server = source["server"] || "apache";
+	        this.server = source["server"];
 	    }
 	}
 
