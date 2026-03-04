@@ -31,7 +31,8 @@ type serviceProcess struct {
 // binPaths:  ServiceName → thư mục chứa executable.
 // dataPaths: ServiceName → thư mục data (chỉ MySQL cần; các service khác bỏ qua).
 // logPaths:  ServiceName → thư mục log tập trung (tạo sẵn nếu chưa có).
-func NewManager(binPaths, dataPaths, logPaths map[ServiceName]string) *Manager {
+// ports:     ServiceName → port (từ config; dùng để hiển thị trên Dashboard).
+func NewManager(binPaths, dataPaths, logPaths map[ServiceName]string, ports map[ServiceName]int) *Manager {
 	bin := func(name ServiceName) string { return binPaths[name] }
 	data := func(name ServiceName) string { return dataPaths[name] }
 	log := func(name ServiceName) string {
@@ -41,15 +42,21 @@ func NewManager(binPaths, dataPaths, logPaths map[ServiceName]string) *Manager {
 		}
 		return dir
 	}
+	port := func(name ServiceName, fallback int) int {
+		if p, ok := ports[name]; ok && p > 0 {
+			return p
+		}
+		return fallback
+	}
 	return &Manager{
 		services: map[ServiceName]*serviceProcess{
-			ServiceApache: {info: ServiceInfo{Name: ServiceApache, Display: "Apache", Status: StatusStopped, Port: 80, Version: "2.4"}, binDir: bin(ServiceApache), logDir: log(ServiceApache)},
-			ServiceNginx:  {info: ServiceInfo{Name: ServiceNginx, Display: "Nginx", Status: StatusStopped, Port: 8080, Version: "1.25"}, binDir: bin(ServiceNginx), logDir: log(ServiceNginx)},
-			ServiceMySQL:  {info: ServiceInfo{Name: ServiceMySQL, Display: "MySQL", Status: StatusStopped, Port: 3306, Version: "8.0"}, binDir: bin(ServiceMySQL), dataDir: data(ServiceMySQL), logDir: log(ServiceMySQL)},
-			ServiceRedis:  {info: ServiceInfo{Name: ServiceRedis, Display: "Redis", Status: StatusStopped, Port: 6379, Version: "7.0"}, binDir: bin(ServiceRedis), logDir: log(ServiceRedis)},
+			ServiceApache: {info: ServiceInfo{Name: ServiceApache, Display: "Apache", Status: StatusStopped, Port: port(ServiceApache, 80), Version: "2.4"}, binDir: bin(ServiceApache), logDir: log(ServiceApache)},
+			ServiceNginx:  {info: ServiceInfo{Name: ServiceNginx, Display: "Nginx", Status: StatusStopped, Port: port(ServiceNginx, 8080), Version: "1.25"}, binDir: bin(ServiceNginx), logDir: log(ServiceNginx)},
+			ServiceMySQL:  {info: ServiceInfo{Name: ServiceMySQL, Display: "MySQL", Status: StatusStopped, Port: port(ServiceMySQL, 3306), Version: "8.0"}, binDir: bin(ServiceMySQL), dataDir: data(ServiceMySQL), logDir: log(ServiceMySQL)},
+			ServiceRedis:  {info: ServiceInfo{Name: ServiceRedis, Display: "Redis", Status: StatusStopped, Port: port(ServiceRedis, 6379), Version: "7.0"}, binDir: bin(ServiceRedis), logDir: log(ServiceRedis)},
 			// PHP-CGI chạy ở port 9000 — cần khi dùng Nginx (FastCGI proxy).
 			// Khi dùng Apache: không cần start (PHP loaded as module).
-			ServicePHP: {info: ServiceInfo{Name: ServicePHP, Display: "PHP", Status: StatusStopped, Port: 9000, Version: "8.2"}, binDir: bin(ServicePHP), logDir: log(ServicePHP)},
+			ServicePHP: {info: ServiceInfo{Name: ServicePHP, Display: "PHP", Status: StatusStopped, Port: port(ServicePHP, 9000), Version: "8.2"}, binDir: bin(ServicePHP), logDir: log(ServicePHP)},
 		},
 	}
 }
@@ -104,7 +111,7 @@ func (m *Manager) Start(name ServiceName) error {
 	m.mu.Unlock()
 
 	// Dọn dẹp tiến trình cũ còn sót lại (do app crash, force-quit, v.v.)
-	killStaleProcesses(name, dataDir)
+	killStaleProcesses(name, binDir, dataDir)
 
 	cmd, err := buildCommand(name, binDir, dataDir, logDir)
 	if err != nil {
@@ -160,7 +167,7 @@ func (m *Manager) Stop(name ServiceName) error {
 		return fmt.Errorf("service %s not found", name)
 	}
 
-	if svc.info.Status != StatusRunning {
+	if svc.info.Status != StatusRunning && svc.info.Status != StatusError {
 		m.mu.Unlock()
 		return fmt.Errorf("service %s is not running", name)
 	}
@@ -242,6 +249,15 @@ func (m *Manager) UpdateDataDir(name ServiceName, dataDir string) {
 	}
 }
 
+// UpdatePort cập nhật port hiển thị của một service tại runtime.
+func (m *Manager) UpdatePort(name ServiceName, port int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if svc, ok := m.services[name]; ok {
+		svc.info.Port = port
+	}
+}
+
 func (m *Manager) setError(name ServiceName, errMsg string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -269,25 +285,30 @@ var staleExeNames = map[ServiceName][]string{
 }
 
 // killStaleProcesses dừng mọi tiến trình cũ của service (app crash, orphaned process).
-// Trên Windows dùng taskkill /IM; trên Unix dùng pkill.
+// Trên Windows: dùng wmic để chỉ kill process có executable path khớp với binDir.
+// Điều này tránh kill nhầm Apache/MySQL của Laragon, XAMPP, v.v.
 // Với MySQL còn xóa luôn file .pid trong dataDir để tránh lỗi "already running".
-func killStaleProcesses(name ServiceName, dataDir string) {
+func killStaleProcesses(name ServiceName, binDir, dataDir string) {
 	exes, ok := staleExeNames[name]
-	if !ok {
+	if !ok || binDir == "" {
 		return
 	}
 
 	if runtime.GOOS == "windows" {
 		for _, exe := range exes {
-			if strings.HasSuffix(exe, ".exe") {
-				exec.Command("taskkill", "/F", "/IM", exe).Run() //nolint:errcheck
+			if !strings.HasSuffix(exe, ".exe") {
+				continue
 			}
+			killByPathWindows(exe, binDir)
 		}
 	} else {
 		for _, exe := range exes {
-			if !strings.HasSuffix(exe, ".exe") {
-				exec.Command("pkill", "-f", exe).Run() //nolint:errcheck
+			if strings.HasSuffix(exe, ".exe") {
+				continue
 			}
+			// Trên Unix: pkill -f với đường dẫn đầy đủ để chỉ kill process của Stacknest
+			fullPath := filepath.Join(binDir, exe)
+			exec.Command("pkill", "-f", fullPath).Run() //nolint:errcheck
 		}
 	}
 
@@ -299,6 +320,42 @@ func killStaleProcesses(name ServiceName, dataDir string) {
 				if !e.IsDir() && strings.HasSuffix(e.Name(), ".pid") {
 					os.Remove(filepath.Join(dataDir, e.Name())) //nolint:errcheck
 				}
+			}
+		}
+	}
+}
+
+// killByPathWindows tìm process theo tên và chỉ kill nếu executable path nằm trong binDir.
+// Sử dụng wmic để lấy ExecutablePath, so sánh với binDir trước khi kill.
+func killByPathWindows(exeName, binDir string) {
+	// Dùng wmic để lấy danh sách process có tên khớp, kèm executable path
+	out, err := exec.Command("wmic", "process", "where",
+		fmt.Sprintf(`Name='%s'`, exeName),
+		"get", "ExecutablePath,ProcessId", "/FORMAT:CSV").Output()
+	if err != nil {
+		return
+	}
+
+	targetDir := strings.ToLower(filepath.Clean(binDir))
+
+	for _, line := range strings.Split(string(out), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "Node") {
+			continue
+		}
+		parts := strings.Split(line, ",")
+		if len(parts) < 3 {
+			continue
+		}
+		// CSV format: Node,ExecutablePath,ProcessId
+		procPath := strings.ToLower(filepath.Clean(strings.TrimSpace(parts[1])))
+		pidStr := strings.TrimSpace(parts[2])
+
+		// Chỉ kill nếu executable nằm trong thư mục binDir của Stacknest
+		if strings.HasPrefix(procPath, targetDir) {
+			pid, _ := strconv.Atoi(pidStr)
+			if pid > 0 {
+				exec.Command("taskkill", "/F", "/T", "/PID", strconv.Itoa(pid)).Run() //nolint:errcheck
 			}
 		}
 	}
