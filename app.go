@@ -17,6 +17,7 @@ import (
 	"stacknest/internal/ssl"
 	"stacknest/internal/terminal"
 	"stacknest/internal/vhost"
+	"sync"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -33,7 +34,10 @@ type App struct {
 	sslMgr      *ssl.Manager
 	adminerSrv  *database.Server
 	logCancel   context.CancelFunc
+	termMu      sync.Mutex
 	termSession *terminal.Session
+	dlMu        sync.Mutex
+	dlCancels   map[string]context.CancelFunc
 }
 
 func NewApp() *App {
@@ -46,12 +50,13 @@ func NewApp() *App {
 	downloader.InitCatalog(cfg.RootPath)
 	return &App{
 		cfg:         cfg,
-		svcMgr:      services.NewManager(serviceBinPaths(cfg), serviceDataPaths(cfg), serviceLogPaths(cfg)),
+		svcMgr:      services.NewManager(serviceBinPaths(cfg), serviceDataPaths(cfg), serviceLogPaths(cfg), servicePortMap(cfg)),
 		vhostMgr:    vhost.NewManager(cfg.RootPath),
 		phpSwitcher: phpswitch.NewSwitcher(cfg.RootPath),
 		cfgEditor:   configeditor.NewManager(cfg.RootPath),
 		sslMgr:      ssl.NewManager(cfg.RootPath),
 		adminerSrv:  database.NewServer(cfg.RootPath),
+		dlCancels:   make(map[string]context.CancelFunc),
 	}
 }
 
@@ -88,6 +93,17 @@ func serviceLogPaths(cfg *config.Config) map[services.ServiceName]string {
 	}
 }
 
+// servicePortMap trả về port từ config cho từng service.
+func servicePortMap(cfg *config.Config) map[services.ServiceName]int {
+	return map[services.ServiceName]int{
+		services.ServiceApache: cfg.Apache.Port,
+		services.ServiceNginx:  cfg.Nginx.Port,
+		services.ServiceMySQL:  cfg.MySQL.Port,
+		services.ServiceRedis:  cfg.Redis.Port,
+		services.ServicePHP:    cfg.PHP.Port,
+	}
+}
+
 // startup được gọi khi app khởi động
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
@@ -100,8 +116,7 @@ func (a *App) startup(ctx context.Context) {
 
 	// Auto start services nếu được cấu hình
 	if a.cfg.AutoStart {
-		go a.StartService(string(services.ServiceApache))
-		go a.StartService(string(services.ServiceMySQL))
+		go a.StartAll()
 	}
 
 	// Emit service status events định kỳ
@@ -220,8 +235,25 @@ func (a *App) GetVersionCatalog() map[string]downloader.ServiceCatalog {
 // StartBinaryDownload bắt đầu tải binary cho service/version trong background.
 // Events: "binary:progress" {service, version, pct float64}, "binary:done" {service, version, error string}
 func (a *App) StartBinaryDownload(service, version string) error {
+	key := service + "@" + version
+
+	// Cancel download cũ nếu đang chạy cho cùng service@version
+	a.dlMu.Lock()
+	if cancel, ok := a.dlCancels[key]; ok {
+		cancel()
+	}
+	dlCtx, cancel := context.WithCancel(a.ctx)
+	a.dlCancels[key] = cancel
+	a.dlMu.Unlock()
+
 	go func() {
-		err := downloader.Download(service, version, a.cfg.BinPath, func(downloaded, total int64) {
+		defer func() {
+			a.dlMu.Lock()
+			delete(a.dlCancels, key)
+			a.dlMu.Unlock()
+		}()
+
+		err := downloader.Download(dlCtx, service, version, a.cfg.BinPath, func(downloaded, total int64) {
 			if total > 0 {
 				pct := float64(downloaded) / float64(total) * 100
 				runtime.EventsEmit(a.ctx, "binary:progress", map[string]any{
@@ -234,7 +266,7 @@ func (a *App) StartBinaryDownload(service, version string) error {
 
 		if err == nil {
 			if service == "nginx" {
-				a.ensureNginxConfig(true) // force: ghi đè stock conf vừa extract từ ZIP
+				a.ensureNginxConfig(true)
 			}
 			if service == "mysql" {
 				a.ensureMySQLInit()
@@ -252,6 +284,22 @@ func (a *App) StartBinaryDownload(service, version string) error {
 		})
 	}()
 	return nil
+}
+
+// CancelBinaryDownload hủy download đang chạy cho service/version.
+func (a *App) CancelBinaryDownload(service, version string) {
+	key := service + "@" + version
+	a.dlMu.Lock()
+	if cancel, ok := a.dlCancels[key]; ok {
+		cancel()
+		delete(a.dlCancels, key)
+	}
+	a.dlMu.Unlock()
+}
+
+// DeleteBinary xóa binary đã cài của service/version. Không cho xóa version active.
+func (a *App) DeleteBinary(service, version string) error {
+	return downloader.Delete(service, version, a.cfg.BinPath)
 }
 
 // SetActiveVersion đặt phiên bản active cho một service, cập nhật service manager.
@@ -328,7 +376,9 @@ func (a *App) SwitchPHP(phpPath string) error {
 		return err
 	}
 	// Cập nhật binDir trong service manager cho PHP service (Nginx mode)
-	newBinDir := downloader.ActiveExeDir(a.cfg.BinPath, "php")
+	// Dùng thư mục chứa PHP exe được chọn, không dùng downloader vì phpSwitcher
+	// lưu vào php_versions.json (file khác với versions.json của downloader).
+	newBinDir := filepath.Dir(phpPath)
 	a.svcMgr.UpdateBinDir(services.ServicePHP, newBinDir)
 
 	// Restart whichever is running
@@ -354,8 +404,19 @@ func (a *App) GetVirtualHosts() []vhost.VirtualHost {
 }
 
 // AddVirtualHost thêm virtual host mới. server là "apache" hoặc "nginx".
+// Nếu ssl=true, tự động generate SSL certificate cho domain.
 func (a *App) AddVirtualHost(name, domain, root, server string, ssl bool) error {
-	return a.vhostMgr.Add(name, domain, root, server, ssl)
+	if err := a.vhostMgr.Add(name, domain, root, server, ssl); err != nil {
+		return err
+	}
+	// Auto generate SSL cert khi add vhost với SSL enabled
+	if ssl {
+		if _, _, err := a.sslMgr.GenerateCert(domain); err != nil {
+			// Log warning nhưng không fail việc thêm vhost — user có thể generate lại sau
+			runtime.LogWarningf(a.ctx, "Auto SSL cert generation failed for %s: %v", domain, err)
+		}
+	}
+	return nil
 }
 
 // RemoveVirtualHost xóa virtual host
@@ -373,6 +434,13 @@ func (a *App) GetConfig() *config.Config {
 // SaveConfig lưu cấu hình
 func (a *App) SaveConfig(cfg config.Config) error {
 	a.cfg = &cfg
+	// Propagate port thay đổi vào service manager để Dashboard hiển thị đúng
+	a.svcMgr.UpdatePort(services.ServiceApache, cfg.Apache.Port)
+	a.svcMgr.UpdatePort(services.ServiceNginx, cfg.Nginx.Port)
+	a.svcMgr.UpdatePort(services.ServiceMySQL, cfg.MySQL.Port)
+	a.svcMgr.UpdatePort(services.ServicePHP, cfg.PHP.Port)
+	a.svcMgr.UpdatePort(services.ServiceRedis, cfg.Redis.Port)
+	a.emitServiceUpdate()
 	return a.cfg.Save()
 }
 
@@ -553,6 +621,7 @@ func (a *App) StopLogWatch() {
 
 // TerminalStart tạo session terminal mới, bắt đầu stream output qua event "term:output"
 func (a *App) TerminalStart(cwd string) error {
+	a.termMu.Lock()
 	// Đóng session cũ nếu có
 	if a.termSession != nil {
 		a.termSession.Close()
@@ -561,9 +630,11 @@ func (a *App) TerminalStart(cwd string) error {
 
 	sess, out, err := terminal.New(a.ctx, cwd)
 	if err != nil {
+		a.termMu.Unlock()
 		return fmt.Errorf("cannot start terminal: %w", err)
 	}
 	a.termSession = sess
+	a.termMu.Unlock()
 
 	// Stream output → frontend
 	go func() {
@@ -572,7 +643,9 @@ func (a *App) TerminalStart(cwd string) error {
 		}
 		// Process exited
 		runtime.EventsEmit(a.ctx, "term:exit", nil)
+		a.termMu.Lock()
 		a.termSession = nil
+		a.termMu.Unlock()
 	}()
 
 	return nil
@@ -580,22 +653,30 @@ func (a *App) TerminalStart(cwd string) error {
 
 // TerminalWrite gửi input từ user vào shell
 func (a *App) TerminalWrite(data string) error {
-	if a.termSession == nil {
+	a.termMu.Lock()
+	sess := a.termSession
+	a.termMu.Unlock()
+	if sess == nil {
 		return fmt.Errorf("no active terminal session")
 	}
-	return a.termSession.Write([]byte(data))
+	return sess.Write([]byte(data))
 }
 
 // TerminalResize thay đổi kích thước terminal
 func (a *App) TerminalResize(rows, cols uint16) error {
-	if a.termSession == nil {
+	a.termMu.Lock()
+	sess := a.termSession
+	a.termMu.Unlock()
+	if sess == nil {
 		return nil
 	}
-	return a.termSession.Resize(rows, cols)
+	return sess.Resize(rows, cols)
 }
 
 // TerminalClose đóng session terminal
 func (a *App) TerminalClose() {
+	a.termMu.Lock()
+	defer a.termMu.Unlock()
 	if a.termSession != nil {
 		a.termSession.Close()
 		a.termSession = nil
