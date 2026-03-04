@@ -11,6 +11,7 @@ import Terminal from './pages/Terminal'
 import Database from './pages/Database'
 import ConfigEditor from './pages/ConfigEditor'
 import Settings from './pages/Settings'
+import PHPSwitcher from './pages/PHPSwitcher'
 
 function App() {
   const [page, setPage] = useState<Page>('dashboard')
@@ -23,14 +24,15 @@ function App() {
   const renderPage = () => {
     switch (page) {
       case 'dashboard': return <Dashboard />
-      case 'binaries':  return <Binaries />
-      case 'vhosts':    return <VirtualHosts />
-      case 'logs':      return <LogViewer />
-      case 'terminal':  return <Terminal />
-      case 'database':  return <Database />
-      case 'config':    return <ConfigEditor />
-      case 'settings':  return <Settings />
-      default:          return <Dashboard />
+      case 'binaries': return <Binaries />
+      case 'vhosts': return <VirtualHosts />
+      case 'logs': return <LogViewer />
+      case 'terminal': return <Terminal />
+      case 'database': return <Database />
+      case 'config': return <ConfigEditor />
+      case 'php': return <PHPSwitcher />
+      case 'settings': return <Settings />
+      default: return <Dashboard />
     }
   }
 

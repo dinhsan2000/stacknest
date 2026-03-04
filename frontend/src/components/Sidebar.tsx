@@ -8,10 +8,11 @@ import {
   ScrollText,
   TerminalSquare,
   Settings,
+  Code2,
 } from 'lucide-react'
 import { useServiceStore } from '../store/serviceStore'
 
-export type Page = 'dashboard' | 'binaries' | 'database' | 'vhosts' | 'logs' | 'terminal' | 'config' | 'settings'
+export type Page = 'dashboard' | 'binaries' | 'database' | 'vhosts' | 'logs' | 'terminal' | 'config' | 'php' | 'settings'
 
 interface Props {
   current: Page
@@ -19,14 +20,15 @@ interface Props {
 }
 
 const navItems: { id: Page; label: string; icon: React.ReactNode }[] = [
-  { id: 'dashboard', label: 'Dashboard',     icon: <LayoutDashboard size={16} /> },
-  { id: 'binaries',  label: 'Binaries',      icon: <Package size={16} /> },
-  // { id: 'database',  label: 'Database',      icon: <Database size={16} /> },
-  { id: 'vhosts',    label: 'Virtual Hosts', icon: <Globe size={16} /> },
-  { id: 'config',    label: 'Config Editor', icon: <FileCode size={16} /> },
-  { id: 'logs',      label: 'Log Viewer',    icon: <ScrollText size={16} /> },
-  { id: 'terminal',  label: 'Terminal',      icon: <TerminalSquare size={16} /> },
-  { id: 'settings',  label: 'Settings',      icon: <Settings size={16} /> },
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+  { id: 'binaries', label: 'Binaries', icon: <Package size={16} /> },
+  { id: 'database', label: 'Database', icon: <Database size={16} /> },
+  { id: 'vhosts', label: 'Virtual Hosts', icon: <Globe size={16} /> },
+  { id: 'config', label: 'Config Editor', icon: <FileCode size={16} /> },
+  { id: 'php', label: 'PHP Versions', icon: <Code2 size={16} /> },
+  { id: 'logs', label: 'Log Viewer', icon: <ScrollText size={16} /> },
+  { id: 'terminal', label: 'Terminal', icon: <TerminalSquare size={16} /> },
+  { id: 'settings', label: 'Settings', icon: <Settings size={16} /> },
 ]
 
 export default function Sidebar({ current, onChange }: Props) {
