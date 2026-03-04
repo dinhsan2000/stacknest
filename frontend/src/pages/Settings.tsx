@@ -7,12 +7,53 @@ export default function Settings() {
   const { config, fetchConfig } = useServiceStore()
   const [form, setForm] = useState<AppConfig | null>(null)
   const [saved, setSaved] = useState(false)
+  const [portErrors, setPortErrors] = useState<Record<string, string>>({})
 
   useEffect(() => { fetchConfig() }, [])
   useEffect(() => { if (config) setForm(config) }, [config])
 
+  const validatePort = (svc: string, value: number): string => {
+    if (isNaN(value) || value < 1 || value > 65535) {
+      return 'Port must be 1–65535'
+    }
+    // Check for duplicate ports
+    if (form) {
+      const allPorts: Record<string, number> = {
+        apache: form.apache.port,
+        nginx: form.nginx.port,
+        mysql: form.mysql.port,
+        php: form.php.port,
+        redis: form.redis.port,
+        [svc]: value, // override with current value
+      }
+      for (const [name, port] of Object.entries(allPorts)) {
+        if (name !== svc && port === value) {
+          return `Conflicts with ${name} port`
+        }
+      }
+    }
+    return ''
+  }
+
+  const handlePortChange = (svc: string, value: string) => {
+    const port = parseInt(value) || 0
+    setForm(f => f ? {
+      ...f,
+      [svc]: { ...f[svc as keyof AppConfig] as any, port }
+    } : f)
+
+    const err = validatePort(svc, port)
+    setPortErrors(prev => {
+      if (err) return { ...prev, [svc]: err }
+      const { [svc]: _, ...rest } = prev
+      return rest
+    })
+  }
+
+  const hasPortErrors = Object.keys(portErrors).length > 0
+
   const handleSave = async () => {
-    if (!form) return
+    if (!form || hasPortErrors) return
     await SaveConfig(form as any)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -55,13 +96,18 @@ export default function Settings() {
               <label className="text-xs text-gray-400 capitalize">{svc} port</label>
               <input
                 type="number"
+                min={1}
+                max={65535}
                 value={form[svc].port}
-                onChange={e => setForm(f => f ? {
-                  ...f,
-                  [svc]: { ...f[svc], port: parseInt(e.target.value) }
-                } : f)}
-                className="bg-[#0f1420] border border-[#2a3347] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                onChange={e => handlePortChange(svc, e.target.value)}
+                className={`bg-[#0f1420] border rounded-lg px-3 py-2 text-sm text-white focus:outline-none ${portErrors[svc]
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-[#2a3347] focus:border-blue-500'
+                  }`}
               />
+              {portErrors[svc] && (
+                <p className="text-xs text-red-400">{portErrors[svc]}</p>
+              )}
             </div>
           ))}
         </div>
@@ -83,9 +129,13 @@ export default function Settings() {
 
       <button
         onClick={handleSave}
-        className="self-start px-6 py-2.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 font-medium transition-colors"
+        disabled={hasPortErrors}
+        className={`self-start px-6 py-2.5 rounded-lg font-medium transition-colors ${hasPortErrors
+            ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+            : 'bg-blue-500 text-white hover:bg-blue-600'
+          }`}
       >
-        {saved ? 'Saved!' : 'Save Settings'}
+        {saved ? '✓ Saved!' : hasPortErrors ? 'Fix errors first' : 'Save Settings'}
       </button>
     </div>
   )
