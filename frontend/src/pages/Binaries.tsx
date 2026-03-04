@@ -1,18 +1,25 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Server, Database, Code2, Zap, Layers } from 'lucide-react'
 import { useServiceStore } from '../store/serviceStore'
 import { ServiceIcon } from '../components/ServiceIcon';
 
 const SERVICE_META: Record<string, { label: string; icon: React.ReactNode }> = {
-  apache: { label: 'Apache', icon: <Server   size={16} className="text-gray-400" /> },
-  nginx:  { label: 'Nginx',  icon: <Zap      size={16} className="text-gray-400" /> },
-  mysql:  { label: 'MySQL',  icon: <Database size={16} className="text-gray-400" /> },
-  php:    { label: 'PHP',    icon: <Code2    size={16} className="text-gray-400" /> },
-  redis:  { label: 'Redis',  icon: <Layers   size={16} className="text-gray-400" /> },
+  apache: { label: 'Apache', icon: <Server size={16} className="text-gray-400" /> },
+  nginx: { label: 'Nginx', icon: <Zap size={16} className="text-gray-400" /> },
+  mysql: { label: 'MySQL', icon: <Database size={16} className="text-gray-400" /> },
+  php: { label: 'PHP', icon: <Code2 size={16} className="text-gray-400" /> },
+  redis: { label: 'Redis', icon: <Layers size={16} className="text-gray-400" /> },
 }
 
 export default function Binaries() {
-  const { binaryStatus, downloadProgress, fetchBinaryStatus, downloadBinary, setActiveVersion } = useServiceStore()
+  const {
+    binaryStatus, downloadProgress, downloadErrors,
+    fetchBinaryStatus, downloadBinary, cancelDownload, deleteBinary,
+    setActiveVersion, dismissDownloadError,
+  } = useServiceStore()
+
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null) // "service@version"
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => { fetchBinaryStatus() }, [])
 
@@ -35,6 +42,35 @@ export default function Binaries() {
             {missingCount} service{missingCount > 1 ? 's' : ''} chưa có binary được cài.
             Tải ít nhất một phiên bản trước khi khởi động.
           </p>
+        </div>
+      )}
+
+      {/* Global download errors */}
+      {Object.entries(downloadErrors).map(([key, errMsg]) => (
+        <div key={key} className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+          <span className="text-red-400 text-lg">✕</span>
+          <p className="text-sm text-red-300 flex-1">
+            <strong>{key.replace('@', ' v')}</strong>: {errMsg}
+          </p>
+          <button
+            onClick={() => dismissDownloadError(key)}
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            Dismiss
+          </button>
+        </div>
+      ))}
+
+      {deleteError && (
+        <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+          <span className="text-red-400 text-lg">✕</span>
+          <p className="text-sm text-red-300 flex-1">{deleteError}</p>
+          <button
+            onClick={() => setDeleteError('')}
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
@@ -78,26 +114,23 @@ export default function Binaries() {
                   return (
                     <div
                       key={ver.version}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
-                        ver.active
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg ${ver.active
                           ? 'bg-blue-500/10 border border-blue-500/20'
                           : 'bg-[#0f1420] border border-transparent'
-                      }`}
+                        }`}
                     >
                       {/* Version indicator dot */}
-                      <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                        isDownloading ? 'bg-blue-400 animate-pulse' :
-                        ver.active ? 'bg-blue-400' :
-                        ver.installed ? 'bg-green-400' :
-                        'bg-gray-600'
-                      }`} />
+                      <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isDownloading ? 'bg-blue-400 animate-pulse' :
+                          ver.active ? 'bg-blue-400' :
+                            ver.installed ? 'bg-green-400' :
+                              'bg-gray-600'
+                        }`} />
 
                       {/* Version label */}
-                      <span className={`text-sm font-mono flex-1 ${
-                        ver.active ? 'text-blue-300 font-medium' :
-                        ver.installed ? 'text-white' :
-                        'text-gray-500'
-                      }`}>
+                      <span className={`text-sm font-mono flex-1 ${ver.active ? 'text-blue-300 font-medium' :
+                          ver.installed ? 'text-white' :
+                            'text-gray-500'
+                        }`}>
                         v{ver.version}
                       </span>
 
@@ -128,33 +161,70 @@ export default function Binaries() {
                         </div>
                       )}
 
-                      {/* Action button */}
-                      {isDownloading ? (
-                        <button
-                          disabled
-                          className="px-2.5 py-1 rounded-lg text-xs bg-blue-500/10 text-blue-400 flex-shrink-0 cursor-wait"
-                        >
-                          Downloading...
-                        </button>
-                      ) : ver.installed ? (
-                        ver.active ? (
-                          <span className="text-xs text-blue-400 px-2.5 py-1 flex-shrink-0">✓ Active</span>
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {isDownloading ? (
+                          <button
+                            onClick={() => cancelDownload(svc.service, ver.version)}
+                            className="px-2.5 py-1 rounded-lg text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        ) : ver.installed ? (
+                          ver.active ? (
+                            <span className="text-xs text-blue-400 px-2.5 py-1">✓ Active</span>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => setActiveVersion(svc.service, ver.version)}
+                                className="px-2.5 py-1 rounded-lg text-xs bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors"
+                              >
+                                Set Active
+                              </button>
+                              {deleteConfirm === key ? (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await deleteBinary(svc.service, ver.version)
+                                        setDeleteConfirm(null)
+                                        setDeleteError('')
+                                      } catch (e: any) {
+                                        setDeleteError(e?.toString() ?? 'Delete failed')
+                                        setDeleteConfirm(null)
+                                      }
+                                    }}
+                                    className="px-2 py-1 rounded-lg text-xs bg-red-500 text-white hover:bg-red-600 transition-colors"
+                                  >
+                                    Yes
+                                  </button>
+                                  <button
+                                    onClick={() => setDeleteConfirm(null)}
+                                    className="px-2 py-1 rounded-lg text-xs bg-[#2a3347] text-gray-300 hover:bg-[#334060] transition-colors"
+                                  >
+                                    No
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setDeleteConfirm(key)}
+                                  className="px-2.5 py-1 rounded-lg text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                                  title="Delete this version"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </>
+                          )
                         ) : (
                           <button
-                            onClick={() => setActiveVersion(svc.service, ver.version)}
-                            className="px-2.5 py-1 rounded-lg text-xs bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors flex-shrink-0"
+                            onClick={() => downloadBinary(svc.service, ver.version)}
+                            className="px-2.5 py-1 rounded-lg text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
                           >
-                            Set Active
+                            Download
                           </button>
-                        )
-                      ) : (
-                        <button
-                          onClick={() => downloadBinary(svc.service, ver.version)}
-                          className="px-2.5 py-1 rounded-lg text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex-shrink-0"
-                        >
-                          Download
-                        </button>
-                      )}
+                        )}
+                      </div>
                     </div>
                   )
                 })}
