@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"archive/zip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -155,7 +156,7 @@ func GetStatus(binPath string) []ServiceVersionStatus {
 }
 
 // Download tải và giải nén binary cho service/version vào binPath/{service}/{version}/
-func Download(service, version, binPath string, onProgress ProgressFunc) error {
+func Download(ctx context.Context, service, version, binPath string, onProgress ProgressFunc) error {
 	cat, ok := Catalog[service]
 	if !ok {
 		return fmt.Errorf("unknown service: %s", service)
@@ -180,7 +181,7 @@ func Download(service, version, binPath string, onProgress ProgressFunc) error {
 	tmpPath := tmp.Name()
 	defer os.Remove(tmpPath)
 
-	if err := downloadToFile(vspec.URL, tmp, onProgress); err != nil {
+	if err := downloadToFile(ctx, vspec.URL, tmp, onProgress); err != nil {
 		tmp.Close()
 		return fmt.Errorf("tải %s: %w", vspec.URL, err)
 	}
@@ -192,8 +193,28 @@ func Download(service, version, binPath string, onProgress ProgressFunc) error {
 	return extractZip(tmpPath, destDir, vspec.ZipStrip)
 }
 
-func downloadToFile(url string, w io.Writer, onProgress ProgressFunc) error {
-	resp, err := http.Get(url) //nolint:gosec
+// Delete xóa binary đã cài của service/version.
+// Không cho xóa version đang active — phải switch sang version khác trước.
+func Delete(service, version, binPath string) error {
+	vDir := versionDir(binPath, service, version)
+	if _, err := os.Stat(vDir); os.IsNotExist(err) {
+		return fmt.Errorf("version %s/%s not found", service, version)
+	}
+
+	avs := LoadActiveVersions(binPath)
+	if avs[service] == version {
+		return fmt.Errorf("cannot delete active version %s/%s — switch to another version first", service, version)
+	}
+
+	return os.RemoveAll(vDir)
+}
+
+func downloadToFile(ctx context.Context, url string, w io.Writer, onProgress ProgressFunc) error {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -208,6 +229,13 @@ func downloadToFile(url string, w io.Writer, onProgress ProgressFunc) error {
 	buf := make([]byte, 32*1024)
 
 	for {
+		// Check cancellation
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
 		n, readErr := resp.Body.Read(buf)
 		if n > 0 {
 			if _, writeErr := w.Write(buf[:n]); writeErr != nil {
