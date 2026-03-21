@@ -51,6 +51,9 @@ const en: Translations = {
     dash_starting: 'Starting…',
     dash_enabled_tip: 'Enabled — click to exclude from Start All',
     dash_disabled_tip: 'Disabled — click to include in Start All',
+    dash_version: 'Version',
+    dash_switch_version: 'Switch version',
+    dash_switching: 'Switching…',
 
     // Service status
     status_running: 'running',

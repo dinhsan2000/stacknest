@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { Server, Database, Code2, Zap, Layers } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Server, Database, Code2, Zap, Layers, ChevronDown } from 'lucide-react'
 import { ServiceInfo } from '../types'
 import { useServiceStore } from '../store/serviceStore'
 import { CheckPortConflict } from '../../wailsjs/go/main/App'
+import { useI18n } from '../i18n'
 import PortConflictModal from './PortConflictModal'
 
 const statusDot: Record<string, string> = {
@@ -45,16 +46,47 @@ interface Props {
 }
 
 export default function ServiceRow({ service }: Props) {
-  const { startService, stopService, restartService, setServiceEnabled, loading } = useServiceStore()
+  const { startService, stopService, restartService, setServiceEnabled, setActiveVersion, loading, binaryStatus } = useServiceStore()
+  const { t } = useI18n()
   const [conflict, setConflict] = useState<ConflictInfo | null>(null)
+  const [versionOpen, setVersionOpen] = useState(false)
+  const [switching, setSwitching] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const isLoading = loading[service.name]
   const isRunning = service.status === 'running'
   const isActive  = service.status === 'running' || service.status === 'starting'
+
+  // Find installed versions for this service
+  const svcVersions = binaryStatus.find(b => b.service === service.name)
+  const installedVersions = svcVersions?.versions.filter(v => v.installed) ?? []
+  const hasMultipleVersions = installedVersions.length > 1
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!versionOpen) return
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setVersionOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [versionOpen])
 
   const handleStart = async () => {
     const info = await CheckPortConflict(service.port) as ConflictInfo
     if (info.in_use) { setConflict(info); return }
     startService(service.name)
+  }
+
+  const handleSwitchVersion = async (version: string) => {
+    setVersionOpen(false)
+    setSwitching(true)
+    try {
+      await setActiveVersion(service.name, version)
+    } finally {
+      setSwitching(false)
+    }
   }
 
   return (
@@ -68,12 +100,52 @@ export default function ServiceRow({ service }: Props) {
         }`}
       >
         {/* Service name */}
-        <div className="flex items-center gap-2.5 w-36 shrink-0">
+        <div className="flex items-center gap-2.5 w-28 shrink-0">
           <ServiceIcon name={service.name} />
-          <div>
-            <div className="text-sm font-semibold text-white leading-tight">{service.display}</div>
-            <div className="text-xs text-gray-600">v{service.version}</div>
-          </div>
+          <span className="text-sm font-semibold text-white">{service.display}</span>
+        </div>
+
+        {/* Version */}
+        <div className="w-28 shrink-0 relative" ref={dropdownRef}>
+          {hasMultipleVersions ? (
+            <>
+              <button
+                onClick={() => setVersionOpen(!versionOpen)}
+                disabled={switching}
+                title={t.dash_switch_version}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
+                  switching
+                    ? 'bg-yellow-500/10 text-yellow-400'
+                    : 'bg-[#0f1420] text-blue-400 hover:bg-blue-500/15 hover:text-blue-300'
+                } disabled:opacity-50`}
+              >
+                {switching ? t.dash_switching : `v${service.version}`}
+                <ChevronDown size={12} className={`transition-transform ${versionOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {versionOpen && (
+                <div className="absolute top-full left-0 mt-1 z-50 bg-[#1e2535] border border-[#2a3347] rounded-lg shadow-xl py-1 min-w-[130px]">
+                  {installedVersions.map(v => (
+                    <button
+                      key={v.version}
+                      onClick={() => !v.active && handleSwitchVersion(v.version)}
+                      className={`w-full text-left px-3 py-1.5 text-xs font-mono transition-colors flex items-center justify-between ${
+                        v.active
+                          ? 'text-green-400 bg-green-500/10 cursor-default'
+                          : 'text-gray-300 hover:bg-[#2a3347] hover:text-white'
+                      }`}
+                    >
+                      v{v.version}
+                      {v.active && <span className="text-[10px] text-green-500">●</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-mono bg-[#0f1420] text-gray-500">
+              v{service.version}
+            </span>
+          )}
         </div>
 
         {/* Status */}

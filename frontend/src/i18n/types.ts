@@ -51,6 +51,9 @@ export interface Translations {
     dash_starting: string
     dash_enabled_tip: string
     dash_disabled_tip: string
+    dash_version: string
+    dash_switch_version: string
+    dash_switching: string
 
     // Service status
     status_running: string

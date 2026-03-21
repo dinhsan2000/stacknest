@@ -51,6 +51,9 @@ const vi: Translations = {
     dash_starting: 'Đang khởi động…',
     dash_enabled_tip: 'Đã bật — bấm để loại khỏi Khởi động tất cả',
     dash_disabled_tip: 'Đã tắt — bấm để thêm vào Khởi động tất cả',
+    dash_version: 'Phiên bản',
+    dash_switch_version: 'Đổi phiên bản',
+    dash_switching: 'Đang chuyển…',
 
     // Service status
     status_running: 'đang chạy',

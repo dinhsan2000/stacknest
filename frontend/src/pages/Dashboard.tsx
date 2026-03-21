@@ -4,11 +4,12 @@ import ServiceRow from '../components/ServiceCard'
 import { useI18n, tt } from '../i18n'
 
 export default function Dashboard() {
-  const { services, fetchServices, startAll, stopAll } = useServiceStore()
+  const { services, fetchServices, fetchBinaryStatus, startAll, stopAll } = useServiceStore()
   const { t } = useI18n()
 
   useEffect(() => {
     fetchServices()
+    fetchBinaryStatus()
   }, [])
 
   const runningCount = services.filter(s => s.status === 'running').length
@@ -53,7 +54,8 @@ export default function Dashboard() {
 
       {/* Table header */}
       <div className="flex items-center gap-4 px-4 text-xs font-medium text-gray-600 uppercase tracking-wider">
-        <span className="w-36 shrink-0">{t.dash_service}</span>
+        <span className="w-28 shrink-0">{t.dash_service}</span>
+        <span className="w-28 shrink-0">{t.dash_version}</span>
         <span className="w-24 shrink-0">{t.dash_status}</span>
         <span className="w-16 shrink-0">{t.dash_port}</span>
         <span className="w-24 shrink-0">{t.dash_pid}</span>
