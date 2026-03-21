@@ -54,6 +54,7 @@ const en: Translations = {
     dash_version: 'Version',
     dash_switch_version: 'Switch version',
     dash_switching: 'Switching…',
+    dash_edit_port: 'Click to edit port in Settings',
 
     // Service status
     status_running: 'running',

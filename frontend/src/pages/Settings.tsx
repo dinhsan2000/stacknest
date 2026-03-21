@@ -1,16 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useServiceStore } from '../store/serviceStore'
 import { SaveConfig } from '../../wailsjs/go/main/App'
 import { AppConfig } from '../types'
 
-export default function Settings() {
+interface Props {
+  highlightPort?: string
+}
+
+export default function Settings({ highlightPort }: Props) {
   const { config, fetchConfig } = useServiceStore()
   const [form, setForm] = useState<AppConfig | null>(null)
   const [saved, setSaved] = useState(false)
   const [portErrors, setPortErrors] = useState<Record<string, string>>({})
+  const [highlighted, setHighlighted] = useState<string | undefined>(highlightPort)
+  const portRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => { fetchConfig() }, [])
   useEffect(() => { if (config) setForm(config) }, [config])
+
+  // Auto-scroll and highlight the target port input
+  useEffect(() => {
+    if (!highlightPort) return
+    setHighlighted(highlightPort)
+    // Wait for DOM to render
+    const timer = setTimeout(() => {
+      portRefs.current[highlightPort]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 100)
+    // Clear highlight after animation
+    const clearTimer = setTimeout(() => setHighlighted(undefined), 2500)
+    return () => { clearTimeout(timer); clearTimeout(clearTimer) }
+  }, [highlightPort])
 
   const validatePort = (svc: string, value: number): string => {
     if (isNaN(value) || value < 1 || value > 65535) {
@@ -92,7 +111,13 @@ export default function Settings() {
         <h3 className="text-white font-semibold">Service Ports</h3>
         <div className="grid grid-cols-2 gap-3">
           {(['apache', 'nginx', 'mysql', 'php', 'redis'] as const).map(svc => (
-            <div key={svc} className="flex flex-col gap-1">
+            <div
+              key={svc}
+              ref={el => { portRefs.current[svc] = el }}
+              className={`flex flex-col gap-1 rounded-lg p-2 -m-2 transition-colors duration-700 ${
+                highlighted === svc ? 'bg-blue-500/10 ring-1 ring-blue-500/40' : ''
+              }`}
+            >
               <label className="text-xs text-gray-400 capitalize">{svc} port</label>
               <input
                 type="number"
@@ -100,9 +125,12 @@ export default function Settings() {
                 max={65535}
                 value={form[svc].port}
                 onChange={e => handlePortChange(svc, e.target.value)}
+                autoFocus={highlighted === svc}
                 className={`bg-[#0f1420] border rounded-lg px-3 py-2 text-sm text-white focus:outline-none ${portErrors[svc]
                     ? 'border-red-500 focus:border-red-500'
-                    : 'border-[#2a3347] focus:border-blue-500'
+                    : highlighted === svc
+                      ? 'border-blue-500'
+                      : 'border-[#2a3347] focus:border-blue-500'
                   }`}
               />
               {portErrors[svc] && (

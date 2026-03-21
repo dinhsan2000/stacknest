@@ -4,6 +4,8 @@ import { ServiceInfo } from '../types'
 import { useServiceStore } from '../store/serviceStore'
 import { CheckPortConflict } from '../../wailsjs/go/main/App'
 import { useI18n } from '../i18n'
+import type { Page } from './Sidebar'
+import type { NavContext } from '../App'
 import PortConflictModal from './PortConflictModal'
 
 const statusDot: Record<string, string> = {
@@ -43,9 +45,10 @@ interface ConflictInfo {
 
 interface Props {
   service: ServiceInfo
+  onNavigate?: (page: Page, ctx?: NavContext) => void
 }
 
-export default function ServiceRow({ service }: Props) {
+export default function ServiceRow({ service, onNavigate }: Props) {
   const { startService, stopService, restartService, setServiceEnabled, setActiveVersion, loading, binaryStatus } = useServiceStore()
   const { t } = useI18n()
   const [conflict, setConflict] = useState<ConflictInfo | null>(null)
@@ -158,9 +161,13 @@ export default function ServiceRow({ service }: Props) {
 
         {/* Port */}
         <div className="w-16 shrink-0">
-          <code className="text-xs text-blue-400 bg-[#0f1420] px-1.5 py-0.5 rounded font-mono">
+          <button
+            onClick={() => onNavigate?.('settings', { highlightPort: service.name })}
+            title={t.dash_edit_port}
+            className="text-xs text-blue-400 bg-[#0f1420] px-1.5 py-0.5 rounded font-mono hover:bg-blue-500/15 hover:text-blue-300 transition-colors cursor-pointer"
+          >
             :{service.port}
-          </code>
+          </button>
         </div>
 
         {/* PID */}

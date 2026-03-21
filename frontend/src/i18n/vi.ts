@@ -54,6 +54,7 @@ const vi: Translations = {
     dash_version: 'Phiên bản',
     dash_switch_version: 'Đổi phiên bản',
     dash_switching: 'Đang chuyển…',
+    dash_edit_port: 'Bấm để chỉnh port trong Cài đặt',
 
     // Service status
     status_running: 'đang chạy',

@@ -2,8 +2,14 @@ import { useEffect } from 'react'
 import { useServiceStore } from '../store/serviceStore'
 import ServiceRow from '../components/ServiceCard'
 import { useI18n, tt } from '../i18n'
+import type { Page } from '../components/Sidebar'
+import type { NavContext } from '../App'
 
-export default function Dashboard() {
+interface Props {
+  onNavigate: (page: Page, ctx?: NavContext) => void
+}
+
+export default function Dashboard({ onNavigate }: Props) {
   const { services, fetchServices, fetchBinaryStatus, startAll, stopAll } = useServiceStore()
   const { t } = useI18n()
 
@@ -67,7 +73,7 @@ export default function Dashboard() {
       {/* Service rows */}
       <div className="flex flex-col gap-1.5">
         {services.map(svc => (
-          <ServiceRow key={svc.name} service={svc} />
+          <ServiceRow key={svc.name} service={svc} onNavigate={onNavigate} />
         ))}
         {services.length === 0 && (
           <p className="text-gray-600 text-sm text-center py-10">{t.dash_loading}</p>

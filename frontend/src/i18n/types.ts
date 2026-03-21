@@ -54,6 +54,7 @@ export interface Translations {
     dash_version: string
     dash_switch_version: string
     dash_switching: string
+    dash_edit_port: string
 
     // Service status
     status_running: string
