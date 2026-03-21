@@ -54,3 +54,6 @@ desktop.ini
 *.pid.lock
 *.seed
 php_versions.json
+
+# AI Skills
+.claude

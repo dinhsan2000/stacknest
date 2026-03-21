@@ -38,7 +38,7 @@ function App() {
 
   return (
     <div className="flex h-screen bg-[#0f1420] text-white font-sans overflow-hidden">
-      <Sidebar current={page} onChange={setPage} />
+      <Sidebar current={page} onNavigate={setPage} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         {/* flex flex-col để child có thể dùng flex-1 và h-full */}
