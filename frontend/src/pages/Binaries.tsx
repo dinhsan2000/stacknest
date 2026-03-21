@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Server, Database, Code2, Zap, Layers, RefreshCw } from 'lucide-react'
+import { Server, Database, Code2, Zap, Layers, RefreshCw, AlertTriangle, X, Check } from 'lucide-react'
 import { useServiceStore } from '../store/serviceStore'
 import { ReloadCatalog } from '../../wailsjs/go/main/App'
 import { ServiceIcon } from '../components/ServiceIcon';
+import { useI18n, tt } from '../i18n'
 
 const SERVICE_META: Record<string, { label: string; icon: React.ReactNode }> = {
   apache: { label: 'Apache', icon: <Server size={16} className="text-gray-400" /> },
@@ -19,6 +20,7 @@ export default function Binaries() {
     setActiveVersion, dismissDownloadError,
   } = useServiceStore()
 
+  const { t } = useI18n()
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null) // "service@version"
   const [deleteError, setDeleteError] = useState('')
   const [reloading, setReloading] = useState(false)
@@ -41,29 +43,28 @@ export default function Binaries() {
     <div className="flex flex-col gap-6 max-w-4xl">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Service Binaries</h2>
+          <h2 className="text-2xl font-bold text-white">{t.bin_title}</h2>
           <p className="text-gray-400 text-sm mt-1">
-            Tải và quản lý các phiên bản binary cho từng service.
-            Binaries được lưu tại <code className="text-blue-400 text-xs">bin/{'{service}/{version}/'}</code>
+            {t.bin_desc}
+            {' '}Binaries are saved at <code className="text-blue-400 text-xs">bin/{'{service}/{version}/'}</code>
           </p>
         </div>
         <button
           onClick={handleReloadCatalog}
           disabled={reloading}
-          title="Reload catalog.json"
+          title={t.bin_reload_tooltip}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#1e2535] text-gray-400 hover:bg-[#2a3347] hover:text-white transition-colors disabled:opacity-50"
         >
           <RefreshCw size={14} className={reloading ? 'animate-spin' : ''} />
-          {reloading ? 'Reloading…' : 'Reload Catalog'}
+          {reloading ? t.bin_reloading : t.bin_reload}
         </button>
       </div>
 
       {missingCount > 0 && (
         <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
-          <span className="text-yellow-400 text-lg mt-0.5">⚠</span>
+          <AlertTriangle size={16} className="text-yellow-400 mt-0.5 flex-shrink-0" />
           <p className="text-sm text-yellow-300">
-            {missingCount} service{missingCount > 1 ? 's' : ''} chưa có binary được cài.
-            Tải ít nhất một phiên bản trước khi khởi động.
+            {tt(t.bin_missing_warn, { count: missingCount, s: missingCount > 1 ? 's' : '' })}
           </p>
         </div>
       )}
@@ -71,7 +72,7 @@ export default function Binaries() {
       {/* Global download errors */}
       {Object.entries(downloadErrors).map(([key, errMsg]) => (
         <div key={key} className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-          <span className="text-red-400 text-lg">✕</span>
+          <X size={16} className="text-red-400 flex-shrink-0" />
           <p className="text-sm text-red-300 flex-1">
             <strong>{key.replace('@', ' v')}</strong>: {errMsg}
           </p>
@@ -79,20 +80,20 @@ export default function Binaries() {
             onClick={() => dismissDownloadError(key)}
             className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
           >
-            Dismiss
+            {t.dismiss}
           </button>
         </div>
       ))}
 
       {deleteError && (
         <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-          <span className="text-red-400 text-lg">✕</span>
+          <X size={16} className="text-red-400 flex-shrink-0" />
           <p className="text-sm text-red-300 flex-1">{deleteError}</p>
           <button
             onClick={() => setDeleteError('')}
             className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
           >
-            Dismiss
+            {t.dismiss}
           </button>
         </div>
       )}
@@ -116,11 +117,11 @@ export default function Binaries() {
                     <span className="text-white font-semibold">{meta?.label ?? svc.service}</span>
                     {hasAnyInstalled ? (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">
-                        {activeVersion ? `Active: v${activeVersion.version}` : 'Installed'}
+                        {activeVersion ? `${t.bin_active}: v${activeVersion.version}` : t.bin_installed}
                       </span>
                     ) : (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-gray-500/15 text-gray-500">
-                        Not installed
+                        {t.bin_not_installed}
                       </span>
                     )}
                   </div>
@@ -161,11 +162,11 @@ export default function Binaries() {
                       <div className="flex items-center gap-2">
                         {ver.active && (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-medium">
-                            Active
+                            {t.bin_active}
                           </span>
                         )}
                         {ver.installed && !ver.active && (
-                          <span className="text-xs text-gray-500">Installed</span>
+                          <span className="text-xs text-gray-500">{t.bin_installed}</span>
                         )}
                       </div>
 
@@ -179,7 +180,7 @@ export default function Binaries() {
                             />
                           </div>
                           <p className="text-xs text-blue-400 mt-0.5 text-right">
-                            {progress === 0 ? 'Connecting...' : `${Math.round(progress)}%`}
+                            {progress === 0 ? t.bin_connecting : `${Math.round(progress)}%`}
                           </p>
                         </div>
                       )}
@@ -191,18 +192,20 @@ export default function Binaries() {
                             onClick={() => cancelDownload(svc.service, ver.version)}
                             className="px-2.5 py-1 rounded-lg text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
                           >
-                            Cancel
+                            {t.bin_cancel}
                           </button>
                         ) : ver.installed ? (
                           ver.active ? (
-                            <span className="text-xs text-blue-400 px-2.5 py-1">✓ Active</span>
+                            <span className="text-xs text-blue-400 px-2.5 py-1 inline-flex items-center gap-1">
+                              <Check size={14} className="text-blue-400" /> {t.bin_active}
+                            </span>
                           ) : (
                             <>
                               <button
                                 onClick={() => setActiveVersion(svc.service, ver.version)}
                                 className="px-2.5 py-1 rounded-lg text-xs bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors"
                               >
-                                Set Active
+                                {t.bin_set_active}
                               </button>
                               {deleteConfirm === key ? (
                                 <div className="flex items-center gap-1">
@@ -219,22 +222,22 @@ export default function Binaries() {
                                     }}
                                     className="px-2 py-1 rounded-lg text-xs bg-red-500 text-white hover:bg-red-600 transition-colors"
                                   >
-                                    Yes
+                                    {t.yes}
                                   </button>
                                   <button
                                     onClick={() => setDeleteConfirm(null)}
                                     className="px-2 py-1 rounded-lg text-xs bg-[#2a3347] text-gray-300 hover:bg-[#334060] transition-colors"
                                   >
-                                    No
+                                    {t.no}
                                   </button>
                                 </div>
                               ) : (
                                 <button
                                   onClick={() => setDeleteConfirm(key)}
                                   className="px-2.5 py-1 rounded-lg text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                                  title="Delete this version"
+                                  title={t.delete}
                                 >
-                                  Delete
+                                  {t.delete}
                                 </button>
                               )}
                             </>
@@ -244,7 +247,7 @@ export default function Binaries() {
                             onClick={() => downloadBinary(svc.service, ver.version)}
                             className="px-2.5 py-1 rounded-lg text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
                           >
-                            Download
+                            {t.bin_download}
                           </button>
                         )}
                       </div>
@@ -258,9 +261,8 @@ export default function Binaries() {
       </div>
 
       <p className="text-xs text-gray-600">
-        Mỗi phiên bản được lưu tại <code className="text-gray-500">bin/{'<service>/<version>/'}</code>.
-        Sau khi tải xong, nhấn <strong className="text-gray-400">Set Active</strong> để chuyển sang phiên bản đó.
-        Service đang chạy sẽ dùng phiên bản active trong lần restart tiếp theo.
+        {t.bin_footer_1} <code className="text-gray-500">bin/{'<service>/<version>/'}</code>.
+        {' '}{t.bin_footer_2} <strong className="text-gray-400">{t.bin_set_active}</strong> {t.bin_footer_3}
       </p>
     </div>
   )

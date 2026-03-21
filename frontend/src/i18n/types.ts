@@ -215,4 +215,22 @@ export interface Translations {
     pc_killing: string
     pc_kill_start: string
     pc_free_port: string
+
+    // Extra keys
+    bin_reload: string
+    bin_reloading: string
+    bin_reload_tooltip: string
+    db_mysql_label: string
+    db_host: string
+    db_port: string
+    db_stop_adminer: string
+    db_adminer_running: string
+    db_open: string
+    vh_domain_required: string
+    log_error_level: string
+    log_warn_level: string
+    log_info_level: string
+    log_debug_level: string
+    settings_port_label: string
+    settings_save_btn: string
 }

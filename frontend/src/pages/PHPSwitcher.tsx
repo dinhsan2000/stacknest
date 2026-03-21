@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { GetPHPInstalls, SwitchPHP, AddPHPPath, SelectFolder } from '../../wailsjs/go/main/App'
+import { useI18n } from '../i18n'
+import { Search, Code2, Check, RefreshCw, Plus } from 'lucide-react'
 
 interface PHPInstall {
   version: string
@@ -30,6 +32,7 @@ export default function PHPSwitcher() {
   const [switching, setSwitching] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const { t } = useI18n()
 
   const refresh = async () => {
     setLoading(true)
@@ -77,55 +80,55 @@ export default function PHPSwitcher() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">PHP Version Switcher</h2>
+          <h2 className="text-2xl font-bold text-white">{t.php_title}</h2>
           <p className="text-gray-400 text-sm mt-1">
             {active
-              ? <>Active: <span className="text-green-400 font-mono">PHP {active.version}</span></>
-              : 'No PHP found on this machine'}
+              ? <>{t.php_active} <span className="text-green-400 font-mono">PHP {active.version}</span></>
+              : t.php_no_found}
           </p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={handleAddPath}
-            className="px-3 py-1.5 text-xs rounded-lg bg-[#1e2535] text-gray-400 hover:text-white transition-colors"
+            className="px-3 py-1.5 text-xs rounded-lg bg-[#1e2535] text-gray-400 hover:text-white transition-colors inline-flex items-center gap-1"
           >
-            + Add Path
+            <Plus size={14} /> {t.php_add_path}
           </button>
           <button
             onClick={refresh}
             disabled={loading}
-            className="px-3 py-1.5 text-xs rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 text-xs rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors disabled:opacity-50 inline-flex items-center gap-1"
           >
-            {loading ? '⟳ Scanning...' : '⟳ Rescan'}
+            <RefreshCw size={14} /> {loading ? t.php_scanning : t.php_rescan}
           </button>
         </div>
       </div>
 
       {/* Alerts */}
       {error   && <p className="text-red-400 text-sm bg-red-500/10 rounded-lg p-3">{error}</p>}
-      {success && <p className="text-green-400 text-sm bg-green-500/10 rounded-lg p-3">✓ {success}</p>}
+      {success && <p className="text-green-400 text-sm bg-green-500/10 rounded-lg p-3 inline-flex items-center gap-1"><Check size={14} /> {success}</p>}
 
       {/* Loading state */}
       {loading && installs.length === 0 && (
         <div className="text-center py-12 text-gray-500">
-          <p className="text-3xl mb-3">🔍</p>
-          <p>Scanning for PHP installations...</p>
+          <p className="mb-3 flex justify-center"><Search size={32} /></p>
+          <p>{t.php_scanning}</p>
         </div>
       )}
 
       {/* No PHP found */}
       {!loading && installs.length === 0 && (
         <div className="text-center py-12 bg-[#1e2535] rounded-xl border border-[#2a3347]">
-          <p className="text-3xl mb-3">🐘</p>
-          <p className="text-gray-300 font-medium">No PHP found</p>
+          <p className="mb-3 flex justify-center text-gray-400"><Code2 size={32} /></p>
+          <p className="text-gray-300 font-medium">{t.php_no_php_title}</p>
           <p className="text-gray-500 text-sm mt-2 mb-4">
-            Install PHP or click "+ Add Path" to point to a custom directory
+            {t.php_no_php_desc}
           </p>
           <button
             onClick={handleAddPath}
             className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600 transition-colors"
           >
-            Add Custom PHP Path
+            {t.php_add_custom}
           </button>
         </div>
       )}
@@ -143,7 +146,7 @@ export default function PHPSwitcher() {
           >
             {/* PHP elephant icon + version badge */}
             <div className="flex flex-col items-center gap-1 w-16">
-              <span className="text-3xl">🐘</span>
+              <Code2 size={24} className="text-gray-400" />
               <span className={`text-xs font-bold font-mono ${versionColor(php.major)}`}>
                 {php.major}
               </span>
@@ -155,7 +158,7 @@ export default function PHPSwitcher() {
                 <span className="text-white font-semibold font-mono">PHP {php.version}</span>
                 {php.active && (
                   <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
-                    Active
+                    {t.php_active}
                   </span>
                 )}
               </div>
@@ -167,14 +170,14 @@ export default function PHPSwitcher() {
             {/* Switch button */}
             <div>
               {php.active ? (
-                <span className="text-xs text-green-400">✓ In use</span>
+                <span className="text-xs text-green-400 inline-flex items-center gap-1"><Check size={14} /> {t.php_in_use}</span>
               ) : (
                 <button
                   onClick={() => handleSwitch(php)}
                   disabled={!!switching}
                   className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 whitespace-nowrap"
                 >
-                  {switching === php.path ? 'Switching...' : 'Use this version'}
+                  {switching === php.path ? t.php_switching : t.php_use_version}
                 </button>
               )}
             </div>
@@ -185,12 +188,12 @@ export default function PHPSwitcher() {
       {/* Info box */}
       {installs.length > 0 && (
         <div className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-4 text-xs text-gray-400">
-          <p className="font-semibold text-gray-300 mb-2">How switching works</p>
+          <p className="font-semibold text-gray-300 mb-2">{t.php_how_title}</p>
           <ul className="flex flex-col gap-1 list-disc list-inside">
-            <li>Selected PHP path is saved to Stacknest config</li>
-            <li>If PHP-FPM service is running, it will be restarted automatically</li>
-            <li>New terminal sessions will use the active PHP version</li>
-            <li>On Windows, a <code className="bg-[#0f1420] px-1 rounded">current</code> symlink is updated in Laragon's PHP folder</li>
+            <li>{t.php_how_1}</li>
+            <li>{t.php_how_2}</li>
+            <li>{t.php_how_3}</li>
+            <li>{t.php_how_4.split('{code}')[0]}<code className="bg-[#0f1420] px-1 rounded">current</code>{t.php_how_4.split('{code}')[1]}</li>
           </ul>
         </div>
       )}

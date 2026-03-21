@@ -8,6 +8,8 @@ import {
   TerminalSquare,
   Settings,
   Code2,
+  Play,
+  Square,
 } from 'lucide-react'
 import { useServiceStore } from '../store/serviceStore'
 import { useI18n } from '../i18n'
@@ -71,14 +73,14 @@ export default function Sidebar({ current, onNavigate }: Props) {
           onClick={startAll}
           className="flex items-center gap-2 px-3 py-2 text-sm text-green-400 hover:bg-green-500/10 rounded-lg transition-colors"
         >
-          <span className="text-xs">▶</span> {t.dash_start_all}
+          <Play size={12} /> {t.dash_start_all}
         </button>
         <button
           onClick={stopAll}
           disabled={runningCount === 0}
           className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-30"
         >
-          <span className="text-xs">■</span> {t.dash_stop_all}
+          <Square size={12} /> {t.dash_stop_all}
         </button>
       </div>
     </aside>

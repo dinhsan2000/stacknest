@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Server, Database, Code2, Zap, Layers, ChevronDown } from 'lucide-react'
+import { Server, Database, Code2, Zap, Layers, ChevronDown, RotateCw } from 'lucide-react'
 import { ServiceInfo } from '../types'
 import { useServiceStore } from '../store/serviceStore'
 import { CheckPortConflict } from '../../wailsjs/go/main/App'
@@ -190,7 +190,7 @@ export default function ServiceRow({ service, onNavigate }: Props) {
         {/* Enabled toggle */}
         <button
           onClick={() => setServiceEnabled(service.name, !service.enabled)}
-          title={service.enabled ? 'Enabled — click to exclude from Start All' : 'Disabled — click to include in Start All'}
+          title={service.enabled ? t.dash_enabled_tip : t.dash_disabled_tip}
           className={`relative w-9 h-5 rounded-full transition-colors duration-200 shrink-0 focus:outline-none ${
             service.enabled ? 'bg-blue-500' : 'bg-gray-600'
           }`}
@@ -209,14 +209,14 @@ export default function ServiceRow({ service, onNavigate }: Props) {
                 disabled={isLoading}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors disabled:opacity-40"
               >
-                Stop
+                {t.stop}
               </button>
               <button
                 onClick={() => restartService(service.name)}
                 disabled={isLoading}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#1e2535] text-gray-400 hover:bg-[#2a3347] hover:text-white transition-colors disabled:opacity-40"
               >
-                ↺
+                <RotateCw size={14} />
               </button>
             </>
           ) : (
@@ -225,7 +225,7 @@ export default function ServiceRow({ service, onNavigate }: Props) {
               disabled={isLoading || service.status === 'starting' || service.status === 'stopping'}
               className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 transition-colors disabled:opacity-40"
             >
-              {isLoading || service.status === 'starting' ? 'Starting…' : 'Start'}
+              {isLoading || service.status === 'starting' ? t.dash_starting : t.start}
             </button>
           )}
         </div>

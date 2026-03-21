@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useServiceStore } from '../store/serviceStore'
+import { useI18n } from '../i18n'
 import {
   SelectFolder,
   GetSSLCerts,
@@ -9,6 +10,17 @@ import {
   GetCACertPath,
   OpenFolder,
 } from '../../wailsjs/go/main/App'
+import {
+  ShieldCheck,
+  ShieldAlert,
+  Check,
+  Lock,
+  AlertTriangle,
+  RefreshCw,
+  Plus,
+  FolderOpen,
+  ExternalLink,
+} from 'lucide-react'
 
 interface CertInfo {
   domain:     string
@@ -19,6 +31,7 @@ interface CertInfo {
 
 export default function VirtualHosts() {
   const { vhosts, fetchVHosts, addVHost, removeVHost } = useServiceStore()
+  const { t } = useI18n()
   const [form, setForm]         = useState({ name: '', domain: '', root: '', server: 'apache', ssl: false })
   const [error, setError]       = useState('')
   const [confirmDomain, setConfirmDomain] = useState<string | null>(null)
@@ -52,7 +65,7 @@ export default function VirtualHosts() {
 
   const handleAdd = async () => {
     if (!form.domain || !form.root) {
-      setError('Domain and root path are required')
+      setError(t.vh_domain_required)
       return
     }
     try {
@@ -103,7 +116,7 @@ export default function VirtualHosts() {
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
-      <h2 className="text-2xl font-bold text-white">Virtual Hosts</h2>
+      <h2 className="text-2xl font-bold text-white">{t.vh_title}</h2>
 
       {/* CA Trust Banner */}
       <div className={`flex items-center gap-4 px-5 py-3 rounded-xl border
@@ -112,13 +125,11 @@ export default function VirtualHosts() {
           : 'bg-yellow-500/10 border-yellow-500/30'
         }`}
       >
-        <span className="text-xl">{caInstalled ? '🔒' : '🔓'}</span>
+        <span className="text-xl">{caInstalled ? <ShieldCheck size={18} /> : <ShieldAlert size={18} />}</span>
         <div className="flex-1">
-          <p className="text-sm font-medium text-white">Local SSL CA</p>
+          <p className="text-sm font-medium text-white">{t.vh_ca_title}</p>
           <p className={`text-xs mt-0.5 ${caInstalled ? 'text-green-400' : 'text-yellow-400'}`}>
-            {caInstalled
-              ? 'CA is trusted by this machine — HTTPS will work without browser warnings'
-              : 'CA is not trusted — browsers will show SSL warnings until you trust it'}
+            {caInstalled ? t.vh_ca_trusted : t.vh_ca_not_trusted}
           </p>
         </div>
         <div className="flex gap-2">
@@ -127,7 +138,7 @@ export default function VirtualHosts() {
               onClick={handleExportCA}
               className="px-3 py-1.5 text-xs rounded-lg bg-[#1e2535] text-gray-400 hover:text-white transition-colors"
             >
-              Export CA Cert
+              {t.vh_export_ca}
             </button>
           ) : (
             <button
@@ -135,7 +146,7 @@ export default function VirtualHosts() {
               disabled={trustingCA}
               className="px-4 py-1.5 text-xs rounded-lg bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition-colors disabled:opacity-50"
             >
-              {trustingCA ? 'Trusting...' : 'Trust CA'}
+              {trustingCA ? t.vh_trusting : t.vh_trust_ca}
             </button>
           )}
         </div>
@@ -143,21 +154,21 @@ export default function VirtualHosts() {
 
       {/* SSL alerts */}
       {sslError   && <p className="text-red-400 text-sm bg-red-500/10 rounded-lg px-4 py-2">{sslError}</p>}
-      {sslSuccess && <p className="text-green-400 text-sm bg-green-500/10 rounded-lg px-4 py-2">✓ {sslSuccess}</p>}
+      {sslSuccess && <p className="text-green-400 text-sm bg-green-500/10 rounded-lg px-4 py-2"><Check size={14} className="inline mr-1" />{sslSuccess}</p>}
 
       {/* Add form */}
       <div className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5 flex flex-col gap-4">
-        <h3 className="text-white font-semibold">Add Virtual Host</h3>
+        <h3 className="text-white font-semibold">{t.vh_add_title}</h3>
 
         <div className="grid grid-cols-2 gap-3">
           <input
-            placeholder="Name (optional)"
+            placeholder={t.vh_name_placeholder}
             value={form.name}
             onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
             className="bg-[#0f1420] border border-[#2a3347] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
           />
           <input
-            placeholder="Domain (e.g. myapp.test)"
+            placeholder={t.vh_domain_placeholder}
             value={form.domain}
             onChange={e => setForm(f => ({ ...f, domain: e.target.value }))}
             className="bg-[#0f1420] border border-[#2a3347] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
@@ -166,7 +177,7 @@ export default function VirtualHosts() {
 
         <div className="flex gap-3">
           <input
-            placeholder="Document root path"
+            placeholder={t.vh_root_placeholder}
             value={form.root}
             onChange={e => setForm(f => ({ ...f, root: e.target.value }))}
             className="flex-1 bg-[#0f1420] border border-[#2a3347] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
@@ -175,7 +186,7 @@ export default function VirtualHosts() {
             onClick={handleSelectFolder}
             className="px-3 py-2 rounded-lg bg-[#0f1420] border border-[#2a3347] text-gray-400 hover:text-white text-sm transition-colors"
           >
-            Browse
+            {t.browse}
           </button>
         </div>
 
@@ -204,14 +215,14 @@ export default function VirtualHosts() {
               onChange={e => setForm(f => ({ ...f, ssl: e.target.checked }))}
               className="accent-blue-500"
             />
-            Enable SSL (HTTPS)
+            {t.vh_enable_ssl}
           </label>
 
           <button
             onClick={handleAdd}
             className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-sm font-medium transition-colors"
           >
-            Add Host
+            {t.vh_add_host}
           </button>
         </div>
 
@@ -221,7 +232,7 @@ export default function VirtualHosts() {
       {/* Hosts list */}
       <div className="flex flex-col gap-2">
         {vhosts.length === 0 && (
-          <p className="text-gray-500 text-center py-8">No virtual hosts configured yet.</p>
+          <p className="text-gray-500 text-center py-8">{t.vh_no_hosts}</p>
         )}
         {vhosts.map(vh => {
           const cert = certFor(vh.domain)
@@ -250,20 +261,24 @@ export default function VirtualHosts() {
                 {vh.ssl && (
                   <div className="flex items-center gap-3 mt-1.5">
                     {cert ? (
-                      <span className="text-xs text-gray-400">
-                        🔐 Cert expires: <span className="text-gray-300">{cert.expires_at}</span>
+                      <span className="text-xs text-gray-400 inline-flex items-center gap-1">
+                        <Lock size={12} /> {t.vh_cert_expires} <span className="text-gray-300">{cert.expires_at}</span>
                       </span>
                     ) : (
-                      <span className="text-xs text-yellow-500">⚠ No certificate yet</span>
+                      <span className="text-xs text-yellow-500 inline-flex items-center gap-1">
+                        <AlertTriangle size={12} /> {t.vh_no_cert}
+                      </span>
                     )}
                     <button
                       onClick={() => handleGenerateCert(vh.domain)}
                       disabled={genDomain === vh.domain}
-                      className="text-xs text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
+                      className="text-xs text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50 inline-flex items-center gap-1"
                     >
                       {genDomain === vh.domain
-                        ? 'Generating...'
-                        : cert ? '↻ Regenerate Cert' : '+ Generate Cert'}
+                        ? t.vh_generating
+                        : cert
+                          ? <><RefreshCw size={12} /> {t.vh_regenerate}</>
+                          : <><Plus size={12} /> {t.vh_generate_cert}</>}
                     </button>
                   </div>
                 )}
@@ -274,22 +289,22 @@ export default function VirtualHosts() {
                   href={`http${vh.ssl ? 's' : ''}://${vh.domain}`}
                   className="px-3 py-1.5 rounded-lg text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
                 >
-                  Open
+                  {t.open}
                 </a>
                 {confirmDomain === vh.domain ? (
                   <>
-                    <span className="text-xs text-red-400">Remove this host?</span>
+                    <span className="text-xs text-red-400">{t.vh_remove_confirm}</span>
                     <button
                       onClick={() => { removeVHost(vh.domain); setConfirmDomain(null) }}
                       className="px-3 py-1.5 rounded-lg text-xs bg-red-500 text-white hover:bg-red-600 transition-colors"
                     >
-                      Yes, remove
+                      {t.vh_yes_remove}
                     </button>
                     <button
                       onClick={() => setConfirmDomain(null)}
                       className="px-3 py-1.5 rounded-lg text-xs bg-[#2a3347] text-gray-300 hover:bg-[#334060] transition-colors"
                     >
-                      Cancel
+                      {t.cancel}
                     </button>
                   </>
                 ) : (
@@ -297,7 +312,7 @@ export default function VirtualHosts() {
                     onClick={() => setConfirmDomain(vh.domain)}
                     className="px-3 py-1.5 rounded-lg text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
                   >
-                    Remove
+                    {t.vh_remove}
                   </button>
                 )}
               </div>

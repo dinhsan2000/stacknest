@@ -11,8 +11,11 @@ import {
   GetWWWPath,
 } from '../../wailsjs/go/main/App'
 import { EventsOn, EventsOff } from '../../wailsjs/runtime/runtime'
+import { useI18n } from '../i18n'
+import { FolderOpen, X, Play, Terminal as TerminalIcon } from 'lucide-react'
 
 export default function Terminal() {
+  const { t } = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const xtermRef    = useRef<XTerm | null>(null)
   const fitAddon    = useRef<FitAddon | null>(null)
@@ -136,11 +139,11 @@ export default function Terminal() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Terminal</h2>
+          <h2 className="text-2xl font-bold text-white">{t.term_title}</h2>
           <p className="text-gray-400 text-sm mt-1">
-            {status === 'running'  && <span className="text-green-400">● Running</span>}
-            {status === 'exited'   && <span className="text-yellow-400">● Exited</span>}
-            {status === 'idle'     && <span className="text-gray-500">● Not started</span>}
+            {status === 'running'  && <span className="text-green-400"><span className="inline-block w-2 h-2 rounded-full bg-green-400 mr-1.5" />{t.term_running}</span>}
+            {status === 'exited'   && <span className="text-yellow-400"><span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-1.5" />{t.term_exited}</span>}
+            {status === 'idle'     && <span className="text-gray-500"><span className="inline-block w-2 h-2 rounded-full bg-gray-500 mr-1.5" />{t.term_not_started}</span>}
           </p>
         </div>
 
@@ -148,25 +151,25 @@ export default function Terminal() {
           {/* Quick launch buttons */}
           <button
             onClick={() => startTerminal(wwwPath)}
-            className="px-3 py-1.5 text-xs rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
-            title="Open in www folder"
+            className="px-3 py-1.5 text-xs rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center gap-1"
+            title={t.term_open_www}
           >
-            📁 Open in WWW
+            <FolderOpen size={14} /> {t.term_open_www}
           </button>
 
           {status === 'running' ? (
             <button
               onClick={stopTerminal}
-              className="px-3 py-1.5 text-xs rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+              className="px-3 py-1.5 text-xs rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors flex items-center gap-1"
             >
-              ✕ Stop
+              <X size={14} /> {t.stop}
             </button>
           ) : (
             <button
               onClick={() => startTerminal('')}
-              className="px-3 py-1.5 text-xs rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
+              className="px-3 py-1.5 text-xs rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors flex items-center gap-1"
             >
-              ▶ Start
+              <Play size={14} /> {t.term_start}
             </button>
           )}
         </div>
@@ -181,20 +184,20 @@ export default function Terminal() {
         {/* Placeholder khi chưa start */}
         {status === 'idle' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
-            <p className="text-4xl">⌨️</p>
-            <p className="text-gray-400 text-sm">Click Start to open a terminal session</p>
+            <TerminalIcon size={40} className="text-gray-600" />
+            <p className="text-gray-400 text-sm">{t.term_click_start}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => startTerminal('')}
                 className="px-5 py-2.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-sm font-medium transition-colors"
               >
-                Start Terminal
+                {t.term_start_btn}
               </button>
               <button
                 onClick={() => startTerminal(wwwPath)}
                 className="px-5 py-2.5 rounded-lg bg-[#1e2535] text-gray-300 hover:bg-[#2a3347] text-sm transition-colors"
               >
-                Open in WWW folder
+                {t.term_open_www_btn}
               </button>
             </div>
           </div>

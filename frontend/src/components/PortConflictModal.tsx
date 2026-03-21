@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { KillConflictProcess, StartService } from '../../wailsjs/go/main/App'
+import { useI18n, tt } from '../i18n'
+import { Zap } from 'lucide-react'
 
 interface ConflictInfo {
   port: number
@@ -18,13 +20,14 @@ interface Props {
 export default function PortConflictModal({ conflict, serviceName, onClose, onResolved }: Props) {
   const [killing, setKilling] = useState(false)
   const [error, setError] = useState('')
+  const { t } = useI18n()
 
   const handleKillAndStart = async () => {
     setKilling(true)
     setError('')
     try {
       await KillConflictProcess(conflict.pid)
-      // Đợi OS release port
+      // Wait for OS to release port
       await new Promise(r => setTimeout(r, 800))
       await StartService(serviceName)
       onResolved()
@@ -40,12 +43,12 @@ export default function PortConflictModal({ conflict, serviceName, onClose, onRe
       <div className="bg-[#1e2535] border border-red-500/30 rounded-xl p-6 max-w-md w-full shadow-2xl">
         {/* Icon + Title */}
         <div className="flex items-start gap-4 mb-5">
-          <span className="text-3xl">⚡</span>
+          <span className="text-red-400"><Zap size={20} /></span>
           <div>
-            <h3 className="text-white font-semibold text-lg">Port Conflict Detected</h3>
+            <h3 className="text-white font-semibold text-lg">{t.pc_title}</h3>
             <p className="text-gray-400 text-sm mt-1">
-              Port <code className="bg-[#0f1420] text-red-400 px-1.5 py-0.5 rounded text-xs">{conflict.port}</code> is already in use.
-              Unable to start <span className="text-white capitalize">{serviceName}</span>.
+              {tt(t.pc_port_in_use, { port: conflict.port })}{' '}
+              {tt(t.pc_unable_start, { service: serviceName })}
             </p>
           </div>
         </div>
@@ -53,7 +56,7 @@ export default function PortConflictModal({ conflict, serviceName, onClose, onRe
         {/* Conflict info */}
         <div className="bg-[#0f1420] rounded-lg p-4 mb-5 flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-400">Process</span>
+            <span className="text-gray-400">{t.pc_process}</span>
             <span className="text-white font-mono">{conflict.process || 'unknown'}</span>
           </div>
           <div className="flex justify-between">
@@ -76,7 +79,7 @@ export default function PortConflictModal({ conflict, serviceName, onClose, onRe
             onClick={onClose}
             className="flex-1 py-2 rounded-lg bg-[#0f1420] text-gray-400 hover:text-white text-sm transition-colors"
           >
-            Cancel
+            {t.cancel}
           </button>
 
           {conflict.pid > 0 ? (
@@ -85,14 +88,14 @@ export default function PortConflictModal({ conflict, serviceName, onClose, onRe
               disabled={killing}
               className="flex-1 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 text-sm font-medium transition-colors disabled:opacity-50"
             >
-              {killing ? 'Killing...' : `Kill & Start ${serviceName}`}
+              {killing ? t.pc_killing : tt(t.pc_kill_start, { service: serviceName })}
             </button>
           ) : (
             <button
               onClick={onClose}
               className="flex-1 py-2 rounded-lg bg-yellow-500/20 text-yellow-400 text-sm"
             >
-              Free port {conflict.port} manually
+              {tt(t.pc_free_port, { port: conflict.port })}
             </button>
           )}
         </div>

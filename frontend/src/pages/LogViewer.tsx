@@ -6,6 +6,8 @@ import {
 } from "../../wailsjs/go/main/App";
 import { EventsOn, EventsOff } from "../../wailsjs/runtime/runtime";
 import { ServiceIcon } from "../components/ServiceIcon";
+import { useI18n, tt } from '../i18n';
+import { FileText, Play, Pause, ArrowDown } from 'lucide-react';
 
 interface LogEntry {
   service: string;
@@ -36,6 +38,7 @@ const levelBadge: Record<string, string> = {
 };
 
 export default function LogViewer() {
+  const { t } = useI18n();
   const [activeService, setActiveService] = useState("apache");
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [filter, setFilter] = useState("");
@@ -103,15 +106,15 @@ export default function LogViewer() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Log Viewer</h2>
+          <h2 className="text-2xl font-bold text-white">{t.log_title}</h2>
           <p className="text-gray-400 text-sm mt-1">
-            {entries.length} lines
+            {tt(t.log_lines, { count: entries.length })}
             {errorCount > 0 && (
-              <span className="ml-2 text-red-400">{errorCount} errors</span>
+              <span className="ml-2 text-red-400">{tt(t.log_errors, { count: errorCount })}</span>
             )}
             {warningCount > 0 && (
               <span className="ml-2 text-yellow-400">
-                {warningCount} warnings
+                {tt(t.log_warnings, { count: warningCount })}
               </span>
             )}
           </p>
@@ -122,27 +125,27 @@ export default function LogViewer() {
             onClick={() => setEntries([])}
             className="px-3 py-1.5 text-xs rounded-lg bg-[#1e2535] text-gray-400 hover:text-white transition-colors"
           >
-            Clear
+            {t.log_clear}
           </button>
           <button
             onClick={() => setPaused((p) => !p)}
-            className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+            className={`px-3 py-1.5 text-xs rounded-lg transition-colors flex items-center gap-1 ${
               paused
                 ? "bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"
                 : "bg-[#1e2535] text-gray-400 hover:text-white"
             }`}
           >
-            {paused ? "▶ Resume" : "⏸ Pause"}
+            {paused ? <><Play size={14} /> {t.log_resume}</> : <><Pause size={14} /> {t.log_pause}</>}
           </button>
           <button
             onClick={() => setAutoScroll((a) => !a)}
-            className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+            className={`px-3 py-1.5 text-xs rounded-lg transition-colors flex items-center gap-1 ${
               autoScroll
                 ? "bg-blue-500/20 text-blue-400"
                 : "bg-[#1e2535] text-gray-400"
             }`}
           >
-            ↓ Auto-scroll
+            <ArrowDown size={14} /> {t.log_autoscroll}
           </button>
         </div>
       </div>
@@ -172,7 +175,7 @@ export default function LogViewer() {
       <div className="flex gap-3">
         <input
           type="text"
-          placeholder="Filter logs..."
+          placeholder={t.log_filter}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="flex-1 bg-[#1e2535] border border-[#2a3347] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
@@ -182,25 +185,23 @@ export default function LogViewer() {
           onChange={(e) => setLevelFilter(e.target.value)}
           className="bg-[#1e2535] border border-[#2a3347] rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500"
         >
-          <option value="all">All levels</option>
-          <option value="error">Error</option>
-          <option value="warning">Warning</option>
-          <option value="info">Info</option>
-          <option value="debug">Debug</option>
+          <option value="all">{t.log_all_levels}</option>
+          <option value="error">{t.log_error_level}</option>
+          <option value="warning">{t.log_warn_level}</option>
+          <option value="info">{t.log_info_level}</option>
+          <option value="debug">{t.log_debug_level}</option>
         </select>
       </div>
 
       {/* Log output */}
       <div className="flex-1 bg-[#080d15] border border-[#1e2535] rounded-xl overflow-auto font-mono text-xs min-h-0">
         {filteredEntries.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-600">
-            <div className="text-center">
-              <p className="text-2xl mb-2">📄</p>
-              <p>No log entries yet</p>
-              <p className="text-gray-700 text-xs mt-1">
-                Start {activeService} to see logs here
-              </p>
-            </div>
+          <div className="flex flex-col items-center justify-center h-full text-gray-600 gap-2">
+            <FileText size={40} />
+            <p>{t.log_no_entries}</p>
+            <p className="text-gray-700 text-xs">
+              {tt(t.log_start_to_see, { service: activeService })}
+            </p>
           </div>
         ) : (
           <table className="w-full">
@@ -241,10 +242,10 @@ export default function LogViewer() {
       {/* Status bar */}
       <div className="flex items-center justify-between text-xs text-gray-600">
         <span>
-          Watching: <span className="text-gray-400">{activeService}</span>
+          {t.log_watching} <span className="text-gray-400">{activeService}</span>
         </span>
         <span>
-          {filteredEntries.length} / {entries.length} lines shown
+          {tt(t.log_lines_shown, { shown: filteredEntries.length, total: entries.length })}
         </span>
       </div>
     </div>

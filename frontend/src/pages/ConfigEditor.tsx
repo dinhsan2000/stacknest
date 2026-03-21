@@ -12,8 +12,9 @@ import {
   RestoreConfigBackup,
   RestartService,
 } from '../../wailsjs/go/main/App'
-import { Code2, Database, Layers, Server, Zap } from 'lucide-react'
+import { Check, Code2, Database, FileCode, FileX, Server, Zap } from 'lucide-react'
 import { ServiceIcon } from '../components/ServiceIcon'
+import { useI18n, tt } from '../i18n'
 
 interface ConfigFile {
   service:  string
@@ -30,10 +31,10 @@ interface BackupInfo {
 }
 
 const SERVICES = [
-  { id: 'apache', label: 'Apache',    icon: '🌐' },
-  { id: 'nginx',  label: 'Nginx',     icon: '⚡' },
-  { id: 'mysql',  label: 'MySQL',     icon: '🗄' },
-  { id: 'php',    label: 'PHP',       icon: '🐘' },
+  { id: 'apache', label: 'Apache',    icon: <Server size={14} /> },
+  { id: 'nginx',  label: 'Nginx',     icon: <Zap size={14} /> },
+  { id: 'mysql',  label: 'MySQL',     icon: <Database size={14} /> },
+  { id: 'php',    label: 'PHP',       icon: <Code2 size={14} /> },
 ]
 
 function getExtensions(lang: string) {
@@ -51,6 +52,7 @@ function formatBytes(bytes: number) {
 }
 
 export default function ConfigEditor() {
+  const { t } = useI18n()
   const [service, setService]         = useState('apache')
   const [configs, setConfigs]         = useState<ConfigFile[]>([])
   const [selected, setSelected]       = useState<ConfigFile | null>(null)
@@ -83,7 +85,7 @@ export default function ConfigEditor() {
 
   const selectFile = useCallback(async (file: ConfigFile) => {
     if (isDirty && selected) {
-      const ok = window.confirm('You have unsaved changes. Discard them?')
+      const ok = window.confirm(t.cfg_unsaved_discard)
       if (!ok) return
     }
     setSelected(file)
@@ -110,7 +112,7 @@ export default function ConfigEditor() {
     try {
       await SaveConfigFile(selected.path, content)
       setSavedContent(content)
-      setSuccess('Saved successfully')
+      setSuccess(t.cfg_saved_ok)
       const bups = await GetConfigBackups(selected.path)
       setBackups((bups || []) as BackupInfo[])
     } catch (e: any) {
@@ -156,7 +158,7 @@ export default function ConfigEditor() {
 
   const handleRestore = async (backup: BackupInfo) => {
     if (!selected) return
-    const ok = window.confirm(`Restore backup from ${backup.created_at}?\nThis will overwrite the current file.`)
+    const ok = window.confirm(tt(t.cfg_restore_confirm, { date: backup.created_at }))
     if (!ok) return
     try {
       await RestoreConfigBackup(backup.path, selected.path)
@@ -176,8 +178,8 @@ export default function ConfigEditor() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div>
-          <h2 className="text-2xl font-bold text-white">Config Editor</h2>
-          <p className="text-gray-400 text-sm mt-1">Edit service configuration files with automatic backup</p>
+          <h2 className="text-2xl font-bold text-white">{t.cfg_title}</h2>
+          <p className="text-gray-400 text-sm mt-1">{t.cfg_desc}</p>
         </div>
       </div>
 
@@ -203,11 +205,11 @@ export default function ConfigEditor() {
       <div className="flex gap-4 flex-1 min-h-0">
         {/* File list */}
         <div className="w-56 flex-shrink-0 flex flex-col gap-1">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2 px-1">Config Files</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2 px-1">{t.cfg_files}</p>
           {configs.length === 0 ? (
             <div className="text-center py-8 text-gray-600 text-sm">
-              <p className="text-2xl mb-2">📭</p>
-              <p>No config files found</p>
+              <div className="flex justify-center mb-2"><FileX size={40} /></div>
+              <p>{t.cfg_no_files}</p>
             </div>
           ) : (
             configs.map(f => (
@@ -223,7 +225,7 @@ export default function ConfigEditor() {
               >
                 <div className="font-medium truncate">{f.label}</div>
                 {!f.writable && (
-                  <div className="text-xs text-yellow-500 mt-0.5">read-only</div>
+                  <div className="text-xs text-yellow-500 mt-0.5">{t.cfg_readonly}</div>
                 )}
               </button>
             ))
@@ -241,7 +243,7 @@ export default function ConfigEditor() {
                 </span>
                 {isDirty && (
                   <span className="text-xs text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-full flex-shrink-0">
-                    unsaved
+                    {t.cfg_unsaved}
                   </span>
                 )}
               </div>
@@ -250,21 +252,21 @@ export default function ConfigEditor() {
                   onClick={handleShowBackups}
                   className="px-3 py-1.5 text-xs rounded-lg bg-[#1e2535] text-gray-400 hover:text-white transition-colors"
                 >
-                  {showBackups ? 'Hide Backups' : 'Backups'}
+                  {showBackups ? t.cfg_hide_backups : t.cfg_backups}
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving || restarting || !isDirty || !selected.writable}
                   className="px-4 py-1.5 text-xs rounded-lg bg-[#1e2535] border border-[#2a3347] text-gray-300 hover:text-white font-medium transition-colors disabled:opacity-40"
                 >
-                  {saving ? 'Saving...' : 'Save'}
+                  {saving ? t.saving : t.save}
                 </button>
                 <button
                   onClick={handleSaveAndRestart}
                   disabled={saving || restarting || !isDirty || !selected.writable}
                   className="px-4 py-1.5 text-xs rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors disabled:opacity-40"
                 >
-                  {restarting ? 'Restarting...' : saving ? 'Saving...' : 'Save & Restart'}
+                  {restarting ? t.cfg_restarting : saving ? t.saving : t.cfg_save_restart}
                 </button>
               </div>
             </div>
@@ -278,14 +280,14 @@ export default function ConfigEditor() {
           )}
           {success && (
             <div className="mb-2 text-green-400 text-sm bg-green-500/10 rounded-lg px-3 py-2 flex-shrink-0">
-              ✓ {success}
+              <Check size={14} className="inline mr-1" /> {success}
             </div>
           )}
 
           {/* Backup list */}
           {showBackups && backups.length > 0 && (
             <div className="mb-2 bg-[#1e2535] border border-[#2a3347] rounded-lg p-3 flex-shrink-0">
-              <p className="text-xs text-gray-400 font-semibold mb-2">Available Backups</p>
+              <p className="text-xs text-gray-400 font-semibold mb-2">{t.cfg_available_backups}</p>
               <div className="flex flex-col gap-1 max-h-36 overflow-y-auto">
                 {backups.map((b, i) => (
                   <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-[#2a3347] last:border-0">
@@ -296,7 +298,7 @@ export default function ConfigEditor() {
                         onClick={() => handleRestore(b)}
                         className="text-blue-400 hover:text-blue-300 transition-colors"
                       >
-                        Restore
+                        {t.cfg_restore}
                       </button>
                     </div>
                   </div>
@@ -306,14 +308,14 @@ export default function ConfigEditor() {
           )}
           {showBackups && backups.length === 0 && (
             <div className="mb-2 text-gray-500 text-xs bg-[#1e2535] rounded-lg px-3 py-2 flex-shrink-0">
-              No backups yet. Backups are created automatically when you save.
+              {t.cfg_no_backups}
             </div>
           )}
 
           {/* CodeMirror editor */}
           {loading ? (
             <div className="flex-1 flex items-center justify-center text-gray-500">
-              <p>Loading...</p>
+              <p>{t.loading}</p>
             </div>
           ) : selected ? (
             <div className="flex-1 min-h-0 rounded-xl overflow-hidden border border-[#2a3347]">
@@ -336,8 +338,8 @@ export default function ConfigEditor() {
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-600">
               <div className="text-center">
-                <p className="text-3xl mb-3">📝</p>
-                <p>Select a config file to edit</p>
+                <div className="flex justify-center mb-3"><FileCode size={40} /></div>
+                <p>{t.cfg_select_file}</p>
               </div>
             </div>
           )}

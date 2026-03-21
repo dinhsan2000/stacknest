@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react'
 import { useServiceStore } from '../store/serviceStore'
 import { SaveConfig } from '../../wailsjs/go/main/App'
 import { AppConfig } from '../types'
+import { useI18n, tt } from '../i18n'
+import { Check } from 'lucide-react'
 
 interface Props {
   highlightPort?: string
@@ -14,6 +16,7 @@ export default function Settings({ highlightPort }: Props) {
   const [portErrors, setPortErrors] = useState<Record<string, string>>({})
   const [highlighted, setHighlighted] = useState<string | undefined>(highlightPort)
   const portRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const { t } = useI18n()
 
   useEffect(() => { fetchConfig() }, [])
   useEffect(() => { if (config) setForm(config) }, [config])
@@ -33,7 +36,7 @@ export default function Settings({ highlightPort }: Props) {
 
   const validatePort = (svc: string, value: number): string => {
     if (isNaN(value) || value < 1 || value > 65535) {
-      return 'Port must be 1–65535'
+      return t.settings_port_range
     }
     // Check for duplicate ports
     if (form) {
@@ -47,7 +50,7 @@ export default function Settings({ highlightPort }: Props) {
       }
       for (const [name, port] of Object.entries(allPorts)) {
         if (name !== svc && port === value) {
-          return `Conflicts with ${name} port`
+          return tt(t.settings_port_conflict, { service: name })
         }
       }
     }
@@ -78,21 +81,21 @@ export default function Settings({ highlightPort }: Props) {
     setTimeout(() => setSaved(false), 2000)
   }
 
-  if (!form) return <p className="text-gray-400">Loading...</p>
+  if (!form) return <p className="text-gray-400">{t.loading}</p>
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
-      <h2 className="text-2xl font-bold text-white">Settings</h2>
+      <h2 className="text-2xl font-bold text-white">{t.settings_title}</h2>
 
       {/* Paths */}
       <section className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5 flex flex-col gap-4">
-        <h3 className="text-white font-semibold">Paths</h3>
+        <h3 className="text-white font-semibold">{t.settings_paths}</h3>
 
         {([
-          { key: 'root_path', label: 'Root Path', hint: undefined },
-          { key: 'data_path', label: 'Data Path', hint: 'MySQL and service data (e.g. databases)' },
-          { key: 'www_path', label: 'WWW Path', hint: undefined },
-          { key: 'log_path', label: 'Log Path', hint: undefined },
+          { key: 'root_path', label: t.settings_root, hint: undefined },
+          { key: 'data_path', label: t.settings_data, hint: t.settings_data_hint },
+          { key: 'www_path', label: t.settings_www, hint: undefined },
+          { key: 'log_path', label: t.settings_log, hint: undefined },
         ] as const).map(({ key, label, hint }) => (
           <div key={key} className="flex flex-col gap-1">
             <label className="text-xs text-gray-400">{label}</label>
@@ -108,7 +111,7 @@ export default function Settings({ highlightPort }: Props) {
 
       {/* Service Ports */}
       <section className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5 flex flex-col gap-4">
-        <h3 className="text-white font-semibold">Service Ports</h3>
+        <h3 className="text-white font-semibold">{t.settings_ports}</h3>
         <div className="grid grid-cols-2 gap-3">
           {(['apache', 'nginx', 'mysql', 'php', 'redis'] as const).map(svc => (
             <div
@@ -118,7 +121,7 @@ export default function Settings({ highlightPort }: Props) {
                 highlighted === svc ? 'bg-blue-500/10 ring-1 ring-blue-500/40' : ''
               }`}
             >
-              <label className="text-xs text-gray-400 capitalize">{svc} port</label>
+              <label className="text-xs text-gray-400 capitalize">{tt(t.settings_port_label, { service: svc })}</label>
               <input
                 type="number"
                 min={1}
@@ -143,7 +146,7 @@ export default function Settings({ highlightPort }: Props) {
 
       {/* General */}
       <section className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5 flex flex-col gap-4">
-        <h3 className="text-white font-semibold">General</h3>
+        <h3 className="text-white font-semibold">{t.settings_general}</h3>
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -151,19 +154,19 @@ export default function Settings({ highlightPort }: Props) {
             onChange={e => setForm(f => f ? { ...f, auto_start: e.target.checked } : f)}
             className="accent-blue-500 w-4 h-4"
           />
-          <span className="text-sm text-gray-300">Auto-start services on launch</span>
+          <span className="text-sm text-gray-300">{t.settings_autostart}</span>
         </label>
       </section>
 
       <button
         onClick={handleSave}
         disabled={hasPortErrors}
-        className={`self-start px-6 py-2.5 rounded-lg font-medium transition-colors ${hasPortErrors
+        className={`self-start px-6 py-2.5 rounded-lg font-medium transition-colors inline-flex items-center gap-1 ${hasPortErrors
             ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
             : 'bg-blue-500 text-white hover:bg-blue-600'
           }`}
       >
-        {saved ? '✓ Saved!' : hasPortErrors ? 'Fix errors first' : 'Save Settings'}
+        {saved ? <><Check size={14} /> {t.settings_saved}</> : hasPortErrors ? t.settings_fix_errors : t.settings_save_btn}
       </button>
     </div>
   )
