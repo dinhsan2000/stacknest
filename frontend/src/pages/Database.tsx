@@ -63,7 +63,7 @@ export default function Database() {
   const mysqlRunning = mysql?.status === 'running'
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6 max-w-4xl">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-white">Database Manager</h2>

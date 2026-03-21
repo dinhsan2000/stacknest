@@ -118,6 +118,10 @@ export function ReadConfigFile(arg1) {
   return window['go']['main']['App']['ReadConfigFile'](arg1);
 }
 
+export function ReloadCatalog() {
+  return window['go']['main']['App']['ReloadCatalog']();
+}
+
 export function RemoveSSLCert(arg1) {
   return window['go']['main']['App']['RemoveSSLCert'](arg1);
 }

@@ -68,6 +68,8 @@ export function OpenHeidiSQL():Promise<void>;
 
 export function ReadConfigFile(arg1:string):Promise<string>;
 
+export function ReloadCatalog():Promise<void>;
+
 export function RemoveSSLCert(arg1:string):Promise<void>;
 
 export function RemoveVirtualHost(arg1:string):Promise<void>;

@@ -81,7 +81,7 @@ export default function Settings({ highlightPort }: Props) {
   if (!form) return <p className="text-gray-400">Loading...</p>
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6 max-w-4xl">
       <h2 className="text-2xl font-bold text-white">Settings</h2>
 
       {/* Paths */}

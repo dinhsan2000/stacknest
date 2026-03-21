@@ -126,6 +126,17 @@
             "exe_sub_dir": ""
           }
         }
+      },
+      {
+        "version": "8.6.1.1",
+        "platforms": {
+          "windows": {
+            "exe_name": "redis-server.exe",
+            "url": "https://github.com/redis-windows/redis-windows/releases/download/8.6.1.1/Redis-8.6.1-Windows-x64-cygwin.zip",
+            "zip_strip": "",
+            "exe_sub_dir": ""
+          }
+        }
       }
     ]
   }

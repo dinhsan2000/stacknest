@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Server, Database, Code2, Zap, Layers } from 'lucide-react'
+import { Server, Database, Code2, Zap, Layers, RefreshCw } from 'lucide-react'
 import { useServiceStore } from '../store/serviceStore'
+import { ReloadCatalog } from '../../wailsjs/go/main/App'
 import { ServiceIcon } from '../components/ServiceIcon';
 
 const SERVICE_META: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -20,19 +21,41 @@ export default function Binaries() {
 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null) // "service@version"
   const [deleteError, setDeleteError] = useState('')
+  const [reloading, setReloading] = useState(false)
 
   useEffect(() => { fetchBinaryStatus() }, [])
+
+  const handleReloadCatalog = async () => {
+    setReloading(true)
+    try {
+      await ReloadCatalog()
+      await fetchBinaryStatus()
+    } finally {
+      setReloading(false)
+    }
+  }
 
   const missingCount = binaryStatus.filter(s => !s.versions.some(v => v.installed)).length
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
-      <div>
-        <h2 className="text-2xl font-bold text-white">Service Binaries</h2>
-        <p className="text-gray-400 text-sm mt-1">
-          Tải và quản lý các phiên bản binary cho từng service.
-          Binaries được lưu tại <code className="text-blue-400 text-xs">bin/{'{service}/{version}/'}</code>
-        </p>
+    <div className="flex flex-col gap-6 max-w-4xl">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Service Binaries</h2>
+          <p className="text-gray-400 text-sm mt-1">
+            Tải và quản lý các phiên bản binary cho từng service.
+            Binaries được lưu tại <code className="text-blue-400 text-xs">bin/{'{service}/{version}/'}</code>
+          </p>
+        </div>
+        <button
+          onClick={handleReloadCatalog}
+          disabled={reloading}
+          title="Reload catalog.json"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#1e2535] text-gray-400 hover:bg-[#2a3347] hover:text-white transition-colors disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={reloading ? 'animate-spin' : ''} />
+          {reloading ? 'Reloading…' : 'Reload Catalog'}
+        </button>
       </div>
 
       {missingCount > 0 && (

@@ -73,7 +73,7 @@ export default function PHPSwitcher() {
   const active = installs.find(p => p.active)
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

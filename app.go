@@ -232,6 +232,11 @@ func (a *App) GetVersionCatalog() map[string]downloader.ServiceCatalog {
 	return downloader.Catalog
 }
 
+// ReloadCatalog đọc lại catalog.json từ disk và cập nhật danh mục phiên bản.
+func (a *App) ReloadCatalog() {
+	downloader.InitCatalog(a.cfg.RootPath)
+}
+
 // StartBinaryDownload bắt đầu tải binary cho service/version trong background.
 // Events: "binary:progress" {service, version, pct float64}, "binary:done" {service, version, error string}
 func (a *App) StartBinaryDownload(service, version string) error {

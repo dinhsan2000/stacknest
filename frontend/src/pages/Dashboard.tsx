@@ -59,7 +59,7 @@ export default function Dashboard({ onNavigate }: Props) {
       </div>
 
       {/* Table header */}
-      <div className="flex items-center gap-4 px-4 text-xs font-medium text-gray-600 uppercase tracking-wider">
+      <div className="flex items-center gap-4 px-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
         <span className="w-28 shrink-0">{t.dash_service}</span>
         <span className="w-28 shrink-0">{t.dash_version}</span>
         <span className="w-24 shrink-0">{t.dash_status}</span>

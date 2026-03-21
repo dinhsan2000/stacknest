@@ -102,7 +102,7 @@ export default function VirtualHosts() {
   const certFor = (domain: string) => certs.find(c => c.domain === domain)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 max-w-4xl">
       <h2 className="text-2xl font-bold text-white">Virtual Hosts</h2>
 
       {/* CA Trust Banner */}
