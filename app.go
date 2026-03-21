@@ -451,21 +451,25 @@ func (a *App) SaveConfig(cfg config.Config) error {
 
 // ─── Database / Adminer APIs ─────────────────────────────────────────────────
 
-// GetAdminerStatus trả về trạng thái của Adminer server và tool paths
+// GetAdminerStatus trả về trạng thái của Adminer server
 func (a *App) GetAdminerStatus() map[string]any {
 	return map[string]any{
 		"running":       a.adminerSrv.IsRunning(),
 		"url":           a.adminerSrv.URL(),
 		"adminer_found": a.adminerSrv.AdminerFound(),
-		"adminer_path":  a.adminerSrv.AdminerPath(),
 		"php_found":     a.adminerSrv.PHPFound(),
 		"php_path":      a.adminerSrv.PHPPath(),
-		"heidisql_path": database.FindHeidiSQL(),
 	}
 }
 
 // StartAdminer khởi động PHP server chạy Adminer, trả về URL
 func (a *App) StartAdminer() (string, error) {
+	// Auto-start MySQL nếu chưa chạy
+	if svc, _ := a.svcMgr.GetOne(services.ServiceMySQL); svc.Status != services.StatusRunning {
+		_ = a.svcMgr.Start(services.ServiceMySQL)
+		a.emitServiceUpdate()
+	}
+
 	url, err := a.adminerSrv.Start()
 	if err != nil {
 		return "", err
@@ -477,16 +481,6 @@ func (a *App) StartAdminer() (string, error) {
 // StopAdminer dừng PHP server Adminer
 func (a *App) StopAdminer() {
 	a.adminerSrv.Stop()
-}
-
-// OpenHeidiSQL mở HeidiSQL native client
-func (a *App) OpenHeidiSQL() error {
-	path := database.FindHeidiSQL()
-	if path == "" {
-		return fmt.Errorf("HeidiSQL not found")
-	}
-	cmd := exec.Command(path)
-	return cmd.Start()
 }
 
 // ─── SSL APIs ────────────────────────────────────────────────────────────────

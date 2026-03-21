@@ -110,10 +110,6 @@ export function OpenFolder(arg1) {
   return window['go']['main']['App']['OpenFolder'](arg1);
 }
 
-export function OpenHeidiSQL() {
-  return window['go']['main']['App']['OpenHeidiSQL']();
-}
-
 export function ReadConfigFile(arg1) {
   return window['go']['main']['App']['ReadConfigFile'](arg1);
 }

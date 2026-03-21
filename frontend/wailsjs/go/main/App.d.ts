@@ -64,8 +64,6 @@ export function KillConflictProcess(arg1:number):Promise<void>;
 
 export function OpenFolder(arg1:string):Promise<void>;
 
-export function OpenHeidiSQL():Promise<void>;
-
 export function ReadConfigFile(arg1:string):Promise<string>;
 
 export function ReloadCatalog():Promise<void>;

@@ -1,51 +1,66 @@
 package database
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 )
 
+//go:embed embed/adminer.php embed/index.php
+var adminerFS embed.FS
+
 // Server quản lý Adminer PHP built-in server
 type Server struct {
-	mu      sync.Mutex
-	cmd     *exec.Cmd
-	port    int
-	phpExe  string
-	admPath string
+	mu       sync.Mutex
+	cmd      *exec.Cmd
+	port     int
+	phpExe   string
+	admDir   string // thư mục chứa adminer.php đã extract
 	rootPath string
 }
 
 func NewServer(rootPath string) *Server {
 	s := &Server{rootPath: rootPath}
 	s.phpExe = s.FindPHPExe()
-	s.admPath = s.FindAdminerPath()
+	s.admDir = s.extractAdminer()
 	return s
 }
 
-// FindAdminerPath tìm file adminer/phpMyAdmin trên máy
-func (s *Server) FindAdminerPath() string {
-	candidates := []string{
-		`C:\laragon\etc\apps\adminer\index.php`,
-		`D:\laragon\etc\apps\adminer\index.php`,
-		`C:\xampp\phpMyAdmin\index.php`,
-		`C:\laragon\www\phpmyadmin\index.php`,
-		`C:\laragon\www\adminer\index.php`,
-		filepath.Join(s.rootPath, "etc", "apps", "adminer", "index.php"),
-		filepath.Join(s.rootPath, "www", "phpmyadmin", "index.php"),
-	}
-	for _, p := range candidates {
-		if _, err := os.Stat(p); err == nil {
-			return p
+// extractAdminer giải nén adminer.php + index.php từ embed vào thư mục data
+func (s *Server) extractAdminer() string {
+	dir := filepath.Join(s.rootPath, "etc", "adminer")
+
+	// Nếu cả 2 file đã tồn tại, không cần extract lại
+	indexPath := filepath.Join(dir, "index.php")
+	adminerPath := filepath.Join(dir, "adminer.php")
+	if _, err1 := os.Stat(indexPath); err1 == nil {
+		if _, err2 := os.Stat(adminerPath); err2 == nil {
+			return dir
 		}
 	}
-	return ""
+
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return ""
+	}
+
+	// Extract cả 2 file
+	for _, name := range []string{"embed/adminer.php", "embed/index.php"} {
+		data, err := adminerFS.ReadFile(name)
+		if err != nil {
+			return ""
+		}
+		out := filepath.Join(dir, filepath.Base(name))
+		if err := os.WriteFile(out, data, 0644); err != nil {
+			return ""
+		}
+	}
+	return dir
 }
 
 // FindPHPExe tìm PHP executable — ưu tiên từ phpswitch state file
@@ -87,27 +102,6 @@ func (s *Server) FindPHPExe() string {
 	return ""
 }
 
-// FindHeidiSQL tìm HeidiSQL executable
-func FindHeidiSQL() string {
-	candidates := []string{
-		`C:\laragon\bin\heidisql\heidisql.exe`,
-		`D:\laragon\bin\heidisql\heidisql.exe`,
-		`C:\Program Files\HeidiSQL\heidisql.exe`,
-		`C:\Program Files (x86)\HeidiSQL\heidisql.exe`,
-	}
-	for _, p := range candidates {
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
-	}
-	if runtime.GOOS == "windows" {
-		if p, err := exec.LookPath("heidisql.exe"); err == nil {
-			return p
-		}
-	}
-	return ""
-}
-
 // Start khởi động PHP built-in server để chạy Adminer
 // Trả về URL để mở trong browser
 func (s *Server) Start() (string, error) {
@@ -118,11 +112,18 @@ func (s *Server) Start() (string, error) {
 		return s.URL(), nil // đã chạy rồi
 	}
 
+	// Re-detect PHP nếu chưa tìm thấy
+	if s.phpExe == "" {
+		s.phpExe = s.FindPHPExe()
+	}
 	if s.phpExe == "" {
 		return "", fmt.Errorf("PHP not found — install PHP or configure it in PHP Versions")
 	}
-	if s.admPath == "" {
-		return "", fmt.Errorf("Adminer not found — expected at C:\\laragon\\etc\\apps\\adminer\\index.php")
+
+	// Đảm bảo adminer files đã extract (force nếu thiếu index.php)
+	s.admDir = s.extractAdminer()
+	if s.admDir == "" {
+		return "", fmt.Errorf("failed to extract bundled Adminer")
 	}
 
 	port, err := freePort(8484)
@@ -131,11 +132,9 @@ func (s *Server) Start() (string, error) {
 	}
 
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
-	admDir := filepath.Dir(s.admPath)
-	admFile := filepath.Base(s.admPath)
 
-	cmd := exec.Command(s.phpExe, "-S", addr, admFile)
-	cmd.Dir = admDir
+	cmd := exec.Command(s.phpExe, "-S", addr, "index.php")
+	cmd.Dir = s.admDir
 
 	// Không gắn stdout/stderr để tránh blocking
 	if err := cmd.Start(); err != nil {
@@ -173,19 +172,14 @@ func (s *Server) URL() string {
 	return fmt.Sprintf("http://127.0.0.1:%d", s.port)
 }
 
-// AdminerFound kiểm tra có tìm thấy Adminer không
+// AdminerFound kiểm tra có bundled Adminer không
 func (s *Server) AdminerFound() bool {
-	return s.admPath != ""
+	return s.admDir != ""
 }
 
 // PHPFound kiểm tra có tìm thấy PHP không
 func (s *Server) PHPFound() bool {
 	return s.phpExe != ""
-}
-
-// AdminerPath trả về đường dẫn adminer (dùng để hiện thị)
-func (s *Server) AdminerPath() string {
-	return s.admPath
 }
 
 // PHPPath trả về đường dẫn PHP

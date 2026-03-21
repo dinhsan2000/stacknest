@@ -5,18 +5,15 @@ import {
   GetAdminerStatus,
   StartAdminer,
   StopAdminer,
-  OpenHeidiSQL,
 } from '../../wailsjs/go/main/App'
-import { Database as DatabaseIcon, AlertTriangle, Globe, Monitor, Square, ExternalLink } from 'lucide-react'
+import { Database as DatabaseIcon, AlertTriangle, Globe, Square, ExternalLink } from 'lucide-react'
 
 interface AdminerStatus {
   running:       boolean
   url:           string
   adminer_found: boolean
-  adminer_path:  string
   php_found:     boolean
   php_path:      string
-  heidisql_path: string
 }
 
 export default function Database() {
@@ -53,14 +50,6 @@ export default function Database() {
   const handleStopAdminer = async () => {
     await StopAdminer()
     await refresh()
-  }
-
-  const handleOpenHeidiSQL = async () => {
-    try {
-      await OpenHeidiSQL()
-    } catch (e: any) {
-      setError(e?.toString() ?? 'Failed to open HeidiSQL')
-    }
   }
 
   const mysqlRunning = mysql?.status === 'running'
@@ -104,10 +93,10 @@ export default function Database() {
               </span>
             </div>
             <div className="flex gap-4 mt-2 text-xs text-gray-500">
-              <span>{t.db_host}: <span className="text-gray-300 font-mono">127.0.0.1</span></span>
-              <span>{t.db_port}: <span className="text-gray-300 font-mono">{mysql?.port ?? 3306}</span></span>
-              <span>{t.db_username}: <span className="text-gray-300 font-mono">root</span></span>
-              <span>{t.db_password}: <span className="text-gray-500 italic">{t.db_password_empty}</span></span>
+              <span>{t.db_host} <span className="text-gray-300 font-mono">127.0.0.1</span></span>
+              <span>{t.db_port} <span className="text-gray-300 font-mono">{mysql?.port ?? 3306}</span></span>
+              <span>{t.db_username} <span className="text-gray-300 font-mono">root</span></span>
+              <span>{t.db_password} <span className="text-gray-500 italic">{t.db_password_empty}</span></span>
             </div>
           </div>
         </div>
@@ -139,11 +128,6 @@ export default function Database() {
               <p className="text-xs text-gray-500 mt-1">
                 {t.db_adminer_desc}
               </p>
-              {status?.adminer_path && (
-                <p className="text-xs text-gray-600 mt-0.5 font-mono truncate" title={status.adminer_path}>
-                  {status.adminer_path}
-                </p>
-              )}
             </div>
           </div>
 
@@ -177,13 +161,7 @@ export default function Database() {
           </div>
         </div>
 
-        {/* Missing dependencies */}
-        {status && !status.adminer_found && (
-          <div className="mt-3 text-xs text-yellow-500 bg-yellow-500/10 rounded-lg px-3 py-2 flex items-center gap-1.5">
-            <AlertTriangle size={14} className="text-yellow-400 flex-shrink-0" />
-            <span>{t.db_adminer_not_found}</span>
-          </div>
-        )}
+        {/* Missing PHP */}
         {status && !status.php_found && (
           <div className="mt-3 text-xs text-yellow-500 bg-yellow-500/10 rounded-lg px-3 py-2 flex items-center gap-1.5">
             <AlertTriangle size={14} className="text-yellow-400 flex-shrink-0" />
@@ -192,43 +170,14 @@ export default function Database() {
         )}
       </div>
 
-      {/* HeidiSQL Card */}
-      {status?.heidisql_path && (
-        <div className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <Monitor size={20} className="text-gray-300 mt-0.5" />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-white font-semibold">{t.db_heidisql}</span>
-                  <span className="text-xs text-gray-500 bg-[#0f1420] px-2 py-0.5 rounded">{t.db_native_client}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {t.db_heidisql_desc}
-                </p>
-                <p className="text-xs text-gray-600 mt-0.5 font-mono truncate" title={status.heidisql_path}>
-                  {status.heidisql_path}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={handleOpenHeidiSQL}
-              className="flex-shrink-0 px-4 py-2 text-sm rounded-lg bg-[#2a3347] text-gray-300 hover:text-white hover:bg-[#3a4357] transition-colors"
-            >
-              {t.db_open_heidisql}
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Info box */}
       <div className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-4 text-xs text-gray-400">
         <p className="font-semibold text-gray-300 mb-2">{t.db_credentials_title}</p>
         <div className="grid grid-cols-2 gap-1 font-mono">
-          <span className="text-gray-500">{t.db_server}:</span>   <span>127.0.0.1</span>
-          <span className="text-gray-500">{t.db_port}:</span>     <span>3306</span>
-          <span className="text-gray-500">{t.db_username}:</span> <span>root</span>
-          <span className="text-gray-500">{t.db_password}:</span> <span className="text-gray-600 italic">{t.db_password_empty}</span>
+          <span className="text-gray-500">{t.db_server}</span>   <span>127.0.0.1</span>
+          <span className="text-gray-500">{t.db_port}</span>     <span>3306</span>
+          <span className="text-gray-500">{t.db_username}</span> <span>root</span>
+          <span className="text-gray-500">{t.db_password}</span> <span className="text-gray-600 italic">{t.db_password_empty}</span>
         </div>
       </div>
     </div>
