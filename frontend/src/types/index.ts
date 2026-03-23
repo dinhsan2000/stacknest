@@ -67,3 +67,16 @@ export interface ServiceCatalog {
   exe_name: string
   versions: VersionSpec[]
 }
+
+export interface Project {
+  id: string
+  name: string
+  doc_root: string
+  domain: string
+  server: string
+  ssl: boolean
+  php_path: string
+  services: Record<string, boolean>
+  created_at: string
+  active: boolean
+}

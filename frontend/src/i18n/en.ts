@@ -233,6 +233,32 @@ const en: Translations = {
     log_debug_level: 'Debug',
     settings_port_label: '{service} port',
     settings_save_btn: 'Save Settings',
+
+    // Projects
+    nav_projects: 'Projects',
+    proj_title: 'Projects',
+    proj_quick_create: 'Quick Create',
+    proj_quick_create_desc: 'Enter a name to create project folder, vhost, and optional SSL in one click.',
+    proj_name_placeholder: 'Project name (e.g. my-app)',
+    proj_create: 'Create',
+    proj_creating: 'Creating...',
+    proj_no_projects: 'No projects yet. Use Quick Create to get started.',
+    proj_apply: 'Apply',
+    proj_applying: 'Applying...',
+    proj_active: 'Active',
+    proj_deactivate: 'Deactivate',
+    proj_delete: 'Delete',
+    proj_delete_confirm: 'Delete this project? Files on disk will not be removed.',
+    proj_open_folder: 'Open Folder',
+    proj_applied_ok: 'Project applied successfully',
+    proj_created_ok: 'Project created successfully',
+    proj_template: 'Template',
+    proj_tpl_blank: 'Blank',
+    proj_tpl_blank_desc: 'Empty project with index.html',
+    proj_tpl_laravel: 'Laravel',
+    proj_tpl_laravel_desc: 'Via composer create-project',
+    proj_tpl_wordpress: 'WordPress',
+    proj_tpl_wordpress_desc: 'Latest from wordpress.org',
 }
 
 export default en

@@ -10,6 +10,10 @@ export function AddVirtualHost(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['AddVirtualHost'](arg1, arg2, arg3, arg4, arg5);
 }
 
+export function ApplyProject(arg1) {
+  return window['go']['main']['App']['ApplyProject'](arg1);
+}
+
 export function CancelBinaryDownload(arg1, arg2) {
   return window['go']['main']['App']['CancelBinaryDownload'](arg1, arg2);
 }
@@ -22,8 +26,20 @@ export function CheckPortConflict(arg1) {
   return window['go']['main']['App']['CheckPortConflict'](arg1);
 }
 
+export function CreateProject(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+  return window['go']['main']['App']['CreateProject'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+
+export function DeactivateProject() {
+  return window['go']['main']['App']['DeactivateProject']();
+}
+
 export function DeleteBinary(arg1, arg2) {
   return window['go']['main']['App']['DeleteBinary'](arg1, arg2);
+}
+
+export function DeleteProject(arg1) {
+  return window['go']['main']['App']['DeleteProject'](arg1);
 }
 
 export function GenerateSSLCert(arg1) {
@@ -60,6 +76,10 @@ export function GetLogPaths() {
 
 export function GetPHPInstalls() {
   return window['go']['main']['App']['GetPHPInstalls']();
+}
+
+export function GetProjects() {
+  return window['go']['main']['App']['GetProjects']();
 }
 
 export function GetRecentLogs(arg1, arg2) {
@@ -108,6 +128,10 @@ export function KillConflictProcess(arg1) {
 
 export function OpenFolder(arg1) {
   return window['go']['main']['App']['OpenFolder'](arg1);
+}
+
+export function QuickCreateProject(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['QuickCreateProject'](arg1, arg2, arg3, arg4);
 }
 
 export function ReadConfigFile(arg1) {
@@ -220,4 +244,8 @@ export function TerminalWrite(arg1) {
 
 export function TrustSSLCA() {
   return window['go']['main']['App']['TrustSSLCA']();
+}
+
+export function UpdateProject(arg1) {
+  return window['go']['main']['App']['UpdateProject'](arg1);
 }

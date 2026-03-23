@@ -238,6 +238,41 @@ export namespace portcheck {
 
 }
 
+export namespace project {
+	
+	export class Project {
+	    id: string;
+	    name: string;
+	    doc_root: string;
+	    domain: string;
+	    server: string;
+	    ssl: boolean;
+	    php_path: string;
+	    services: Record<string, boolean>;
+	    created_at: string;
+	    active: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Project(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.doc_root = source["doc_root"];
+	        this.domain = source["domain"];
+	        this.server = source["server"];
+	        this.ssl = source["ssl"];
+	        this.php_path = source["php_path"];
+	        this.services = source["services"];
+	        this.created_at = source["created_at"];
+	        this.active = source["active"];
+	    }
+	}
+
+}
+
 export namespace services {
 	
 	export class ServiceInfo {

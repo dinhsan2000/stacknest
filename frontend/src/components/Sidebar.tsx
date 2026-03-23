@@ -10,11 +10,12 @@ import {
   Code2,
   Play,
   Square,
+  FolderKanban,
 } from 'lucide-react'
 import { useServiceStore } from '../store/serviceStore'
 import { useI18n } from '../i18n'
 
-export type Page = 'dashboard' | 'binaries' | 'database' | 'vhosts' | 'logs' | 'terminal' | 'config' | 'php' | 'settings'
+export type Page = 'dashboard' | 'projects' | 'binaries' | 'database' | 'vhosts' | 'logs' | 'terminal' | 'config' | 'php' | 'settings'
 
 interface Props {
   current: Page
@@ -28,6 +29,7 @@ export default function Sidebar({ current, onNavigate }: Props) {
 
   const navItems: { id: Page; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: t.nav_dashboard, icon: <LayoutDashboard size={16} /> },
+    { id: 'projects', label: t.nav_projects, icon: <FolderKanban size={16} /> },
     { id: 'binaries', label: t.nav_binaries, icon: <Package size={16} /> },
     { id: 'database', label: t.nav_database, icon: <Database size={16} /> },
     { id: 'vhosts', label: t.nav_vhosts, icon: <Globe size={16} /> },

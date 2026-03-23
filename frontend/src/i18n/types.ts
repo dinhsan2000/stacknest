@@ -233,4 +233,30 @@ export interface Translations {
     log_debug_level: string
     settings_port_label: string
     settings_save_btn: string
+
+    // Projects
+    nav_projects: string
+    proj_title: string
+    proj_quick_create: string
+    proj_quick_create_desc: string
+    proj_name_placeholder: string
+    proj_create: string
+    proj_creating: string
+    proj_no_projects: string
+    proj_apply: string
+    proj_applying: string
+    proj_active: string
+    proj_deactivate: string
+    proj_delete: string
+    proj_delete_confirm: string
+    proj_open_folder: string
+    proj_applied_ok: string
+    proj_created_ok: string
+    proj_template: string
+    proj_tpl_blank: string
+    proj_tpl_blank_desc: string
+    proj_tpl_laravel: string
+    proj_tpl_laravel_desc: string
+    proj_tpl_wordpress: string
+    proj_tpl_wordpress_desc: string
 }

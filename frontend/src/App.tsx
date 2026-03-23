@@ -12,6 +12,7 @@ import Database from './pages/Database'
 import ConfigEditor from './pages/ConfigEditor'
 import Settings from './pages/Settings'
 import PHPSwitcher from './pages/PHPSwitcher'
+import Projects from './pages/Projects'
 
 export interface NavContext {
   highlightPort?: string  // service name to highlight in Settings
@@ -34,6 +35,7 @@ function App() {
   const renderPage = () => {
     switch (page) {
       case 'dashboard': return <Dashboard onNavigate={navigateTo} />
+      case 'projects': return <Projects />
       case 'binaries': return <Binaries />
       case 'vhosts': return <VirtualHosts />
       case 'logs': return <LogViewer />

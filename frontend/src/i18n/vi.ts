@@ -233,6 +233,32 @@ const vi: Translations = {
     log_debug_level: 'Gỡ lỗi',
     settings_port_label: 'Cổng {service}',
     settings_save_btn: 'Lưu cài đặt',
+
+    // Projects
+    nav_projects: 'Dự án',
+    proj_title: 'Dự án',
+    proj_quick_create: 'Tạo nhanh',
+    proj_quick_create_desc: 'Nhập tên để tạo thư mục, vhost và SSL (tùy chọn) chỉ với một click.',
+    proj_name_placeholder: 'Tên dự án (vd: my-app)',
+    proj_create: 'Tạo',
+    proj_creating: 'Đang tạo...',
+    proj_no_projects: 'Chưa có dự án. Dùng Tạo nhanh để bắt đầu.',
+    proj_apply: 'Áp dụng',
+    proj_applying: 'Đang áp dụng...',
+    proj_active: 'Đang dùng',
+    proj_deactivate: 'Bỏ kích hoạt',
+    proj_delete: 'Xóa',
+    proj_delete_confirm: 'Xóa dự án này? Các file trên ổ đĩa sẽ không bị xóa.',
+    proj_open_folder: 'Mở thư mục',
+    proj_applied_ok: 'Đã áp dụng dự án',
+    proj_created_ok: 'Đã tạo dự án',
+    proj_template: 'Mẫu',
+    proj_tpl_blank: 'Trống',
+    proj_tpl_blank_desc: 'Dự án rỗng với index.html',
+    proj_tpl_laravel: 'Laravel',
+    proj_tpl_laravel_desc: 'Qua composer create-project',
+    proj_tpl_wordpress: 'WordPress',
+    proj_tpl_wordpress_desc: 'Bản mới nhất từ wordpress.org',
 }
 
 export default vi

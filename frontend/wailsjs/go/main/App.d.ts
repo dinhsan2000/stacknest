@@ -5,6 +5,7 @@ import {phpswitch} from '../models';
 import {downloader} from '../models';
 import {config} from '../models';
 import {configeditor} from '../models';
+import {project} from '../models';
 import {logs} from '../models';
 import {ssl} from '../models';
 import {services} from '../models';
@@ -14,13 +15,21 @@ export function AddPHPPath(arg1:string):Promise<void>;
 
 export function AddVirtualHost(arg1:string,arg2:string,arg3:string,arg4:string,arg5:boolean):Promise<void>;
 
+export function ApplyProject(arg1:string):Promise<void>;
+
 export function CancelBinaryDownload(arg1:string,arg2:string):Promise<void>;
 
 export function CheckAllPortConflicts():Promise<Array<portcheck.ConflictInfo>>;
 
 export function CheckPortConflict(arg1:number):Promise<portcheck.ConflictInfo>;
 
+export function CreateProject(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:boolean,arg7:Record<string, boolean>):Promise<void>;
+
+export function DeactivateProject():Promise<void>;
+
 export function DeleteBinary(arg1:string,arg2:string):Promise<void>;
+
+export function DeleteProject(arg1:string):Promise<void>;
 
 export function GenerateSSLCert(arg1:string):Promise<void>;
 
@@ -39,6 +48,8 @@ export function GetConfigBackups(arg1:string):Promise<Array<configeditor.BackupI
 export function GetLogPaths():Promise<Record<string, Array<string>>>;
 
 export function GetPHPInstalls():Promise<Array<phpswitch.PHPInstall>>;
+
+export function GetProjects():Promise<Array<project.Project>>;
 
 export function GetRecentLogs(arg1:string,arg2:number):Promise<Array<logs.LogEntry>>;
 
@@ -63,6 +74,8 @@ export function IsSSLCAInstalled():Promise<boolean>;
 export function KillConflictProcess(arg1:number):Promise<void>;
 
 export function OpenFolder(arg1:string):Promise<void>;
+
+export function QuickCreateProject(arg1:string,arg2:string,arg3:string,arg4:boolean):Promise<project.Project>;
 
 export function ReadConfigFile(arg1:string):Promise<string>;
 
@@ -119,3 +132,5 @@ export function TerminalStart(arg1:string):Promise<void>;
 export function TerminalWrite(arg1:string):Promise<void>;
 
 export function TrustSSLCA():Promise<void>;
+
+export function UpdateProject(arg1:project.Project):Promise<void>;

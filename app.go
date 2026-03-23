@@ -13,6 +13,7 @@ import (
 	"stacknest/internal/logs"
 	"stacknest/internal/phpswitch"
 	"stacknest/internal/portcheck"
+	"stacknest/internal/project"
 	"stacknest/internal/services"
 	"stacknest/internal/ssl"
 	"stacknest/internal/terminal"
@@ -33,6 +34,7 @@ type App struct {
 	cfgEditor   *configeditor.Manager
 	sslMgr      *ssl.Manager
 	adminerSrv  *database.Server
+	projectMgr  *project.Manager
 	logCancel   context.CancelFunc
 	termMu      sync.Mutex
 	termSession *terminal.Session
@@ -56,6 +58,7 @@ func NewApp() *App {
 		cfgEditor:   configeditor.NewManager(cfg.RootPath),
 		sslMgr:      ssl.NewManager(cfg.RootPath),
 		adminerSrv:  database.NewServer(cfg.RootPath),
+		projectMgr:  project.NewManager(cfg.RootPath),
 		dlCancels:   make(map[string]context.CancelFunc),
 	}
 }
@@ -481,6 +484,110 @@ func (a *App) StartAdminer() (string, error) {
 // StopAdminer dừng PHP server Adminer
 func (a *App) StopAdminer() {
 	a.adminerSrv.Stop()
+}
+
+// ─── Project APIs ─────────────────────────────────────────────────────────────
+
+// GetProjects trả về danh sách tất cả projects
+func (a *App) GetProjects() []project.Project {
+	return a.projectMgr.GetAll()
+}
+
+// CreateProject tạo project mới
+func (a *App) CreateProject(name, docRoot, domain, server, phpPath string, ssl bool, svcMap map[string]bool) error {
+	p := project.Project{
+		Name:     name,
+		DocRoot:  docRoot,
+		Domain:   domain,
+		Server:   server,
+		SSL:      ssl,
+		PHPPath:  phpPath,
+		Services: svcMap,
+	}
+	return a.projectMgr.Create(p)
+}
+
+// UpdateProject cập nhật project
+func (a *App) UpdateProject(p project.Project) error {
+	return a.projectMgr.Update(p)
+}
+
+// DeleteProject xóa project (không xóa files trên disk)
+func (a *App) DeleteProject(id string) error {
+	p, err := a.projectMgr.Get(id)
+	if err != nil {
+		return err
+	}
+
+	// Xóa vhost nếu có domain
+	if p.Domain != "" {
+		_ = a.vhostMgr.Remove(p.Domain)
+	}
+
+	// Xóa folder project
+	if p.DocRoot != "" {
+		_ = os.RemoveAll(p.DocRoot)
+	}
+
+	return a.projectMgr.Delete(id)
+}
+
+// QuickCreateProject tạo project nhanh: folder + vhost + optional SSL
+// template: "blank", "laravel", "wordpress"
+func (a *App) QuickCreateProject(name, server, template string, ssl bool) (*project.Project, error) {
+	p, err := a.projectMgr.QuickCreate(name, a.cfg.WWWPath, server, template, ssl)
+	if err != nil {
+		return nil, err
+	}
+
+	// Tạo vhost
+	if err := a.vhostMgr.Add(p.Name, p.Domain, p.DocRoot, p.Server, p.SSL); err != nil {
+		// Vhost đã tồn tại hoặc lỗi khác — vẫn giữ project, báo warning
+		fmt.Fprintf(os.Stderr, "[stacknest] vhost warning: %v\n", err)
+	}
+
+	// Tạo SSL cert nếu cần
+	if p.SSL {
+		if _, _, err := a.sslMgr.GenerateCert(p.Domain); err != nil {
+			fmt.Fprintf(os.Stderr, "[stacknest] ssl warning: %v\n", err)
+		}
+	}
+
+	return p, nil
+}
+
+// ApplyProject chuyển đổi tất cả service/config theo project
+func (a *App) ApplyProject(id string) error {
+	p, err := a.projectMgr.Get(id)
+	if err != nil {
+		return err
+	}
+
+	// Enable/disable services theo project config
+	for svc, enabled := range p.Services {
+		_ = a.SetServiceEnabled(svc, enabled)
+	}
+
+	// Switch PHP nếu project chỉ định
+	if p.PHPPath != "" {
+		_ = a.SwitchPHP(p.PHPPath)
+	}
+
+	// Stop all rồi start enabled services
+	a.StopAll()
+	time.Sleep(500 * time.Millisecond)
+	a.StartAll()
+
+	// Đánh dấu project active
+	_ = a.projectMgr.SetActive(id)
+
+	runtime.EventsEmit(a.ctx, "project:applied", id)
+	return nil
+}
+
+// DeactivateProject bỏ đánh dấu active project
+func (a *App) DeactivateProject() error {
+	return a.projectMgr.ClearActive()
 }
 
 // ─── SSL APIs ────────────────────────────────────────────────────────────────

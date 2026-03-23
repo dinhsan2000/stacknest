@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { ServiceInfo, VirtualHost, AppConfig, ServiceVersionStatus } from '../types'
+import { ServiceInfo, VirtualHost, AppConfig, ServiceVersionStatus, Project } from '../types'
 import {
   GetServices,
   StartService,
@@ -17,6 +17,11 @@ import {
   SetServiceEnabled,
   CancelBinaryDownload,
   DeleteBinary,
+  GetProjects,
+  QuickCreateProject,
+  ApplyProject,
+  DeactivateProject,
+  DeleteProject,
 } from '../../wailsjs/go/main/App'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 
@@ -30,6 +35,7 @@ interface ServiceStore {
   downloadProgress: Record<string, number>
   // key: "service@version", value: error message
   downloadErrors: Record<string, string>
+  projects: Project[]
 
   fetchServices: () => Promise<void>
   startService: (name: string) => Promise<void>
@@ -50,6 +56,11 @@ interface ServiceStore {
   setActiveVersion: (service: string, version: string) => Promise<void>
   setServiceEnabled: (name: string, enabled: boolean) => Promise<void>
   dismissDownloadError: (key: string) => void
+  fetchProjects: () => Promise<void>
+  quickCreateProject: (name: string, server: string, template: string, ssl: boolean) => Promise<void>
+  applyProject: (id: string) => Promise<void>
+  deactivateProject: () => Promise<void>
+  deleteProject: (id: string) => Promise<void>
   initEventListeners: () => void
 }
 
@@ -61,6 +72,7 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
   binaryStatus: [],
   downloadProgress: {},
   downloadErrors: {},
+  projects: [],
 
   fetchServices: async () => {
     const services = await GetServices()
@@ -178,6 +190,33 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
     })
   },
 
+  fetchProjects: async () => {
+    const projects = await GetProjects()
+    set({ projects: (projects || []) as Project[] })
+  },
+
+  quickCreateProject: async (name, server, template, ssl) => {
+    await QuickCreateProject(name, server, template, ssl)
+    await get().fetchProjects()
+    await get().fetchVHosts()
+  },
+
+  applyProject: async (id) => {
+    await ApplyProject(id)
+    await get().fetchProjects()
+    await get().fetchServices()
+  },
+
+  deactivateProject: async () => {
+    await DeactivateProject()
+    await get().fetchProjects()
+  },
+
+  deleteProject: async (id) => {
+    await DeleteProject(id)
+    await get().fetchProjects()
+  },
+
   initEventListeners: () => {
     // Prevent duplicate registration (React StrictMode calls useEffect twice)
     if ((window as any).__stacknest_events_init) return
@@ -190,6 +229,11 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
     EventsOn('binary:progress', (data: { service: string; version: string; pct: number }) => {
       const key = `${data.service}@${data.version}`
       set(s => ({ downloadProgress: { ...s.downloadProgress, [key]: data.pct } }))
+    })
+
+    EventsOn('project:applied', () => {
+      get().fetchProjects()
+      get().fetchServices()
     })
 
     EventsOn('binary:done', (data: { service: string; version: string; error: string }) => {
