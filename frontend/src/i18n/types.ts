@@ -259,4 +259,28 @@ export interface Translations {
     proj_tpl_laravel_desc: string
     proj_tpl_wordpress: string
     proj_tpl_wordpress_desc: string
+
+    // Database Backups
+    db_backups: string
+    db_backups_desc: string
+    db_create_backup: string
+    db_creating_backup: string
+    db_backup_restore: string
+    db_restoring: string
+    db_delete_backup: string
+    db_confirm_restore: string
+    db_confirm_delete_backup: string
+    db_backup_all: string
+    db_backup_success: string
+    db_restore_success: string
+    db_no_backups: string
+    db_backup_size: string
+    db_backup_date: string
+    db_mysql_required: string
+
+    // Auto-recovery
+    dash_uptime: string
+    dash_crash_loop: string
+    settings_auto_recover: string
+    settings_auto_recover_desc: string
 }

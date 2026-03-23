@@ -11,6 +11,10 @@ export interface ServiceInfo {
   pid: number
   error?: string
   enabled: boolean
+  auto_recover: boolean
+  uptime_since: number
+  restart_count: number
+  crash_loop: boolean
 }
 
 export interface VirtualHost {
@@ -27,6 +31,7 @@ export interface ServiceConfig {
   port: number
   path: string
   version: string
+  auto_recover: boolean
 }
 
 export interface AppConfig {
@@ -66,6 +71,13 @@ export interface VersionSpec {
 export interface ServiceCatalog {
   exe_name: string
   versions: VersionSpec[]
+}
+
+export interface BackupInfo {
+  name: string
+  size: number
+  database: string
+  created_at: string
 }
 
 export interface Project {

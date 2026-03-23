@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Manager quản lý tất cả services
@@ -20,11 +21,13 @@ type Manager struct {
 }
 
 type serviceProcess struct {
-	info    ServiceInfo
-	cmd     *exec.Cmd
-	binDir  string // thư mục chứa binary của service
-	dataDir string // thư mục lưu data của service (MySQL); rỗng = không dùng
-	logDir  string // thư mục lưu log tập trung; rỗng = dùng default của service
+	info         ServiceInfo
+	cmd          *exec.Cmd
+	binDir       string      // thư mục chứa binary của service
+	dataDir      string      // thư mục lưu data của service (MySQL); rỗng = không dùng
+	logDir       string      // thư mục lưu log tập trung; rỗng = dùng default của service
+	restartTimes []time.Time // timestamps of recent auto-restarts
+	onCrash      func(ServiceName)
 }
 
 // NewManager khởi tạo Manager.
@@ -133,14 +136,17 @@ func (m *Manager) Start(name ServiceName) error {
 	svc.info.PID = cmd.Process.Pid
 	svc.info.Status = StatusRunning
 	svc.info.Error = ""
+	svc.info.UptimeSince = time.Now().Unix()
+	svc.info.CrashLoop = false
 	m.mu.Unlock()
 
-	// Watch process in background — nếu exit sớm thì báo lỗi
+	// Watch process in background — nếu exit sớm thì báo lỗi + trigger crash callback
 	go func() {
 		exitErr := cmd.Wait()
 		m.mu.Lock()
 		if svc.info.Status == StatusRunning {
 			svc.info.PID = 0
+			svc.info.UptimeSince = 0
 			if exitErr != nil {
 				errMsg := strings.TrimSpace(stderr.String())
 				if errMsg == "" {
@@ -151,6 +157,12 @@ func (m *Manager) Start(name ServiceName) error {
 			} else {
 				svc.info.Status = StatusStopped
 			}
+			cb := svc.onCrash
+			m.mu.Unlock()
+			if cb != nil {
+				cb(name)
+			}
+			return
 		}
 		m.mu.Unlock()
 	}()
@@ -191,6 +203,7 @@ func (m *Manager) Stop(name ServiceName) error {
 	m.mu.Lock()
 	svc.info.Status = StatusStopped
 	svc.info.PID = 0
+	svc.info.UptimeSince = 0
 	svc.cmd = nil
 	m.mu.Unlock()
 
@@ -255,6 +268,62 @@ func (m *Manager) UpdatePort(name ServiceName, port int) {
 	defer m.mu.Unlock()
 	if svc, ok := m.services[name]; ok {
 		svc.info.Port = port
+	}
+}
+
+// SetCrashCallback đặt callback cho tất cả services khi crash
+func (m *Manager) SetCrashCallback(cb func(ServiceName)) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, svc := range m.services {
+		svc.onCrash = cb
+	}
+}
+
+// SetAutoRecover cập nhật flag auto_recover cho service
+func (m *Manager) SetAutoRecover(name ServiceName, enabled bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if svc, ok := m.services[name]; ok {
+		svc.info.AutoRecover = enabled
+	}
+}
+
+// IsCrashLoop kiểm tra service có đang crash loop (>3 restarts/phút)
+func (m *Manager) IsCrashLoop(name ServiceName) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	svc, ok := m.services[name]
+	if !ok {
+		return false
+	}
+	cutoff := time.Now().Add(-1 * time.Minute)
+	recent := make([]time.Time, 0, len(svc.restartTimes))
+	for _, t := range svc.restartTimes {
+		if t.After(cutoff) {
+			recent = append(recent, t)
+		}
+	}
+	svc.restartTimes = recent
+	return len(recent) > 3
+}
+
+// RecordRestart ghi nhận một lần auto-restart
+func (m *Manager) RecordRestart(name ServiceName) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if svc, ok := m.services[name]; ok {
+		svc.restartTimes = append(svc.restartTimes, time.Now())
+		svc.info.RestartCount = len(svc.restartTimes)
+	}
+}
+
+// SetCrashLoop đánh dấu service đang crash loop
+func (m *Manager) SetCrashLoop(name ServiceName, loop bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if svc, ok := m.services[name]; ok {
+		svc.info.CrashLoop = loop
 	}
 }
 

@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useServiceStore } from '../store/serviceStore'
 import { useI18n } from '../i18n'
+import { BackupInfo } from '../types'
 import {
   GetAdminerStatus,
   StartAdminer,
   StopAdminer,
+  ListBackups,
+  ListDatabases,
+  CreateBackup,
+  RestoreBackup,
+  DeleteBackup,
 } from '../../wailsjs/go/main/App'
-import { Database as DatabaseIcon, AlertTriangle, Globe, Square, ExternalLink } from 'lucide-react'
+import {
+  Database as DatabaseIcon, AlertTriangle, Globe, Square,
+  ExternalLink, HardDrive, Download, Upload, Trash2, Check, X,
+} from 'lucide-react'
 
 interface AdminerStatus {
   running:       boolean
@@ -14,6 +23,13 @@ interface AdminerStatus {
   adminer_found: boolean
   php_found:     boolean
   php_path:      string
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
 }
 
 export default function Database() {
@@ -25,20 +41,51 @@ export default function Database() {
   const [starting, setStarting]   = useState(false)
   const [error, setError]         = useState('')
 
+  // Backup state
+  const [backups, setBackups]         = useState<BackupInfo[]>([])
+  const [databases, setDatabases]     = useState<string[]>([])
+  const [selectedDb, setSelectedDb]   = useState('all')
+  const [backingUp, setBackingUp]     = useState(false)
+  const [restoring, setRestoring]     = useState<string | null>(null)
+  const [confirmRestore, setConfirmRestore] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete]   = useState<string | null>(null)
+  const [backupSuccess, setBackupSuccess]   = useState('')
+
+  const mysqlRunning = mysql?.status === 'running'
+
   const refresh = async () => {
     const s = await GetAdminerStatus()
     setStatus(s as AdminerStatus)
   }
 
+  const refreshBackups = async () => {
+    try {
+      const list = await ListBackups()
+      setBackups((list || []) as BackupInfo[])
+    } catch { /* MySQL not running */ }
+  }
+
+  const refreshDatabases = async () => {
+    try {
+      const dbs = await ListDatabases()
+      setDatabases(dbs || [])
+    } catch { /* MySQL not running */ }
+  }
+
   useEffect(() => {
     refresh()
+    refreshBackups()
   }, [])
+
+  useEffect(() => {
+    if (mysqlRunning) refreshDatabases()
+  }, [mysqlRunning])
 
   const handleStartAdminer = async () => {
     setStarting(true)
     setError('')
     try {
-      await StartAdminer()  // Go side opens browser automatically
+      await StartAdminer()
       await refresh()
     } catch (e: any) {
       setError(e?.toString() ?? 'Failed to start Adminer')
@@ -52,7 +99,47 @@ export default function Database() {
     await refresh()
   }
 
-  const mysqlRunning = mysql?.status === 'running'
+  const handleCreateBackup = async () => {
+    setBackingUp(true)
+    setError('')
+    setBackupSuccess('')
+    try {
+      await CreateBackup(selectedDb === 'all' ? '' : selectedDb)
+      await refreshBackups()
+      setBackupSuccess(t.db_backup_success)
+      setTimeout(() => setBackupSuccess(''), 3000)
+    } catch (e: any) {
+      setError(e?.toString() ?? 'Backup failed')
+    } finally {
+      setBackingUp(false)
+    }
+  }
+
+  const handleRestore = async (filename: string) => {
+    setConfirmRestore(null)
+    setRestoring(filename)
+    setError('')
+    setBackupSuccess('')
+    try {
+      await RestoreBackup(filename)
+      setBackupSuccess(t.db_restore_success)
+      setTimeout(() => setBackupSuccess(''), 3000)
+    } catch (e: any) {
+      setError(e?.toString() ?? 'Restore failed')
+    } finally {
+      setRestoring(null)
+    }
+  }
+
+  const handleDeleteBackup = async (filename: string) => {
+    setConfirmDelete(null)
+    try {
+      await DeleteBackup(filename)
+      await refreshBackups()
+    } catch (e: any) {
+      setError(e?.toString() ?? 'Delete failed')
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
@@ -63,7 +150,14 @@ export default function Database() {
       </div>
 
       {error && (
-        <div className="text-red-400 text-sm bg-red-500/10 rounded-lg px-4 py-3">{error}</div>
+        <div className="text-red-400 text-sm bg-red-500/10 rounded-lg px-4 py-3 flex items-center gap-2">
+          <X size={14} className="flex-shrink-0" /> {error}
+        </div>
+      )}
+      {backupSuccess && (
+        <div className="text-green-400 text-sm bg-green-500/10 rounded-lg px-4 py-3 flex items-center gap-2">
+          <Check size={14} className="flex-shrink-0" /> {backupSuccess}
+        </div>
       )}
 
       {/* MySQL Status Card */}
@@ -125,9 +219,7 @@ export default function Database() {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {t.db_adminer_desc}
-              </p>
+              <p className="text-xs text-gray-500 mt-1">{t.db_adminer_desc}</p>
             </div>
           </div>
 
@@ -161,11 +253,128 @@ export default function Database() {
           </div>
         </div>
 
-        {/* Missing PHP */}
         {status && !status.php_found && (
           <div className="mt-3 text-xs text-yellow-500 bg-yellow-500/10 rounded-lg px-3 py-2 flex items-center gap-1.5">
             <AlertTriangle size={14} className="text-yellow-400 flex-shrink-0" />
             <span>{t.db_php_not_found}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Backups Card */}
+      <div className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex items-start gap-3">
+            <HardDrive size={20} className="text-gray-300 mt-0.5" />
+            <div>
+              <span className="text-white font-semibold">{t.db_backups}</span>
+              <p className="text-xs text-gray-500 mt-1">{t.db_backups_desc}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <select
+              value={selectedDb}
+              onChange={e => setSelectedDb(e.target.value)}
+              disabled={!mysqlRunning}
+              className="bg-[#0f1420] border border-[#2a3347] rounded-lg px-2 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-blue-500"
+            >
+              <option value="all">{t.db_backup_all}</option>
+              {databases.map(db => (
+                <option key={db} value={db}>{db}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleCreateBackup}
+              disabled={!mysqlRunning || backingUp}
+              className="px-3 py-1.5 text-xs rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors disabled:opacity-40 flex items-center gap-1.5"
+            >
+              <Download size={12} />
+              {backingUp ? t.db_creating_backup : t.db_create_backup}
+            </button>
+          </div>
+        </div>
+
+        {!mysqlRunning && (
+          <div className="text-xs text-yellow-500 bg-yellow-500/10 rounded-lg px-3 py-2 flex items-center gap-1.5 mb-4">
+            <AlertTriangle size={14} className="text-yellow-400 flex-shrink-0" />
+            <span>{t.db_mysql_required}</span>
+          </div>
+        )}
+
+        {/* Backup list */}
+        {backups.length === 0 ? (
+          <p className="text-gray-600 text-sm text-center py-6">{t.db_no_backups}</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {backups.map(bk => (
+              <div
+                key={bk.name}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#0f1420] border border-transparent hover:border-[#2a3347] transition-colors"
+              >
+                <HardDrive size={14} className="text-gray-500 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white font-mono truncate" title={bk.name}>{bk.name}</p>
+                  <div className="flex gap-3 text-xs text-gray-500 mt-0.5">
+                    <span>{bk.database}</span>
+                    <span>{formatSize(bk.size)}</span>
+                    <span>{new Date(bk.created_at).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {confirmRestore === bk.name ? (
+                    <>
+                      <span className="text-xs text-yellow-400 mr-1">{t.db_confirm_restore}</span>
+                      <button
+                        onClick={() => handleRestore(bk.name)}
+                        className="px-2 py-1 rounded-lg text-xs bg-yellow-500 text-black font-medium hover:bg-yellow-400 transition-colors"
+                      >
+                        {t.yes}
+                      </button>
+                      <button
+                        onClick={() => setConfirmRestore(null)}
+                        className="px-2 py-1 rounded-lg text-xs bg-[#2a3347] text-gray-300 hover:bg-[#334060] transition-colors"
+                      >
+                        {t.no}
+                      </button>
+                    </>
+                  ) : confirmDelete === bk.name ? (
+                    <>
+                      <button
+                        onClick={() => handleDeleteBackup(bk.name)}
+                        className="px-2 py-1 rounded-lg text-xs bg-red-500 text-white hover:bg-red-600 transition-colors"
+                      >
+                        {t.yes}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        className="px-2 py-1 rounded-lg text-xs bg-[#2a3347] text-gray-300 hover:bg-[#334060] transition-colors"
+                      >
+                        {t.no}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setConfirmRestore(bk.name)}
+                        disabled={!mysqlRunning || restoring === bk.name}
+                        className="px-2.5 py-1 rounded-lg text-xs bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors disabled:opacity-40 flex items-center gap-1"
+                      >
+                        <Upload size={12} />
+                        {restoring === bk.name ? t.db_restoring : t.db_backup_restore}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(bk.name)}
+                        className="px-2.5 py-1 rounded-lg text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

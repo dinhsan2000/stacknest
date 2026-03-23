@@ -26,12 +26,20 @@ export function CheckPortConflict(arg1) {
   return window['go']['main']['App']['CheckPortConflict'](arg1);
 }
 
+export function CreateBackup(arg1) {
+  return window['go']['main']['App']['CreateBackup'](arg1);
+}
+
 export function CreateProject(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
   return window['go']['main']['App']['CreateProject'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
 export function DeactivateProject() {
   return window['go']['main']['App']['DeactivateProject']();
+}
+
+export function DeleteBackup(arg1) {
+  return window['go']['main']['App']['DeleteBackup'](arg1);
 }
 
 export function DeleteBinary(arg1, arg2) {
@@ -126,6 +134,14 @@ export function KillConflictProcess(arg1) {
   return window['go']['main']['App']['KillConflictProcess'](arg1);
 }
 
+export function ListBackups() {
+  return window['go']['main']['App']['ListBackups']();
+}
+
+export function ListDatabases() {
+  return window['go']['main']['App']['ListDatabases']();
+}
+
 export function OpenFolder(arg1) {
   return window['go']['main']['App']['OpenFolder'](arg1);
 }
@@ -154,6 +170,10 @@ export function RestartService(arg1) {
   return window['go']['main']['App']['RestartService'](arg1);
 }
 
+export function RestoreBackup(arg1) {
+  return window['go']['main']['App']['RestoreBackup'](arg1);
+}
+
 export function RestoreConfigBackup(arg1, arg2) {
   return window['go']['main']['App']['RestoreConfigBackup'](arg1, arg2);
 }
@@ -172,6 +192,10 @@ export function SelectFolder() {
 
 export function SetActiveVersion(arg1, arg2) {
   return window['go']['main']['App']['SetActiveVersion'](arg1, arg2);
+}
+
+export function SetAutoRecover(arg1, arg2) {
+  return window['go']['main']['App']['SetAutoRecover'](arg1, arg2);
 }
 
 export function SetServiceEnabled(arg1, arg2) {

@@ -36,6 +36,16 @@ const ServiceIcon = ({ name }: { name: string }) => {
   }
 }
 
+function formatUptime(since: number): string {
+  if (!since) return ''
+  const elapsed = Math.floor(Date.now() / 1000) - since
+  if (elapsed < 60) return `${elapsed}s`
+  if (elapsed < 3600) return `${Math.floor(elapsed / 60)}m`
+  const h = Math.floor(elapsed / 3600)
+  const m = Math.floor((elapsed % 3600) / 60)
+  return `${h}h ${m}m`
+}
+
 interface ConflictInfo {
   port: number
   pid: number
@@ -170,17 +180,28 @@ export default function ServiceRow({ service, onNavigate }: Props) {
           </button>
         </div>
 
-        {/* PID */}
+        {/* PID + Uptime */}
         <div className="w-24 shrink-0 text-xs">
-          {service.pid > 0
-            ? <code className="text-gray-500 bg-[#0f1420] px-1.5 py-0.5 rounded font-mono">PID {service.pid}</code>
-            : <span className="text-gray-700">—</span>
-          }
+          {service.pid > 0 ? (
+            <div>
+              <code className="text-gray-500 bg-[#0f1420] px-1.5 py-0.5 rounded font-mono">PID {service.pid}</code>
+              {service.uptime_since > 0 && (
+                <span className="text-gray-600 text-[10px] ml-1">{formatUptime(service.uptime_since)}</span>
+              )}
+            </div>
+          ) : (
+            <span className="text-gray-700">—</span>
+          )}
         </div>
 
-        {/* Error message — chiếm phần còn lại */}
+        {/* Error / crash loop — chiếm phần còn lại */}
         <div className="flex-1 min-w-0">
-          {service.error && (
+          {service.crash_loop && (
+            <span className="text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">
+              {t.dash_crash_loop}
+            </span>
+          )}
+          {service.error && !service.crash_loop && (
             <p className="text-xs text-red-400 truncate" title={service.error}>
               {service.error}
             </p>

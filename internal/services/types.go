@@ -24,14 +24,18 @@ const (
 
 // ServiceInfo thông tin đầy đủ của một service
 type ServiceInfo struct {
-	Name    ServiceName   `json:"name"`
-	Display string        `json:"display"`
-	Status  ServiceStatus `json:"status"`
-	Port    int           `json:"port"`
-	Version string        `json:"version"`
-	PID     int           `json:"pid"`
-	Error   string        `json:"error,omitempty"`
-	Enabled bool          `json:"enabled"`
+	Name         ServiceName   `json:"name"`
+	Display      string        `json:"display"`
+	Status       ServiceStatus `json:"status"`
+	Port         int           `json:"port"`
+	Version      string        `json:"version"`
+	PID          int           `json:"pid"`
+	Error        string        `json:"error,omitempty"`
+	Enabled      bool          `json:"enabled"`
+	AutoRecover  bool          `json:"auto_recover"`
+	UptimeSince  int64         `json:"uptime_since"`
+	RestartCount int           `json:"restart_count"`
+	CrashLoop    bool          `json:"crash_loop"`
 }
 
 // PHPVersion thông tin về một phiên bản PHP

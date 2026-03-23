@@ -9,10 +9,11 @@ import (
 )
 
 type ServiceConfig struct {
-	Enabled bool   `json:"enabled"`
-	Port    int    `json:"port"`
-	Path    string `json:"path"`
-	Version string `json:"version"`
+	Enabled     bool   `json:"enabled"`
+	Port        int    `json:"port"`
+	Path        string `json:"path"`
+	Version     string `json:"version"`
+	AutoRecover bool   `json:"auto_recover"`
 }
 
 type Config struct {
@@ -52,10 +53,11 @@ func DefaultConfig() *Config {
 		WWWPath:  filepath.Join(root, "www"),
 		LogPath:  filepath.Join(root, "logs"),
 		Apache: ServiceConfig{
-			Enabled: true,
-			Port:    80,
-			Path:    filepath.Join(bin, "apache", "bin"),
-			Version: "2.4",
+			Enabled:     true,
+			Port:        80,
+			Path:        filepath.Join(bin, "apache", "bin"),
+			Version:     "2.4",
+			AutoRecover: true,
 		},
 		Nginx: ServiceConfig{
 			Enabled: false,
@@ -64,10 +66,11 @@ func DefaultConfig() *Config {
 			Version: "1.25",
 		},
 		MySQL: ServiceConfig{
-			Enabled: true,
-			Port:    3306,
-			Path:    filepath.Join(bin, "mysql", "bin"),
-			Version: "8.0",
+			Enabled:     true,
+			Port:        3306,
+			Path:        filepath.Join(bin, "mysql", "bin"),
+			Version:     "8.0",
+			AutoRecover: true,
 		},
 		PHP: ServiceConfig{
 			Enabled: true,

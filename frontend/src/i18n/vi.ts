@@ -259,6 +259,30 @@ const vi: Translations = {
     proj_tpl_laravel_desc: 'Qua composer create-project',
     proj_tpl_wordpress: 'WordPress',
     proj_tpl_wordpress_desc: 'Bản mới nhất từ wordpress.org',
+
+    // Database Backups
+    db_backups: 'Sao lưu',
+    db_backups_desc: 'Sao lưu và khôi phục cơ sở dữ liệu MySQL',
+    db_create_backup: 'Tạo bản sao lưu',
+    db_creating_backup: 'Đang sao lưu...',
+    db_backup_restore: 'Khôi phục',
+    db_restoring: 'Đang khôi phục...',
+    db_delete_backup: 'Xóa',
+    db_confirm_restore: 'Khôi phục bản sao lưu này? Dữ liệu hiện tại sẽ bị ghi đè.',
+    db_confirm_delete_backup: 'Xóa bản sao lưu này?',
+    db_backup_all: 'Tất cả cơ sở dữ liệu',
+    db_backup_success: 'Đã tạo bản sao lưu',
+    db_restore_success: 'Đã khôi phục bản sao lưu',
+    db_no_backups: 'Chưa có bản sao lưu. Tạo một bản để bắt đầu.',
+    db_backup_size: 'Dung lượng',
+    db_backup_date: 'Ngày',
+    db_mysql_required: 'MySQL phải đang chạy để thực hiện sao lưu',
+
+    // Auto-recovery
+    dash_uptime: 'Thời gian hoạt động',
+    dash_crash_loop: 'Lỗi lặp',
+    settings_auto_recover: 'Tự phục hồi',
+    settings_auto_recover_desc: 'Tự khởi động lại khi crash (tối đa 3 lần/phút)',
 }
 
 export default vi

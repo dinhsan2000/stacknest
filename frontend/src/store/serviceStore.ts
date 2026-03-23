@@ -17,6 +17,7 @@ import {
   SetServiceEnabled,
   CancelBinaryDownload,
   DeleteBinary,
+  SetAutoRecover,
   GetProjects,
   QuickCreateProject,
   ApplyProject,
@@ -55,6 +56,7 @@ interface ServiceStore {
   deleteBinary: (service: string, version: string) => Promise<void>
   setActiveVersion: (service: string, version: string) => Promise<void>
   setServiceEnabled: (name: string, enabled: boolean) => Promise<void>
+  setAutoRecover: (name: string, enabled: boolean) => Promise<void>
   dismissDownloadError: (key: string) => void
   fetchProjects: () => Promise<void>
   quickCreateProject: (name: string, server: string, template: string, ssl: boolean) => Promise<void>
@@ -180,6 +182,11 @@ export const useServiceStore = create<ServiceStore>((set, get) => ({
 
   setServiceEnabled: async (name, enabled) => {
     await SetServiceEnabled(name, enabled)
+    await get().fetchServices()
+  },
+
+  setAutoRecover: async (name, enabled) => {
+    await SetAutoRecover(name, enabled)
     await get().fetchServices()
   },
 

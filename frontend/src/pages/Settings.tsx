@@ -144,6 +144,30 @@ export default function Settings({ highlightPort }: Props) {
         </div>
       </section>
 
+      {/* Auto-recover */}
+      <section className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5 flex flex-col gap-4">
+        <div>
+          <h3 className="text-white font-semibold">{t.settings_auto_recover}</h3>
+          <p className="text-xs text-gray-500 mt-1">{t.settings_auto_recover_desc}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {(['apache', 'nginx', 'mysql', 'php', 'redis'] as const).map(svc => (
+            <label key={svc} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form[svc].auto_recover}
+                onChange={e => setForm(f => f ? {
+                  ...f,
+                  [svc]: { ...f[svc], auto_recover: e.target.checked }
+                } : f)}
+                className="accent-blue-500 w-4 h-4"
+              />
+              <span className="text-sm text-gray-300 capitalize">{svc}</span>
+            </label>
+          ))}
+        </div>
+      </section>
+
       {/* General */}
       <section className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5 flex flex-col gap-4">
         <h3 className="text-white font-semibold">{t.settings_general}</h3>

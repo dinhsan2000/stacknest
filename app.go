@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"stacknest/internal/backup"
 	"stacknest/internal/config"
 	"stacknest/internal/configeditor"
 	"stacknest/internal/database"
@@ -34,7 +35,9 @@ type App struct {
 	cfgEditor   *configeditor.Manager
 	sslMgr      *ssl.Manager
 	adminerSrv  *database.Server
+	backupMgr   *backup.Manager
 	projectMgr  *project.Manager
+	crashLog    *services.CrashLogger
 	logCancel   context.CancelFunc
 	termMu      sync.Mutex
 	termSession *terminal.Session
@@ -58,7 +61,9 @@ func NewApp() *App {
 		cfgEditor:   configeditor.NewManager(cfg.RootPath),
 		sslMgr:      ssl.NewManager(cfg.RootPath),
 		adminerSrv:  database.NewServer(cfg.RootPath),
+		backupMgr:   backup.NewManager(cfg.BinPath, cfg.DataPath, cfg.MySQL.Port),
 		projectMgr:  project.NewManager(cfg.RootPath),
+		crashLog:    services.NewCrashLogger(filepath.Join(cfg.LogPath, "stacknest")),
 		dlCancels:   make(map[string]context.CancelFunc),
 	}
 }
@@ -110,6 +115,15 @@ func servicePortMap(cfg *config.Config) map[services.ServiceName]int {
 // startup được gọi khi app khởi động
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	// Set emit function cho backup manager
+	a.backupMgr.EmitFn = func(event string, data ...interface{}) {
+		runtime.EventsEmit(a.ctx, event, data...)
+	}
+
+	// Setup auto-recovery
+	a.svcMgr.SetCrashCallback(a.handleServiceCrash)
+	a.syncAutoRecoverFlags()
 
 	// Đảm bảo nginx.conf đúng (trỏ vào www/) nếu binary đã có
 	a.ensureNginxConfig(false)
@@ -448,6 +462,7 @@ func (a *App) SaveConfig(cfg config.Config) error {
 	a.svcMgr.UpdatePort(services.ServiceMySQL, cfg.MySQL.Port)
 	a.svcMgr.UpdatePort(services.ServicePHP, cfg.PHP.Port)
 	a.svcMgr.UpdatePort(services.ServiceRedis, cfg.Redis.Port)
+	a.backupMgr.UpdatePort(cfg.MySQL.Port)
 	a.emitServiceUpdate()
 	return a.cfg.Save()
 }
@@ -484,6 +499,28 @@ func (a *App) StartAdminer() (string, error) {
 // StopAdminer dừng PHP server Adminer
 func (a *App) StopAdminer() {
 	a.adminerSrv.Stop()
+}
+
+// ─── Database Backup APIs ─────────────────────────────────────────────────────
+
+func (a *App) ListDatabases() ([]string, error) {
+	return a.backupMgr.ListDatabases()
+}
+
+func (a *App) CreateBackup(database string) (*backup.BackupInfo, error) {
+	return a.backupMgr.CreateBackup(database)
+}
+
+func (a *App) ListBackups() ([]backup.BackupInfo, error) {
+	return a.backupMgr.ListBackups()
+}
+
+func (a *App) RestoreBackup(filename string) error {
+	return a.backupMgr.RestoreBackup(filename)
+}
+
+func (a *App) DeleteBackup(filename string) error {
+	return a.backupMgr.DeleteBackup(filename)
 }
 
 // ─── Project APIs ─────────────────────────────────────────────────────────────
@@ -967,6 +1004,97 @@ func min(a, b int) int {
 }
 
 // servicesWithEnabled trả về danh sách services kèm trạng thái enabled từ config.
+// ─── Auto-Recovery ────────────────────────────────────────────────────────────
+
+func (a *App) handleServiceCrash(name services.ServiceName) {
+	info, _ := a.svcMgr.GetOne(name)
+	autoRecover := a.isAutoRecoverEnabled(name)
+
+	a.crashLog.Log(name, info.Error, autoRecover)
+
+	runtime.EventsEmit(a.ctx, "service:crashed", map[string]any{
+		"name":    string(name),
+		"error":   info.Error,
+		"recover": autoRecover,
+	})
+
+	if !autoRecover {
+		a.emitServiceUpdate()
+		return
+	}
+
+	if a.svcMgr.IsCrashLoop(name) {
+		a.svcMgr.SetCrashLoop(name, true)
+		a.crashLog.Log(name, "crash loop detected, stopping auto-recovery", false)
+		runtime.EventsEmit(a.ctx, "service:crash-loop", map[string]any{
+			"name": string(name),
+		})
+		a.emitServiceUpdate()
+		return
+	}
+
+	a.svcMgr.RecordRestart(name)
+	time.Sleep(2 * time.Second)
+	if err := a.svcMgr.Start(name); err != nil {
+		a.crashLog.Log(name, "auto-restart failed: "+err.Error(), false)
+	}
+	a.emitServiceUpdate()
+}
+
+func (a *App) isAutoRecoverEnabled(name services.ServiceName) bool {
+	switch name {
+	case services.ServiceApache:
+		return a.cfg.Apache.AutoRecover
+	case services.ServiceNginx:
+		return a.cfg.Nginx.AutoRecover
+	case services.ServiceMySQL:
+		return a.cfg.MySQL.AutoRecover
+	case services.ServicePHP:
+		return a.cfg.PHP.AutoRecover
+	case services.ServiceRedis:
+		return a.cfg.Redis.AutoRecover
+	}
+	return false
+}
+
+func (a *App) syncAutoRecoverFlags() {
+	flags := map[services.ServiceName]bool{
+		services.ServiceApache: a.cfg.Apache.AutoRecover,
+		services.ServiceNginx:  a.cfg.Nginx.AutoRecover,
+		services.ServiceMySQL:  a.cfg.MySQL.AutoRecover,
+		services.ServicePHP:    a.cfg.PHP.AutoRecover,
+		services.ServiceRedis:  a.cfg.Redis.AutoRecover,
+	}
+	for name, enabled := range flags {
+		a.svcMgr.SetAutoRecover(name, enabled)
+	}
+}
+
+// SetAutoRecover bật/tắt auto-recovery cho một service
+func (a *App) SetAutoRecover(name string, enabled bool) error {
+	sn := services.ServiceName(name)
+	switch sn {
+	case services.ServiceApache:
+		a.cfg.Apache.AutoRecover = enabled
+	case services.ServiceNginx:
+		a.cfg.Nginx.AutoRecover = enabled
+	case services.ServiceMySQL:
+		a.cfg.MySQL.AutoRecover = enabled
+	case services.ServicePHP:
+		a.cfg.PHP.AutoRecover = enabled
+	case services.ServiceRedis:
+		a.cfg.Redis.AutoRecover = enabled
+	default:
+		return fmt.Errorf("unknown service: %s", name)
+	}
+	a.svcMgr.SetAutoRecover(sn, enabled)
+	if err := a.cfg.Save(); err != nil {
+		return err
+	}
+	a.emitServiceUpdate()
+	return nil
+}
+
 func (a *App) servicesWithEnabled() []services.ServiceInfo {
 	all := a.svcMgr.GetAll()
 	enabledMap := map[services.ServiceName]bool{
@@ -976,8 +1104,16 @@ func (a *App) servicesWithEnabled() []services.ServiceInfo {
 		services.ServicePHP:    a.cfg.PHP.Enabled,
 		services.ServiceRedis:  a.cfg.Redis.Enabled,
 	}
+	recoverMap := map[services.ServiceName]bool{
+		services.ServiceApache: a.cfg.Apache.AutoRecover,
+		services.ServiceNginx:  a.cfg.Nginx.AutoRecover,
+		services.ServiceMySQL:  a.cfg.MySQL.AutoRecover,
+		services.ServicePHP:    a.cfg.PHP.AutoRecover,
+		services.ServiceRedis:  a.cfg.Redis.AutoRecover,
+	}
 	for i := range all {
 		all[i].Enabled = enabledMap[all[i].Name]
+		all[i].AutoRecover = recoverMap[all[i].Name]
 	}
 	return all
 }

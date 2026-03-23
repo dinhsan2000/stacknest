@@ -259,6 +259,30 @@ const en: Translations = {
     proj_tpl_laravel_desc: 'Via composer create-project',
     proj_tpl_wordpress: 'WordPress',
     proj_tpl_wordpress_desc: 'Latest from wordpress.org',
+
+    // Database Backups
+    db_backups: 'Backups',
+    db_backups_desc: 'Backup and restore MySQL databases',
+    db_create_backup: 'Create Backup',
+    db_creating_backup: 'Backing up...',
+    db_backup_restore: 'Restore',
+    db_restoring: 'Restoring...',
+    db_delete_backup: 'Delete',
+    db_confirm_restore: 'Restore this backup? This will overwrite existing data.',
+    db_confirm_delete_backup: 'Delete this backup?',
+    db_backup_all: 'All databases',
+    db_backup_success: 'Backup created successfully',
+    db_restore_success: 'Backup restored successfully',
+    db_no_backups: 'No backups yet. Create one to get started.',
+    db_backup_size: 'Size',
+    db_backup_date: 'Date',
+    db_mysql_required: 'MySQL must be running to perform backups',
+
+    // Auto-recovery
+    dash_uptime: 'Uptime',
+    dash_crash_loop: 'Crash loop',
+    settings_auto_recover: 'Auto-recover',
+    settings_auto_recover_desc: 'Automatically restart on crash (max 3/min)',
 }
 
 export default en

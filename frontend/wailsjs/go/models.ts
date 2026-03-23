@@ -1,3 +1,26 @@
+export namespace backup {
+	
+	export class BackupInfo {
+	    name: string;
+	    size: number;
+	    database: string;
+	    created_at: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new BackupInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.size = source["size"];
+	        this.database = source["database"];
+	        this.created_at = source["created_at"];
+	    }
+	}
+
+}
+
 export namespace config {
 	
 	export class ServiceConfig {
@@ -5,6 +28,7 @@ export namespace config {
 	    port: number;
 	    path: string;
 	    version: string;
+	    auto_recover: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ServiceConfig(source);
@@ -16,6 +40,7 @@ export namespace config {
 	        this.port = source["port"];
 	        this.path = source["path"];
 	        this.version = source["version"];
+	        this.auto_recover = source["auto_recover"];
 	    }
 	}
 	export class Config {
@@ -284,6 +309,10 @@ export namespace services {
 	    pid: number;
 	    error?: string;
 	    enabled: boolean;
+	    auto_recover: boolean;
+	    uptime_since: number;
+	    restart_count: number;
+	    crash_loop: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ServiceInfo(source);
@@ -299,6 +328,10 @@ export namespace services {
 	        this.pid = source["pid"];
 	        this.error = source["error"];
 	        this.enabled = source["enabled"];
+	        this.auto_recover = source["auto_recover"];
+	        this.uptime_since = source["uptime_since"];
+	        this.restart_count = source["restart_count"];
+	        this.crash_loop = source["crash_loop"];
 	    }
 	}
 
