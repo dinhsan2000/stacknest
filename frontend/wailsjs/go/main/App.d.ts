@@ -36,6 +36,8 @@ export function DeleteBinary(arg1:string,arg2:string):Promise<void>;
 
 export function DeleteProject(arg1:string):Promise<void>;
 
+export function CompleteOnboarding():Promise<void>;
+
 export function GenerateSSLCert(arg1:string):Promise<void>;
 
 export function GetActivePHP():Promise<phpswitch.PHPInstall>;
@@ -47,6 +49,8 @@ export function GetBinaryStatus():Promise<Array<downloader.ServiceVersionStatus>
 export function GetCACertPath():Promise<string>;
 
 export function GetConfig():Promise<config.Config>;
+
+export function IsFirstRun():Promise<boolean>;
 
 export function GetConfigBackups(arg1:string):Promise<Array<configeditor.BackupInfo>>;
 

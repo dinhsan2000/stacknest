@@ -453,6 +453,18 @@ func (a *App) GetConfig() *config.Config {
 	return a.cfg
 }
 
+// IsFirstRun kiểm tra lần chạy đầu tiên
+func (a *App) IsFirstRun() bool {
+	return !a.cfg.OnboardingDone
+}
+
+// CompleteOnboarding đánh dấu đã hoàn thành onboarding
+func (a *App) CompleteOnboarding() error {
+	a.cfg.OnboardingDone = true
+	downloader.InitCatalog(a.cfg.RootPath)
+	return a.cfg.Save()
+}
+
 // SaveConfig lưu cấu hình
 func (a *App) SaveConfig(cfg config.Config) error {
 	a.cfg = &cfg

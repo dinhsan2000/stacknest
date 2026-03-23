@@ -13,6 +13,9 @@ import ConfigEditor from './pages/ConfigEditor'
 import Settings from './pages/Settings'
 import PHPSwitcher from './pages/PHPSwitcher'
 import Projects from './pages/Projects'
+import ToastContainer from './components/Toast'
+import OnboardingWizard from './components/OnboardingWizard'
+import { IsFirstRun } from '../wailsjs/go/main/App'
 
 export interface NavContext {
   highlightPort?: string  // service name to highlight in Settings
@@ -21,10 +24,12 @@ export interface NavContext {
 function App() {
   const [page, setPage] = useState<Page>('dashboard')
   const [navContext, setNavContext] = useState<NavContext>({})
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const { initEventListeners } = useServiceStore()
 
   useEffect(() => {
     initEventListeners()
+    IsFirstRun().then(first => setShowOnboarding(first))
   }, [])
 
   const navigateTo = (target: Page, ctx?: NavContext) => {
@@ -50,6 +55,8 @@ function App() {
 
   return (
     <div className="flex h-screen bg-[#0f1420] text-white font-sans overflow-hidden">
+      <ToastContainer />
+      {showOnboarding && <OnboardingWizard onComplete={() => setShowOnboarding(false)} />}
       <Sidebar current={page} onNavigate={(p) => navigateTo(p)} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />

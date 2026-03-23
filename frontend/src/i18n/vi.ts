@@ -283,6 +283,30 @@ const vi: Translations = {
     dash_crash_loop: 'Lỗi lặp',
     settings_auto_recover: 'Tự phục hồi',
     settings_auto_recover_desc: 'Tự khởi động lại khi crash (tối đa 3 lần/phút)',
+
+    // Notifications
+    notif_service_crashed: '{service} bị crash: {error}',
+    notif_service_recovered: '{service} đã tự khởi động lại',
+    notif_crash_loop: '{service} crash liên tục — tạm dừng tự phục hồi',
+    notif_download_done: '{service} v{version} đã tải xong',
+    notif_download_failed: '{service} v{version} tải thất bại',
+
+    // Onboarding
+    onb_welcome: 'Chào mừng đến với Stacknest',
+    onb_welcome_desc: 'Công cụ quản lý môi trường phát triển cục bộ. Hãy cùng thiết lập.',
+    onb_select_language: 'Chọn ngôn ngữ',
+    onb_next: 'Tiếp',
+    onb_back: 'Quay lại',
+    onb_skip: 'Bỏ qua',
+    onb_root_path: 'Đường dẫn gốc',
+    onb_root_path_desc: 'Chọn nơi Stacknest lưu trữ binary, dữ liệu và dự án.',
+    onb_select_services: 'Chọn dịch vụ',
+    onb_select_services_desc: 'Chọn dịch vụ cần tải. Bạn có thể thêm sau.',
+    onb_downloading: 'Đang tải dịch vụ...',
+    onb_download_complete: 'Đã tải xong tất cả!',
+    onb_done_title: 'Sẵn sàng!',
+    onb_done_desc: 'Stacknest đã sẵn sàng. Khởi động dịch vụ từ Bảng điều khiển.',
+    onb_get_started: 'Bắt đầu',
 }
 
 export default vi

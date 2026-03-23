@@ -50,6 +50,10 @@ export function DeleteProject(arg1) {
   return window['go']['main']['App']['DeleteProject'](arg1);
 }
 
+export function CompleteOnboarding() {
+  return window['go']['main']['App']['CompleteOnboarding']();
+}
+
 export function GenerateSSLCert(arg1) {
   return window['go']['main']['App']['GenerateSSLCert'](arg1);
 }
@@ -72,6 +76,10 @@ export function GetCACertPath() {
 
 export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
+}
+
+export function IsFirstRun() {
+  return window['go']['main']['App']['IsFirstRun']();
 }
 
 export function GetConfigBackups(arg1) {

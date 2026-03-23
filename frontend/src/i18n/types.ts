@@ -283,4 +283,28 @@ export interface Translations {
     dash_crash_loop: string
     settings_auto_recover: string
     settings_auto_recover_desc: string
+
+    // Notifications
+    notif_service_crashed: string
+    notif_service_recovered: string
+    notif_crash_loop: string
+    notif_download_done: string
+    notif_download_failed: string
+
+    // Onboarding
+    onb_welcome: string
+    onb_welcome_desc: string
+    onb_select_language: string
+    onb_next: string
+    onb_back: string
+    onb_skip: string
+    onb_root_path: string
+    onb_root_path_desc: string
+    onb_select_services: string
+    onb_select_services_desc: string
+    onb_downloading: string
+    onb_download_complete: string
+    onb_done_title: string
+    onb_done_desc: string
+    onb_get_started: string
 }

@@ -283,6 +283,30 @@ const en: Translations = {
     dash_crash_loop: 'Crash loop',
     settings_auto_recover: 'Auto-recover',
     settings_auto_recover_desc: 'Automatically restart on crash (max 3/min)',
+
+    // Notifications
+    notif_service_crashed: '{service} crashed: {error}',
+    notif_service_recovered: '{service} auto-restarted',
+    notif_crash_loop: '{service} is in a crash loop — auto-recovery paused',
+    notif_download_done: '{service} v{version} downloaded',
+    notif_download_failed: '{service} v{version} download failed',
+
+    // Onboarding
+    onb_welcome: 'Welcome to Stacknest',
+    onb_welcome_desc: 'Your local development environment manager. Let\'s get you set up.',
+    onb_select_language: 'Select language',
+    onb_next: 'Next',
+    onb_back: 'Back',
+    onb_skip: 'Skip Setup',
+    onb_root_path: 'Root Path',
+    onb_root_path_desc: 'Choose where Stacknest stores binaries, data, and projects.',
+    onb_select_services: 'Select Services',
+    onb_select_services_desc: 'Choose which services to download. You can add more later.',
+    onb_downloading: 'Downloading services...',
+    onb_download_complete: 'All downloads complete!',
+    onb_done_title: 'You\'re all set!',
+    onb_done_desc: 'Stacknest is ready to use. Start services from the Dashboard.',
+    onb_get_started: 'Get Started',
 }
 
 export default en

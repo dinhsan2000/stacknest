@@ -29,8 +29,9 @@ type Config struct {
 	PHP    ServiceConfig `json:"php"`
 	Redis  ServiceConfig `json:"redis"`
 
-	AutoStart bool   `json:"auto_start"`
-	Theme     string `json:"theme"` // "light" | "dark"
+	AutoStart      bool   `json:"auto_start"`
+	Theme          string `json:"theme"` // "light" | "dark"
+	OnboardingDone bool   `json:"onboarding_done"`
 }
 
 // MySQLDataDir trả về thư mục data riêng cho từng phiên bản MySQL.
