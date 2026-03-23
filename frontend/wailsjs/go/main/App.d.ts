@@ -24,6 +24,8 @@ export function CheckAllPortConflicts():Promise<Array<portcheck.ConflictInfo>>;
 
 export function CheckPortConflict(arg1:number):Promise<portcheck.ConflictInfo>;
 
+export function CompleteOnboarding():Promise<void>;
+
 export function CreateBackup(arg1:string):Promise<backup.BackupInfo>;
 
 export function CreateProject(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:boolean,arg7:Record<string, boolean>):Promise<void>;
@@ -36,8 +38,6 @@ export function DeleteBinary(arg1:string,arg2:string):Promise<void>;
 
 export function DeleteProject(arg1:string):Promise<void>;
 
-export function CompleteOnboarding():Promise<void>;
-
 export function GenerateSSLCert(arg1:string):Promise<void>;
 
 export function GetActivePHP():Promise<phpswitch.PHPInstall>;
@@ -49,8 +49,6 @@ export function GetBinaryStatus():Promise<Array<downloader.ServiceVersionStatus>
 export function GetCACertPath():Promise<string>;
 
 export function GetConfig():Promise<config.Config>;
-
-export function IsFirstRun():Promise<boolean>;
 
 export function GetConfigBackups(arg1:string):Promise<Array<configeditor.BackupInfo>>;
 
@@ -75,6 +73,8 @@ export function GetVirtualHosts():Promise<Array<vhost.VirtualHost>>;
 export function GetWWWPath():Promise<string>;
 
 export function HideWindow():Promise<void>;
+
+export function IsFirstRun():Promise<boolean>;
 
 export function IsPortInUse(arg1:number):Promise<boolean>;
 

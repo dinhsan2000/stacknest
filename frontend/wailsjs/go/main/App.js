@@ -26,6 +26,10 @@ export function CheckPortConflict(arg1) {
   return window['go']['main']['App']['CheckPortConflict'](arg1);
 }
 
+export function CompleteOnboarding() {
+  return window['go']['main']['App']['CompleteOnboarding']();
+}
+
 export function CreateBackup(arg1) {
   return window['go']['main']['App']['CreateBackup'](arg1);
 }
@@ -50,10 +54,6 @@ export function DeleteProject(arg1) {
   return window['go']['main']['App']['DeleteProject'](arg1);
 }
 
-export function CompleteOnboarding() {
-  return window['go']['main']['App']['CompleteOnboarding']();
-}
-
 export function GenerateSSLCert(arg1) {
   return window['go']['main']['App']['GenerateSSLCert'](arg1);
 }
@@ -76,10 +76,6 @@ export function GetCACertPath() {
 
 export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
-}
-
-export function IsFirstRun() {
-  return window['go']['main']['App']['IsFirstRun']();
 }
 
 export function GetConfigBackups(arg1) {
@@ -128,6 +124,10 @@ export function GetWWWPath() {
 
 export function HideWindow() {
   return window['go']['main']['App']['HideWindow']();
+}
+
+export function IsFirstRun() {
+  return window['go']['main']['App']['IsFirstRun']();
 }
 
 export function IsPortInUse(arg1) {

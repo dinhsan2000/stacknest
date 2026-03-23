@@ -56,6 +56,7 @@ export namespace config {
 	    redis: ServiceConfig;
 	    auto_start: boolean;
 	    theme: string;
+	    onboarding_done: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -75,6 +76,7 @@ export namespace config {
 	        this.redis = this.convertValues(source["redis"], ServiceConfig);
 	        this.auto_start = source["auto_start"];
 	        this.theme = source["theme"];
+	        this.onboarding_done = source["onboarding_done"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
