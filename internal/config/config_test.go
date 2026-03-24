@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -135,6 +136,62 @@ func TestConfigJSONRoundTrip(t *testing.T) {
 		t.Run(c.label, func(t *testing.T) {
 			if c.got != c.want {
 				t.Errorf("got %v, want %v", c.got, c.want)
+			}
+		})
+	}
+}
+
+// TestEnsureDirs verifies all required directories are created.
+func TestEnsureDirs(t *testing.T) {
+	root := t.TempDir()
+	bin := filepath.Join(root, "bin")
+	cfg := &Config{
+		RootPath: root,
+		BinPath:  bin,
+		DataPath: filepath.Join(root, "data"),
+		WWWPath:  filepath.Join(root, "www"),
+		LogPath:  filepath.Join(root, "logs"),
+		Apache:   ServiceConfig{Path: filepath.Join(bin, "apache", "bin")},
+		Nginx:    ServiceConfig{Path: filepath.Join(bin, "nginx")},
+		MySQL:    ServiceConfig{Path: filepath.Join(bin, "mysql", "bin")},
+		PHP:      ServiceConfig{Path: filepath.Join(bin, "php")},
+		Redis:    ServiceConfig{Path: filepath.Join(bin, "redis")},
+	}
+
+	cfg.EnsureDirs()
+
+	expected := []string{
+		"bin",
+		"data",
+		"www",
+		"logs",
+		filepath.Join("logs", "apache"),
+		filepath.Join("logs", "nginx"),
+		filepath.Join("logs", "mysql"),
+		filepath.Join("logs", "php"),
+		filepath.Join("logs", "redis"),
+		"ssl",
+		"vhosts",
+		filepath.Join("vhosts", "nginx"),
+		".config_backups",
+		"etc",
+		filepath.Join("bin", "apache", "bin"),
+		filepath.Join("bin", "nginx"),
+		filepath.Join("bin", "mysql", "bin"),
+		filepath.Join("bin", "php"),
+		filepath.Join("bin", "redis"),
+	}
+
+	for _, dir := range expected {
+		t.Run(dir, func(t *testing.T) {
+			full := filepath.Join(root, dir)
+			info, err := os.Stat(full)
+			if err != nil {
+				t.Errorf("directory %q not created: %v", dir, err)
+				return
+			}
+			if !info.IsDir() {
+				t.Errorf("%q exists but is not a directory", dir)
 			}
 		})
 	}

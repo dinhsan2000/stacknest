@@ -127,20 +127,46 @@ func (c *Config) ConfigFilePath() string {
 }
 
 // EnsureDirs tạo tất cả thư mục cần thiết của app nếu chưa tồn tại.
+// Gồm: service binaries, data, www, logs (per-service), ssl, vhosts, config backups.
 func (c *Config) EnsureDirs() {
-	for _, d := range []string{
+	dirs := []string{
+		// Top-level runtime dirs
 		c.BinPath,
 		c.DataPath,
 		c.WWWPath,
 		c.LogPath,
+
+		// Service binary paths
 		c.Apache.Path,
 		c.Nginx.Path,
 		c.MySQL.Path,
 		c.PHP.Path,
 		c.Redis.Path,
-	} {
+
+		// Per-service log dirs
+		filepath.Join(c.LogPath, "apache"),
+		filepath.Join(c.LogPath, "nginx"),
+		filepath.Join(c.LogPath, "mysql"),
+		filepath.Join(c.LogPath, "php"),
+		filepath.Join(c.LogPath, "redis"),
+
+		// SSL certificates
+		filepath.Join(c.RootPath, "ssl"),
+
+		// Virtual host configs (Apache + Nginx)
+		filepath.Join(c.RootPath, "vhosts"),
+		filepath.Join(c.RootPath, "vhosts", "nginx"),
+
+		// Config editor backups
+		filepath.Join(c.RootPath, ".config_backups"),
+
+		// Etc (shared config files)
+		filepath.Join(c.RootPath, "etc"),
+	}
+
+	for _, d := range dirs {
 		if d != "" {
-			os.MkdirAll(d, 0755)
+			os.MkdirAll(d, 0755) //nolint:errcheck
 		}
 	}
 }
