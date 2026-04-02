@@ -1,0 +1,22 @@
+# OS files
+.DS_Store
+Thumbs.db
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependencies (if using npm in future)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build output (if adding build process)
+dist/
+build/
+
+# Analytics/Monitoring
+.plausible-event-queue
