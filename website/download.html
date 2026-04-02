@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Download Stacknest - Free, open-source development environment manager for Windows, macOS, and Linux.">
+    <meta name="keywords" content="download, Stacknest, Windows, macOS, Linux, development tools">
+    <meta name="author" content="Stacknest">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0F172A">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stacknests.org/download">
+    <meta property="og:title" content="Download Stacknest">
+    <meta property="og:description" content="Download Stacknest for Windows, macOS, or Linux. Free and open source.">
+    <meta property="og:image" content="https://stacknests.org/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://stacknests.org/download">
+    <meta property="twitter:title" content="Download Stacknest">
+
+    <link rel="canonical" href="https://stacknests.org/download">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3B82F6',
+                        'primary-dark': '#2563EB',
+                        secondary: '#1E293B',
+                        bg: '#0F172A',
+                        text: '#F1F5F9',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary: #1E293B;
+            --bg: #0F172A;
+            --text: #F1F5F9;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #0F172A 100%);
+            background-attachment: fixed;
+            color: #F1F5F9;
+            font-family: 'DM Sans', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            animation: meshGradient 15s ease infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes meshGradient {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        .btn-primary {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            cursor: pointer;
+            transition: all 200ms;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            border: 2px solid #60a5fa;
+            color: #a5d6ff;
+            background: transparent;
+            cursor: pointer;
+            transition: all 200ms;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(59, 130, 246, 0.2);
+            border-color: #60a5fa;
+        }
+
+        .download-card {
+            padding: 2rem;
+            border-radius: 1rem;
+            background-color: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 400ms cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-card:hover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.15);
+            box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .download-card h3 {
+            color: #e0f2fe;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .system-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #93c5fd;
+            margin-bottom: 1rem;
+        }
+
+        .version-info {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+            border-left: 3px solid #3b82f6;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            animation: fadeInUp 0.8s ease-out forwards;
+            animation-timeline: view();
+            animation-range: entry 0% cover 30%;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-bg text-text">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-bg/80 backdrop-blur-md border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">S</span>
+                </div>
+                <span class="text-xl font-bold font-display">Stacknest</span>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-8">
+                <a href="/" class="hover:text-blue-400 transition-colors">Home</a>
+                <a href="/docs.html" class="hover:text-blue-400 transition-colors">Docs</a>
+                <a href="/download.html" class="text-blue-400">Download</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded cursor-pointer" aria-label="Toggle menu" aria-expanded="false">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+            <a href="#downloads" class="btn-primary text-sm hidden sm:block">Get Started</a>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-slate-900/95 backdrop-blur-sm border-t border-slate-700">
+            <div class="px-4 py-4 space-y-3">
+                <a href="/" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">Home</a>
+                <a href="/docs.html" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">Docs</a>
+                <a href="/download.html" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">Download</a>
+                <a href="#downloads" class="block btn-primary text-center mt-2">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !isExpanded);
+            menu.classList.toggle('hidden');
+        });
+    </script>
+
+    <main>
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold font-display mb-6">Download Stacknest</h1>
+            <p class="text-xl text-slate-300 mb-4">Free, open-source development environment manager</p>
+            <p class="text-slate-400 mb-8">Available for Windows, macOS, and Linux</p>
+
+            <div class="inline-block bg-blue-500/20 border border-blue-500/30 rounded-lg px-4 py-2 text-sm text-blue-200 mb-8">
+                Latest Version: <strong>1.0.0</strong> • Updated 2026-04-02
+            </div>
+        </div>
+    </section>
+
+    <!-- System Requirements -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-900/30 border-y border-slate-700">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold font-display mb-8 text-center">System Requirements</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 rounded-lg border border-slate-700 bg-slate-900/50">
+                    <h3 class="font-bold text-lg mb-3">Windows</h3>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li>✓ Windows 10 or later</li>
+                        <li>✓ Intel/ARM 64-bit processor</li>
+                        <li>✓ 4 GB RAM minimum</li>
+                        <li>✓ 500 MB disk space</li>
+                    </ul>
+                </div>
+
+                <div class="p-6 rounded-lg border border-slate-700 bg-slate-900/50">
+                    <h3 class="font-bold text-lg mb-3">macOS</h3>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li>✓ macOS 10.13 or later</li>
+                        <li>✓ Apple Silicon & Intel</li>
+                        <li>✓ 4 GB RAM minimum</li>
+                        <li>✓ 500 MB disk space</li>
+                    </ul>
+                </div>
+
+                <div class="p-6 rounded-lg border border-slate-700 bg-slate-900/50">
+                    <h3 class="font-bold text-lg mb-3">Linux</h3>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li>✓ Ubuntu 18.04+, Debian 10+</li>
+                        <li>✓ 64-bit processor</li>
+                        <li>✓ 4 GB RAM minimum</li>
+                        <li>✓ 500 MB disk space</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Downloads -->
+    <section id="downloads" class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold font-display text-center mb-16">Downloads</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Windows -->
+                <div class="download-card">
+                    <div class="system-badge">Windows 10+</div>
+                    <h3>Windows</h3>
+                    <p class="text-slate-300 mb-4">Intel/ARM 64-bit</p>
+
+                    <div class="space-y-2 mb-6 text-sm text-slate-400">
+                        <p>📦 <strong>Installer:</strong> stacknest-1.0.0-setup.exe</p>
+                        <p>💾 <strong>Size:</strong> 85 MB</p>
+                        <p>✓ <strong>Status:</strong> Recommended</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <a href="#" class="btn-primary w-full block text-center">Download Installer</a>
+                        <a href="#" class="btn-secondary w-full block text-center">Download Portable</a>
+                        <p class="text-xs text-slate-500 text-center mt-2">SHA256: a1b2c3d4...</p>
+                    </div>
+                </div>
+
+                <!-- macOS -->
+                <div class="download-card">
+                    <div class="system-badge">macOS 10.13+</div>
+                    <h3>macOS</h3>
+                    <p class="text-slate-300 mb-4">Apple Silicon & Intel</p>
+
+                    <div class="space-y-2 mb-6 text-sm text-slate-400">
+                        <p>📦 <strong>DMG File:</strong> Stacknest-1.0.0.dmg</p>
+                        <p>💾 <strong>Size:</strong> 92 MB</p>
+                        <p>✓ <strong>Status:</strong> Universal</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <a href="#" class="btn-primary w-full block text-center">Download DMG</a>
+                        <a href="#" class="btn-secondary w-full block text-center">Download via Homebrew</a>
+                        <p class="text-xs text-slate-500 text-center mt-2">SHA256: e5f6g7h8...</p>
+                    </div>
+                </div>
+
+                <!-- Linux -->
+                <div class="download-card">
+                    <div class="system-badge">Linux x64</div>
+                    <h3>Linux</h3>
+                    <p class="text-slate-300 mb-4">AppImage / Deb Package</p>
+
+                    <div class="space-y-2 mb-6 text-sm text-slate-400">
+                        <p>📦 <strong>AppImage:</strong> stacknest-1.0.0.AppImage</p>
+                        <p>💾 <strong>Size:</strong> 78 MB</p>
+                        <p>✓ <strong>Status:</strong> Portable</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <a href="#" class="btn-primary w-full block text-center">Download AppImage</a>
+                        <a href="#" class="btn-secondary w-full block text-center">Download .deb</a>
+                        <p class="text-xs text-slate-500 text-center mt-2">SHA256: i9j0k1l2...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="version-info mt-12">
+                <h3 class="font-bold mb-2">🔄 Check for Updates</h3>
+                <p class="text-slate-300">Stacknest automatically checks for updates and notifies you when a new version is available.</p>
+                <p class="text-sm text-slate-400 mt-2">You can disable auto-update in Settings if preferred.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Guides -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-900/30 border-y border-slate-700">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold font-display mb-12 text-center">Installation Guides</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <details class="p-6 rounded-lg border border-slate-700 bg-slate-900/50 cursor-pointer group">
+                    <summary class="font-bold text-lg flex items-center justify-between hover:text-blue-400 transition-colors">
+                        Windows Installation
+                        <span class="transform group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div class="mt-4 text-sm text-slate-300 space-y-2">
+                        <p>1. Download the installer (.exe file)</p>
+                        <p>2. Run the installer and follow the setup wizard</p>
+                        <p>3. Choose installation directory (default: Program Files)</p>
+                        <p>4. Wait for installation to complete</p>
+                        <p>5. Launch Stacknest from Start menu or desktop shortcut</p>
+                    </div>
+                </details>
+
+                <details class="p-6 rounded-lg border border-slate-700 bg-slate-900/50 cursor-pointer group">
+                    <summary class="font-bold text-lg flex items-center justify-between hover:text-blue-400 transition-colors">
+                        macOS Installation
+                        <span class="transform group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div class="mt-4 text-sm text-slate-300 space-y-2">
+                        <p>1. Download the DMG file</p>
+                        <p>2. Double-click to mount the DMG</p>
+                        <p>3. Drag Stacknest to Applications folder</p>
+                        <p>4. Eject the DMG</p>
+                        <p>5. Launch from Applications folder</p>
+                        <p>Note: Allow permissions in System Preferences if prompted</p>
+                    </div>
+                </details>
+
+                <details class="p-6 rounded-lg border border-slate-700 bg-slate-900/50 cursor-pointer group">
+                    <summary class="font-bold text-lg flex items-center justify-between hover:text-blue-400 transition-colors">
+                        Linux Installation
+                        <span class="transform group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div class="mt-4 text-sm text-slate-300 space-y-2">
+                        <p><strong>AppImage:</strong> Make executable, run directly</p>
+                        <p><code class="text-xs bg-slate-800 px-2 py-1 rounded">chmod +x stacknest-*.AppImage</code></p>
+                        <p><strong>.deb:</strong> Install via package manager</p>
+                        <p><code class="text-xs bg-slate-800 px-2 py-1 rounded">sudo apt install ./stacknest*.deb</code></p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Changelog & Release Notes -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold font-display mb-12 text-center">Latest Release Notes</h2>
+
+            <div class="bg-slate-900/50 border border-slate-700 rounded-lg p-8">
+                <h3 class="text-xl font-bold mb-2">Version 1.0.0 - Stable Release</h3>
+                <p class="text-slate-400 text-sm mb-6">Released April 2, 2026</p>
+
+                <div class="space-y-4 text-slate-300">
+                    <div>
+                        <h4 class="font-bold text-green-400 mb-2">✨ New Features</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>Dashboard with real-time service monitoring</li>
+                            <li>Virtual host management with automatic hosts file editing</li>
+                            <li>SSL certificate generation and management</li>
+                            <li>Built-in config editor with syntax highlighting</li>
+                            <li>Integrated terminal with full PTY support</li>
+                            <li>Database tools (Adminer & HeidiSQL integration)</li>
+                            <li>System tray integration</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-blue-400 mb-2">🐛 Bug Fixes</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>Fixed service restart race condition</li>
+                            <li>Improved config file backup handling</li>
+                            <li>Fixed cross-platform path handling</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-purple-400 mb-2">📊 Improvements</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>Better error messages and logging</li>
+                            <li>Improved startup performance</li>
+                            <li>Enhanced UI/UX on all platforms</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <a href="#" class="text-blue-400 hover:text-blue-300 text-sm mt-6 inline-block">View full changelog →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support & Resources -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-900/30 border-y border-slate-700">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold font-display mb-12">Need Help?</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-3">📚 Documentation</h3>
+                    <p class="text-slate-400 mb-4">Complete guides and tutorials for getting started.</p>
+                    <a href="/docs.html" class="btn-primary">Read Docs</a>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-3">💬 Community</h3>
+                    <p class="text-slate-400 mb-4">Join our community forum to ask questions and share ideas.</p>
+                    <a href="#" class="btn-primary">Join Community</a>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-3">🐛 Report Issues</h3>
+                    <p class="text-slate-400 mb-4">Found a bug? Report it on our GitHub repository.</p>
+                    <a href="#" class="btn-primary">GitHub Issues</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-700 py-12 px-4 sm:px-6 lg:px-8 bg-slate-900/20">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">S</span>
+                        </div>
+                        <span class="font-bold font-display">Stacknest</span>
+                    </div>
+                    <p class="text-sm text-slate-400">Cross-platform development environment manager.</p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold font-display mb-4">Product</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="/" class="hover:text-blue-400">Home</a></li>
+                        <li><a href="/download.html" class="hover:text-blue-400">Download</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Changelog</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold font-display mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="/docs.html" class="hover:text-blue-400">Documentation</a></li>
+                        <li><a href="#" class="hover:text-blue-400">GitHub</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Issues</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold font-display mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-blue-400">MIT License</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Code of Conduct</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-700 pt-8">
+                <p class="text-sm text-slate-500 text-center">© 2026 Stacknest. All rights reserved. | Built with ❤️ for developers</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
