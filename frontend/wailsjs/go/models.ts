@@ -52,6 +52,8 @@ export namespace config {
 	    apache: ServiceConfig;
 	    nginx: ServiceConfig;
 	    mysql: ServiceConfig;
+	    postgres: ServiceConfig;
+	    mongodb: ServiceConfig;
 	    php: ServiceConfig;
 	    redis: ServiceConfig;
 	    auto_start: boolean;
@@ -72,6 +74,8 @@ export namespace config {
 	        this.apache = this.convertValues(source["apache"], ServiceConfig);
 	        this.nginx = this.convertValues(source["nginx"], ServiceConfig);
 	        this.mysql = this.convertValues(source["mysql"], ServiceConfig);
+	        this.postgres = this.convertValues(source["postgres"], ServiceConfig);
+	        this.mongodb = this.convertValues(source["mongodb"], ServiceConfig);
 	        this.php = this.convertValues(source["php"], ServiceConfig);
 	        this.redis = this.convertValues(source["redis"], ServiceConfig);
 	        this.auto_start = source["auto_start"];
