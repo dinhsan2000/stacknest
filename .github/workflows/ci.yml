@@ -82,32 +82,37 @@ jobs:
           # Install core build tools
           sudo apt-get install -y build-essential pkg-config libgtk-3-dev
           # Install webkit2gtk - try 4.0 first, then 4.1
-          sudo apt-get install -y libwebkit2gtk-4.0-dev || \
-          sudo apt-get install -y libwebkit2gtk-4.1-dev || \
-          echo "Neither webkit2gtk-4.0-dev nor 4.1-dev found"
+          if ! sudo apt-get install -y libwebkit2gtk-4.0-dev; then
+            echo "webkit2gtk-4.0-dev not available, trying 4.1..."
+            sudo apt-get install -y libwebkit2gtk-4.1-dev
+          fi
 
-      - name: Diagnose webkit2gtk (Linux only)
+      - name: Setup webkit2gtk pkg-config (Linux only)
         if: matrix.goos == 'linux'
         run: |
-          echo "=== Installed webkit packages ==="
-          dpkg -l | grep webkit || echo "No webkit packages installed"
-          echo ""
-          echo "=== Available webkit2gtk packages in apt ==="
-          apt-cache search webkit2gtk | head -20 || echo "No webkit packages found"
-          echo ""
-          echo "=== Looking for .pc files ==="
-          find /usr -name "webkit2gtk*.pc" 2>/dev/null | sort || echo "No .pc files found"
-          echo ""
-          echo "=== Searching all pkgconfig directories ==="
-          ls -la /usr/lib/x86_64-linux-gnu/pkgconfig/ 2>/dev/null | grep webkit || echo "None in /usr/lib/x86_64-linux-gnu/pkgconfig"
-          ls -la /usr/lib/pkgconfig/ 2>/dev/null | grep webkit || echo "None in /usr/lib/pkgconfig"
-          ls -la /usr/share/pkgconfig/ 2>/dev/null | grep webkit || echo "None in /usr/share/pkgconfig"
+          # Find where webkit2gtk .pc files are
+          WEBKIT_PC=$(find /usr -name "webkit2gtk*.pc" 2>/dev/null | head -1)
+          if [ -z "$WEBKIT_PC" ]; then
+            echo "ERROR: No webkit2gtk .pc file found!"
+            exit 1
+          fi
+
+          WEBKIT_DIR=$(dirname "$WEBKIT_PC")
+          echo "Found webkit2gtk .pc file in: $WEBKIT_DIR"
+
+          # If it's 4.1, create a symlink for 4.0
+          if [ -f "$WEBKIT_DIR/webkit2gtk-4.1.pc" ] && [ ! -f "$WEBKIT_DIR/webkit2gtk-4.0.pc" ]; then
+            echo "Creating symlink: webkit2gtk-4.0.pc -> webkit2gtk-4.1.pc"
+            sudo ln -sf "$WEBKIT_DIR/webkit2gtk-4.1.pc" "$WEBKIT_DIR/webkit2gtk-4.0.pc"
+          fi
+
+          # Export the directory containing the .pc files
+          echo "PKG_CONFIG_PATH=$WEBKIT_DIR:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
       - name: Build
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig:/usr/local/lib/pkgconfig
         run: wails build -clean
 
       - name: Upload artifact
