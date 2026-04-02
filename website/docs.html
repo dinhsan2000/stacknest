@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Stacknest Documentation - Complete guides, tutorials, and API references for the local development environment manager.">
+    <meta name="keywords" content="documentation, guide, tutorial, API reference, development tools, Stacknest">
+    <meta name="author" content="Stacknest">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0F172A">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stacknests.org/docs">
+    <meta property="og:title" content="Stacknest Documentation - Guides & API Reference">
+    <meta property="og:description" content="Complete guides, tutorials, and API documentation for Stacknest.">
+    <meta property="og:image" content="https://stacknests.org/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://stacknests.org/docs">
+    <meta property="twitter:title" content="Stacknest Documentation">
+    <meta property="twitter:description" content="Complete guides and API reference for Stacknest.">
+
+    <link rel="canonical" href="https://stacknests.org/docs">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3B82F6',
+                        'primary-dark': '#2563EB',
+                        secondary: '#1E293B',
+                        bg: '#0F172A',
+                        text: '#F1F5F9',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary: #1E293B;
+            --bg: #0F172A;
+            --text: #F1F5F9;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #0F172A 100%);
+            background-attachment: fixed;
+            color: #F1F5F9;
+            font-family: 'DM Sans', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            animation: meshGradient 15s ease infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes meshGradient {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            cursor: pointer;
+            transition: all 200ms;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .doc-card {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            background-color: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            cursor: pointer;
+            transition: all 400ms cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .doc-card:hover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.15);
+            box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .doc-card h3 {
+            color: #e0f2fe;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-box {
+            position: relative;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            transition: all 300ms;
+        }
+
+        .search-box:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px -5px rgba(59, 130, 246, 0.3);
+        }
+
+        .search-box input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #F1F5F9;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: #94a3b8;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            animation: fadeInUp 0.8s ease-out forwards;
+            animation-timeline: view();
+            animation-range: entry 0% cover 30%;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-bg/80 backdrop-blur-md border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">S</span>
+                </div>
+                <span class="text-xl font-bold font-display">Stacknest Docs</span>
+            </div>
+
+            <div class="hidden md:flex items-center gap-8">
+                <a href="/" class="hover:text-blue-400 transition-colors">← Back to Home</a>
+                <a href="https://github.com" class="text-blue-400 hover:text-blue-300 transition-colors">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+    <!-- Hero Section -->
+    <section class="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-5xl sm:text-6xl font-bold font-display mb-6">Documentation</h1>
+            <p class="text-xl text-slate-300 mb-8">Complete guides, tutorials, and API references to get the most out of Stacknest.</p>
+
+            <div class="search-box max-w-2xl mx-auto mb-12">
+                <svg class="absolute left-3 top-3 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="search" placeholder="Search documentation..." class="pl-8">
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold font-display mb-12">Quick Start</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="#" class="doc-card group">
+                    <div class="text-3xl mb-3">📦</div>
+                    <h3>Installation</h3>
+                    <p class="text-slate-400 text-sm">Get Stacknest up and running in minutes</p>
+                    <p class="text-blue-400 text-sm mt-4 group-hover:translate-x-1 transition-transform">Read guide →</p>
+                </a>
+
+                <a href="#" class="doc-card group">
+                    <div class="text-3xl mb-3">🚀</div>
+                    <h3>Getting Started</h3>
+                    <p class="text-slate-400 text-sm">Start your first local development setup</p>
+                    <p class="text-blue-400 text-sm mt-4 group-hover:translate-x-1 transition-transform">Read guide →</p>
+                </a>
+
+                <a href="#" class="doc-card group">
+                    <div class="text-3xl mb-3">⚙️</div>
+                    <h3>Configuration</h3>
+                    <p class="text-slate-400 text-sm">Configure services and preferences</p>
+                    <p class="text-blue-400 text-sm mt-4 group-hover:translate-x-1 transition-transform">Read guide →</p>
+                </a>
+
+                <a href="#" class="doc-card group">
+                    <div class="text-3xl mb-3">❓</div>
+                    <h3>Troubleshooting</h3>
+                    <p class="text-slate-400 text-sm">Common issues and solutions</p>
+                    <p class="text-blue-400 text-sm mt-4 group-hover:translate-x-1 transition-transform">Read guide →</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Guides -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-900/30 border-y border-slate-700">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold font-display mb-12">User Guides</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">Managing Services</h3>
+                    <p class="text-slate-400 mb-4">Learn how to start, stop, and manage Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, and Redis from the dashboard.</p>
+                    <span class="text-blue-400 text-sm">→ Read more</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">Virtual Hosts Setup</h3>
+                    <p class="text-slate-400 mb-4">Create and manage virtual hosts for your local development projects with automatic hosts file management.</p>
+                    <span class="text-blue-400 text-sm">→ Read more</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">SSL Certificates</h3>
+                    <p class="text-slate-400 mb-4">Generate local CA and per-domain TLS certificates for HTTPS development with one-click installation.</p>
+                    <span class="text-blue-400 text-sm">→ Read more</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">Config Editor</h3>
+                    <p class="text-slate-400 mb-4">Edit service configurations with syntax highlighting, auto-completion, and automatic backups.</p>
+                    <span class="text-blue-400 text-sm">→ Read more</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">Database Management</h3>
+                    <p class="text-slate-400 mb-4">Browse databases with Adminer or HeidiSQL, all accessible from within Stacknest.</p>
+                    <span class="text-blue-400 text-sm">→ Read more</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">Terminal Usage</h3>
+                    <p class="text-slate-400 mb-4">Use the built-in PTY terminal for command-line operations without leaving Stacknest.</p>
+                    <span class="text-blue-400 text-sm">→ Read more</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- API & Developer Resources -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold font-display mb-12">Developer Resources</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">API Reference</h3>
+                    <p class="text-slate-400 mb-4">Complete API documentation for developers integrating with Stacknest.</p>
+                    <span class="text-blue-400 text-sm">→ View API</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">Plugin Development</h3>
+                    <p class="text-slate-400 mb-4">Create custom plugins and extensions to add functionality to Stacknest.</p>
+                    <span class="text-blue-400 text-sm">→ Read guide</span>
+                </a>
+
+                <a href="#" class="doc-card">
+                    <h3 class="text-lg mb-2">CLI Reference</h3>
+                    <p class="text-slate-400 mb-4">Complete command-line interface documentation and examples.</p>
+                    <span class="text-blue-400 text-sm">→ View CLI docs</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community & Support -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-900/30 border-y border-slate-700">
+        <div class="max-w-7xl mx-auto text-center">
+            <h2 class="text-3xl font-bold font-display mb-6">Need Help?</h2>
+            <p class="text-lg text-slate-300 mb-8">Can't find what you're looking for?</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-3">GitHub Issues</h3>
+                    <p class="text-slate-400 mb-4">Report bugs or request features on our GitHub repository.</p>
+                    <a href="#" class="btn-primary">View Issues</a>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-3">Discussions</h3>
+                    <p class="text-slate-400 mb-4">Join our community to discuss ideas and get help from others.</p>
+                    <a href="#" class="btn-primary">Join Discussion</a>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-3">Email Support</h3>
+                    <p class="text-slate-400 mb-4">Contact us directly at support@stacknests.org</p>
+                    <a href="mailto:support@stacknests.org" class="btn-primary">Send Email</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Table of Contents -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold font-display mb-8">Complete Documentation Index</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Getting Started</h3>
+                    <ul class="space-y-2 text-slate-300">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Installation Guide</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">System Requirements</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">First Project Setup</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Platform-Specific Guides</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Features & Usage</h3>
+                    <ul class="space-y-2 text-slate-300">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Dashboard Overview</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Service Management</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Virtual Hosts</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">SSL Certificates</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Log Viewer</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Configuration</h3>
+                    <ul class="space-y-2 text-slate-300">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Settings</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Service Configuration</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Database Setup</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">PHP Versions</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Custom Ports</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Advanced Topics</h3>
+                    <ul class="space-y-2 text-slate-300">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">API Reference</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Plugin Development</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Performance Tips</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Troubleshooting</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-700 py-12 px-4 sm:px-6 lg:px-8 bg-slate-900/20">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">S</span>
+                        </div>
+                        <span class="font-bold font-display">Stacknest</span>
+                    </div>
+                    <p class="text-sm text-slate-400">Cross-platform development environment manager.</p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold font-display mb-4">Product</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="/" class="hover:text-blue-400">Home</a></li>
+                        <li><a href="/" class="hover:text-blue-400">Features</a></li>
+                        <li><a href="/" class="hover:text-blue-400">Download</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold font-display mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-blue-400">Documentation</a></li>
+                        <li><a href="#" class="hover:text-blue-400">GitHub</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Issues</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold font-display mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-blue-400">MIT License</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-blue-400">Code of Conduct</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-700 pt-8">
+                <p class="text-sm text-slate-500 text-center">© 2026 Stacknest. All rights reserved. | Built with ❤️ for developers</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
