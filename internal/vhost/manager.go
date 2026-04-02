@@ -206,7 +206,16 @@ func (m *Manager) removeNginxConfig(h VirtualHost) {
 
 func (m *Manager) hostsFilePath() string {
 	if runtime.GOOS == "windows" {
-		return `C:\Windows\System32\drivers\etc\hosts`
+		// Use WINDIR environment variable to get Windows directory
+		// Handles systems where Windows is on any drive (C:, D:, E:, etc.)
+		winDir := os.Getenv("WINDIR")
+		if winDir == "" {
+			winDir = os.Getenv("SYSTEMROOT")
+		}
+		if winDir == "" {
+			winDir = `C:\Windows` // Final fallback
+		}
+		return filepath.Join(winDir, "System32", "drivers", "etc", "hosts")
 	}
 	return "/etc/hosts"
 }
@@ -233,8 +242,10 @@ func (m *Manager) addToHostsFile(domain string) error {
 
 	// On Windows, re-try with a UAC-elevated PowerShell process
 	if runtime.GOOS == "windows" {
+		hostsPath := m.hostsFilePath()
 		script := fmt.Sprintf(
-			"Add-Content -Path 'C:\\Windows\\System32\\drivers\\etc\\hosts' -Value \"`r`n127.0.0.1`t%s\"\r\n",
+			"Add-Content -Path '%s' -Value \"`r`n127.0.0.1`t%s\"\r\n",
+			hostsPath,
 			domain,
 		)
 		return m.runElevated(script)
@@ -260,8 +271,10 @@ func (m *Manager) removeFromHostsFile(domain string) {
 
 	if err := os.WriteFile(path, []byte(newContent), 0644); err != nil && runtime.GOOS == "windows" {
 		// Rewrite via elevation
+		hostsPath := m.hostsFilePath()
 		script := fmt.Sprintf(
-			"$h='C:\\Windows\\System32\\drivers\\etc\\hosts'; (Get-Content $h) | Where-Object { $_ -notlike '*%s*' } | Set-Content $h\r\n",
+			"$h='%s'; (Get-Content $h) | Where-Object { $_ -notlike '*%s*' } | Set-Content $h\r\n",
+			hostsPath,
 			domain,
 		)
 		m.runElevated(script) //nolint:errcheck
