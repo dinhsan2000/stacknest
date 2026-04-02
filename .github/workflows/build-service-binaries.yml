@@ -111,7 +111,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y build-essential autoconf bison re2c \
             libxml2-dev libsqlite3-dev libssl-dev libcurl4-openssl-dev libpng-dev libjpeg-dev \
-            libonig-dev libzip-dev libreadline-dev pkg-config
+            libonig-dev libzip-dev libreadline-dev pkg-config libc6-dev
           curl -fsSL https://www.php.net/distributions/php-${{ matrix.version }}.tar.gz | tar xz
           cd php-${{ matrix.version }}
           ./configure --prefix=/opt/php \
@@ -137,7 +137,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build PHP from source
         run: |
-          brew install autoconf bison re2c libxml2 openssl curl libpng libjpeg oniguruma libzip readline pkg-config
+          brew install autoconf bison re2c libxml2 openssl curl libpng libjpeg oniguruma libzip readline pkg-config libiconv
           export PATH="$(brew --prefix bison)/bin:$PATH"
           curl -fsSL https://www.php.net/distributions/php-${{ matrix.version }}.tar.gz | tar xz
           cd php-${{ matrix.version }}
@@ -147,6 +147,7 @@ jobs:
             --with-openssl=$(brew --prefix openssl) \
             --with-curl=$(brew --prefix curl) \
             --with-zlib --with-pdo-mysql --with-mysqli \
+            --with-iconv=$(brew --prefix libiconv) \
             --with-jpeg --with-zip --with-readline=$(brew --prefix readline)
           make -j$(sysctl -n hw.ncpu)
           make install DESTDIR=${{ runner.temp }}/install
