@@ -111,14 +111,14 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y build-essential autoconf bison re2c \
             libxml2-dev libsqlite3-dev libssl-dev libcurl4-openssl-dev libpng-dev libjpeg-dev \
-            libonig-dev libzip-dev libreadline-dev pkg-config libc6-dev
+            libonig-dev libzip-dev libreadline-dev pkg-config
           curl -fsSL https://www.php.net/distributions/php-${{ matrix.version }}.tar.gz | tar xz
           cd php-${{ matrix.version }}
           ./configure --prefix=/opt/php \
             --enable-fpm --enable-mbstring --enable-zip --enable-bcmath --enable-intl \
             --enable-opcache --enable-gd --enable-soap \
             --with-openssl --with-curl --with-zlib --with-pdo-mysql --with-mysqli \
-            --with-iconv=/usr --with-jpeg --with-zip --with-readline
+            --with-iconv-dir=/usr --with-jpeg --with-zip --with-readline
           make -j$(nproc)
           make install DESTDIR=${{ runner.temp }}/install
           # Create tarball from installed files
@@ -151,6 +151,7 @@ jobs:
             --with-iconv=$(brew --prefix libiconv) \
             --with-jpeg --with-zip --with-readline=$(brew --prefix readline)
           make -j$(sysctl -n hw.ncpu)
+          mkdir -p ${{ runner.temp }}/install/opt
           make install DESTDIR=${{ runner.temp }}/install
           cd ${{ runner.temp }}/install/opt
           tar czf ${{ runner.temp }}/php-${{ matrix.version }}-macos-arm64.tar.gz php/
