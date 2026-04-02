@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { Server, Database, Code2, Zap, Layers, RefreshCw, AlertTriangle, X, Check } from 'lucide-react'
+import { Server, Database, Code2, Zap, Layers, HardDrive, Leaf, RefreshCw, AlertTriangle, X, Check } from 'lucide-react'
 import { useServiceStore } from '../store/serviceStore'
 import { ReloadCatalog } from '../../wailsjs/go/main/App'
 import { ServiceIcon } from '../components/ServiceIcon';
 import { useI18n, tt } from '../i18n'
 
-const SERVICE_META: Record<string, { label: string; icon: React.ReactNode }> = {
-  apache: { label: 'Apache', icon: <Server size={16} className="text-gray-400" /> },
-  nginx: { label: 'Nginx', icon: <Zap size={16} className="text-gray-400" /> },
-  mysql: { label: 'MySQL', icon: <Database size={16} className="text-gray-400" /> },
-  php: { label: 'PHP', icon: <Code2 size={16} className="text-gray-400" /> },
-  redis: { label: 'Redis', icon: <Layers size={16} className="text-gray-400" /> },
+const SERVICE_META: Record<string, { label: string }> = {
+  apache: { label: 'Apache' },
+  nginx: { label: 'Nginx' },
+  mysql: { label: 'MySQL' },
+  postgres: { label: 'PostgreSQL' },
+  mongodb: { label: 'MongoDB' },
+  php: { label: 'PHP' },
+  redis: { label: 'Redis' },
 }
 
 export default function Binaries() {
