@@ -118,10 +118,11 @@ jobs:
             --enable-fpm --enable-mbstring --enable-zip --enable-bcmath --enable-intl \
             --enable-opcache --enable-gd --enable-soap \
             --with-openssl --with-curl --with-zlib --with-pdo-mysql --with-mysqli \
-            --with-jpeg --with-zip --with-readline
+            --with-iconv=/usr --with-jpeg --with-zip --with-readline
           make -j$(nproc)
           make install DESTDIR=${{ runner.temp }}/install
-          cd ${{ runner.temp }}/install/opt
+          # Create tarball from installed files
+          cd ${{ runner.temp }}/install/opt || (ls -la ${{ runner.temp }}/install/ && exit 1)
           tar czf ${{ runner.temp }}/php-${{ matrix.version }}-linux-x64.tar.gz php/
       - uses: actions/upload-artifact@v4
         with:
