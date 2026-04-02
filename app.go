@@ -72,11 +72,13 @@ func NewApp() *App {
 // Đọc từ versions.json; fallback về phiên bản đầu tiên trong catalog nếu chưa đặt.
 func serviceBinPaths(cfg *config.Config) map[services.ServiceName]string {
 	return map[services.ServiceName]string{
-		services.ServiceApache: downloader.ActiveExeDir(cfg.BinPath, "apache"),
-		services.ServiceNginx:  downloader.ActiveExeDir(cfg.BinPath, "nginx"),
-		services.ServiceMySQL:  downloader.ActiveExeDir(cfg.BinPath, "mysql"),
-		services.ServiceRedis:  downloader.ActiveExeDir(cfg.BinPath, "redis"),
-		services.ServicePHP:    downloader.ActiveExeDir(cfg.BinPath, "php"),
+		services.ServiceApache:   downloader.ActiveExeDir(cfg.BinPath, "apache"),
+		services.ServiceNginx:    downloader.ActiveExeDir(cfg.BinPath, "nginx"),
+		services.ServiceMySQL:    downloader.ActiveExeDir(cfg.BinPath, "mysql"),
+		services.ServicePostgres: downloader.ActiveExeDir(cfg.BinPath, "postgres"),
+		services.ServiceMongoDB:  downloader.ActiveExeDir(cfg.BinPath, "mongodb"),
+		services.ServiceRedis:    downloader.ActiveExeDir(cfg.BinPath, "redis"),
+		services.ServicePHP:      downloader.ActiveExeDir(cfg.BinPath, "php"),
 	}
 }
 
@@ -85,7 +87,9 @@ func serviceBinPaths(cfg *config.Config) map[services.ServiceName]string {
 func serviceDataPaths(cfg *config.Config) map[services.ServiceName]string {
 	avs := downloader.LoadActiveVersions(cfg.BinPath)
 	return map[services.ServiceName]string{
-		services.ServiceMySQL: cfg.MySQLDataDir(avs["mysql"]),
+		services.ServiceMySQL:    cfg.MySQLDataDir(avs["mysql"]),
+		services.ServicePostgres: cfg.PostgresDataDir(avs["postgres"]),
+		services.ServiceMongoDB:  cfg.MongoDBDataDir(avs["mongodb"]),
 	}
 }
 
@@ -93,22 +97,26 @@ func serviceDataPaths(cfg *config.Config) map[services.ServiceName]string {
 // Nginx log được set trong nginx.conf nên không cần truyền qua đây.
 func serviceLogPaths(cfg *config.Config) map[services.ServiceName]string {
 	return map[services.ServiceName]string{
-		services.ServiceApache: filepath.Join(cfg.LogPath, "apache"),
-		services.ServiceNginx:  filepath.Join(cfg.LogPath, "nginx"),
-		services.ServiceMySQL:  filepath.Join(cfg.LogPath, "mysql"),
-		services.ServiceRedis:  filepath.Join(cfg.LogPath, "redis"),
-		services.ServicePHP:    filepath.Join(cfg.LogPath, "php"),
+		services.ServiceApache:   filepath.Join(cfg.LogPath, "apache"),
+		services.ServiceNginx:    filepath.Join(cfg.LogPath, "nginx"),
+		services.ServiceMySQL:    filepath.Join(cfg.LogPath, "mysql"),
+		services.ServicePostgres: filepath.Join(cfg.LogPath, "postgres"),
+		services.ServiceMongoDB:  filepath.Join(cfg.LogPath, "mongodb"),
+		services.ServiceRedis:    filepath.Join(cfg.LogPath, "redis"),
+		services.ServicePHP:      filepath.Join(cfg.LogPath, "php"),
 	}
 }
 
 // servicePortMap trả về port từ config cho từng service.
 func servicePortMap(cfg *config.Config) map[services.ServiceName]int {
 	return map[services.ServiceName]int{
-		services.ServiceApache: cfg.Apache.Port,
-		services.ServiceNginx:  cfg.Nginx.Port,
-		services.ServiceMySQL:  cfg.MySQL.Port,
-		services.ServiceRedis:  cfg.Redis.Port,
-		services.ServicePHP:    cfg.PHP.Port,
+		services.ServiceApache:   cfg.Apache.Port,
+		services.ServiceNginx:    cfg.Nginx.Port,
+		services.ServiceMySQL:    cfg.MySQL.Port,
+		services.ServicePostgres: cfg.Postgres.Port,
+		services.ServiceMongoDB:  cfg.MongoDB.Port,
+		services.ServiceRedis:    cfg.Redis.Port,
+		services.ServicePHP:      cfg.PHP.Port,
 	}
 }
 

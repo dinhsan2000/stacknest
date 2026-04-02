@@ -41,7 +41,7 @@ func TestNewManager(t *testing.T) {
 	m := newTestManager()
 
 	expectedServices := []ServiceName{
-		ServiceApache, ServiceNginx, ServiceMySQL, ServicePHP, ServiceRedis,
+		ServiceApache, ServiceNginx, ServiceMySQL, ServicePostgres, ServiceMongoDB, ServicePHP, ServiceRedis,
 	}
 
 	for _, name := range expectedServices {
@@ -61,7 +61,7 @@ func TestGetAll_Order(t *testing.T) {
 	m := newTestManager()
 	all := m.GetAll()
 
-	want := []ServiceName{ServiceApache, ServiceMySQL, ServicePHP, ServiceRedis, ServiceNginx}
+	want := []ServiceName{ServiceApache, ServiceMySQL, ServicePostgres, ServiceMongoDB, ServicePHP, ServiceRedis, ServiceNginx}
 
 	if len(all) != len(want) {
 		t.Fatalf("GetAll() returned %d services, want %d", len(all), len(want))

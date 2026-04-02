@@ -53,10 +53,12 @@ func NewManager(binPaths, dataPaths, logPaths map[ServiceName]string, ports map[
 	}
 	return &Manager{
 		services: map[ServiceName]*serviceProcess{
-			ServiceApache: {info: ServiceInfo{Name: ServiceApache, Display: "Apache", Status: StatusStopped, Port: port(ServiceApache, 80), Version: "2.4"}, binDir: bin(ServiceApache), logDir: log(ServiceApache)},
-			ServiceNginx:  {info: ServiceInfo{Name: ServiceNginx, Display: "Nginx", Status: StatusStopped, Port: port(ServiceNginx, 8080), Version: "1.25"}, binDir: bin(ServiceNginx), logDir: log(ServiceNginx)},
-			ServiceMySQL:  {info: ServiceInfo{Name: ServiceMySQL, Display: "MySQL", Status: StatusStopped, Port: port(ServiceMySQL, 3306), Version: "8.0"}, binDir: bin(ServiceMySQL), dataDir: data(ServiceMySQL), logDir: log(ServiceMySQL)},
-			ServiceRedis:  {info: ServiceInfo{Name: ServiceRedis, Display: "Redis", Status: StatusStopped, Port: port(ServiceRedis, 6379), Version: "7.0"}, binDir: bin(ServiceRedis), logDir: log(ServiceRedis)},
+			ServiceApache:   {info: ServiceInfo{Name: ServiceApache, Display: "Apache", Status: StatusStopped, Port: port(ServiceApache, 80), Version: "2.4"}, binDir: bin(ServiceApache), logDir: log(ServiceApache)},
+			ServiceNginx:    {info: ServiceInfo{Name: ServiceNginx, Display: "Nginx", Status: StatusStopped, Port: port(ServiceNginx, 8080), Version: "1.25"}, binDir: bin(ServiceNginx), logDir: log(ServiceNginx)},
+			ServiceMySQL:    {info: ServiceInfo{Name: ServiceMySQL, Display: "MySQL", Status: StatusStopped, Port: port(ServiceMySQL, 3306), Version: "8.0"}, binDir: bin(ServiceMySQL), dataDir: data(ServiceMySQL), logDir: log(ServiceMySQL)},
+			ServicePostgres: {info: ServiceInfo{Name: ServicePostgres, Display: "PostgreSQL", Status: StatusStopped, Port: port(ServicePostgres, 5432), Version: "17"}, binDir: bin(ServicePostgres), dataDir: data(ServicePostgres), logDir: log(ServicePostgres)},
+			ServiceMongoDB:  {info: ServiceInfo{Name: ServiceMongoDB, Display: "MongoDB", Status: StatusStopped, Port: port(ServiceMongoDB, 27017), Version: "8.0"}, binDir: bin(ServiceMongoDB), dataDir: data(ServiceMongoDB), logDir: log(ServiceMongoDB)},
+			ServiceRedis:    {info: ServiceInfo{Name: ServiceRedis, Display: "Redis", Status: StatusStopped, Port: port(ServiceRedis, 6379), Version: "7.0"}, binDir: bin(ServiceRedis), logDir: log(ServiceRedis)},
 			// PHP-CGI chạy ở port 9000 — cần khi dùng Nginx (FastCGI proxy).
 			// Khi dùng Apache: không cần start (PHP loaded as module).
 			ServicePHP: {info: ServiceInfo{Name: ServicePHP, Display: "PHP", Status: StatusStopped, Port: port(ServicePHP, 9000), Version: "8.2"}, binDir: bin(ServicePHP), logDir: log(ServicePHP)},
@@ -68,6 +70,8 @@ func NewManager(binPaths, dataPaths, logPaths map[ServiceName]string, ports map[
 var serviceOrder = []ServiceName{
 	ServiceApache,
 	ServiceMySQL,
+	ServicePostgres,
+	ServiceMongoDB,
 	ServicePHP,
 	ServiceRedis,
 	ServiceNginx,
@@ -346,11 +350,13 @@ func exePath(binDir, name string) string {
 
 // staleExeNames maps service → executable file name(s) to kill before starting.
 var staleExeNames = map[ServiceName][]string{
-	ServiceApache: {"httpd.exe", "httpd"},
-	ServiceNginx:  {"nginx.exe", "nginx"},
-	ServiceMySQL:  {"mysqld.exe", "mysqld"},
-	ServiceRedis:  {"redis-server.exe", "redis-server"},
-	ServicePHP:    {"php-cgi.exe", "php-fpm"},
+	ServiceApache:   {"httpd.exe", "httpd"},
+	ServiceNginx:    {"nginx.exe", "nginx"},
+	ServiceMySQL:    {"mysqld.exe", "mysqld"},
+	ServicePostgres: {"postgres.exe", "postgres"},
+	ServiceMongoDB:  {"mongod.exe", "mongod"},
+	ServiceRedis:    {"redis-server.exe", "redis-server"},
+	ServicePHP:      {"php-cgi.exe", "php-fpm"},
 }
 
 // killStaleProcesses dừng mọi tiến trình cũ của service (app crash, orphaned process).
@@ -381,8 +387,8 @@ func killStaleProcesses(name ServiceName, binDir, dataDir string) {
 		}
 	}
 
-	// MySQL: xóa stale pid file nếu có
-	if name == ServiceMySQL && dataDir != "" {
+	// MySQL/PostgreSQL: xóa stale pid file nếu có
+	if (name == ServiceMySQL || name == ServicePostgres) && dataDir != "" {
 		entries, err := os.ReadDir(dataDir)
 		if err == nil {
 			for _, e := range entries {
@@ -439,6 +445,10 @@ func buildCommand(name ServiceName, binDir, dataDir, logDir string) (*exec.Cmd, 
 		return buildNginxCmd(binDir)
 	case ServiceMySQL:
 		return buildMySQLCmd(binDir, dataDir, logDir)
+	case ServicePostgres:
+		return buildPostgresCmd(binDir, dataDir, logDir)
+	case ServiceMongoDB:
+		return buildMongoDBCmd(binDir, dataDir, logDir)
 	case ServiceRedis:
 		return buildRedisCmd(binDir, logDir)
 	case ServicePHP:
@@ -515,6 +525,36 @@ func buildRedisCmd(binDir, logDir string) (*exec.Cmd, error) {
 		return exec.Command(exePath(binDir, "redis-server.exe"), args...), nil
 	}
 	return exec.Command(exePath(binDir, "redis-server"), args...), nil
+}
+
+func buildPostgresCmd(binDir, dataDir, logDir string) (*exec.Cmd, error) {
+	// PostgreSQL cần data directory đã được initdb trước khi start.
+	// -D chỉ định datadir, -p chỉ định port (dùng default 5432 nếu không set).
+	args := []string{"-D", filepath.ToSlash(dataDir)}
+	if logDir != "" {
+		logFile := filepath.ToSlash(filepath.Join(logDir, "postgres.log"))
+		args = append(args, "-l", logFile)
+	}
+	if runtime.GOOS == "windows" {
+		return exec.Command(exePath(binDir, "postgres.exe"), args...), nil
+	}
+	return exec.Command(exePath(binDir, "postgres"), args...), nil
+}
+
+func buildMongoDBCmd(binDir, dataDir, logDir string) (*exec.Cmd, error) {
+	// MongoDB: --dbpath chỉ định thư mục lưu data, --bind_ip giới hạn localhost.
+	args := []string{
+		"--dbpath", filepath.ToSlash(dataDir),
+		"--bind_ip", "127.0.0.1",
+	}
+	if logDir != "" {
+		logFile := filepath.ToSlash(filepath.Join(logDir, "mongod.log"))
+		args = append(args, "--logpath", logFile, "--logappend")
+	}
+	if runtime.GOOS == "windows" {
+		return exec.Command(exePath(binDir, "mongod.exe"), args...), nil
+	}
+	return exec.Command(exePath(binDir, "mongod"), args...), nil
 }
 
 func buildPHPCmd(binDir, logDir string) (*exec.Cmd, error) {

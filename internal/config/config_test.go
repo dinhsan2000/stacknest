@@ -154,6 +154,8 @@ func TestEnsureDirs(t *testing.T) {
 		Apache:   ServiceConfig{Path: filepath.Join(bin, "apache", "bin")},
 		Nginx:    ServiceConfig{Path: filepath.Join(bin, "nginx")},
 		MySQL:    ServiceConfig{Path: filepath.Join(bin, "mysql", "bin")},
+		Postgres: ServiceConfig{Path: filepath.Join(bin, "postgres", "bin")},
+		MongoDB:  ServiceConfig{Path: filepath.Join(bin, "mongodb", "bin")},
 		PHP:      ServiceConfig{Path: filepath.Join(bin, "php")},
 		Redis:    ServiceConfig{Path: filepath.Join(bin, "redis")},
 	}
@@ -168,6 +170,8 @@ func TestEnsureDirs(t *testing.T) {
 		filepath.Join("logs", "apache"),
 		filepath.Join("logs", "nginx"),
 		filepath.Join("logs", "mysql"),
+		filepath.Join("logs", "postgres"),
+		filepath.Join("logs", "mongodb"),
 		filepath.Join("logs", "php"),
 		filepath.Join("logs", "redis"),
 		"ssl",
@@ -178,6 +182,8 @@ func TestEnsureDirs(t *testing.T) {
 		filepath.Join("bin", "apache", "bin"),
 		filepath.Join("bin", "nginx"),
 		filepath.Join("bin", "mysql", "bin"),
+		filepath.Join("bin", "postgres", "bin"),
+		filepath.Join("bin", "mongodb", "bin"),
 		filepath.Join("bin", "php"),
 		filepath.Join("bin", "redis"),
 	}

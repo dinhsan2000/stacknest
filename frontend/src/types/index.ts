@@ -1,4 +1,4 @@
-export type ServiceName = 'apache' | 'nginx' | 'mysql' | 'php' | 'redis'
+export type ServiceName = 'apache' | 'nginx' | 'mysql' | 'postgres' | 'mongodb' | 'php' | 'redis'
 
 export type ServiceStatus = 'running' | 'stopped' | 'starting' | 'stopping' | 'error'
 
@@ -43,6 +43,8 @@ export interface AppConfig {
   apache: ServiceConfig
   nginx: ServiceConfig
   mysql: ServiceConfig
+  postgres: ServiceConfig
+  mongodb: ServiceConfig
   php: ServiceConfig
   redis: ServiceConfig
   auto_start: boolean

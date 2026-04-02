@@ -44,6 +44,8 @@ export default function Settings({ highlightPort }: Props) {
         apache: form.apache.port,
         nginx: form.nginx.port,
         mysql: form.mysql.port,
+        postgres: form.postgres.port,
+        mongodb: form.mongodb.port,
         php: form.php.port,
         redis: form.redis.port,
         [svc]: value, // override with current value
@@ -113,7 +115,7 @@ export default function Settings({ highlightPort }: Props) {
       <section className="bg-[#1e2535] border border-[#2a3347] rounded-xl p-5 flex flex-col gap-4">
         <h3 className="text-white font-semibold">{t.settings_ports}</h3>
         <div className="grid grid-cols-2 gap-3">
-          {(['apache', 'nginx', 'mysql', 'php', 'redis'] as const).map(svc => (
+          {(['apache', 'nginx', 'mysql', 'postgres', 'mongodb', 'php', 'redis'] as const).map(svc => (
             <div
               key={svc}
               ref={el => { portRefs.current[svc] = el }}
@@ -151,7 +153,7 @@ export default function Settings({ highlightPort }: Props) {
           <p className="text-xs text-gray-500 mt-1">{t.settings_auto_recover_desc}</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {(['apache', 'nginx', 'mysql', 'php', 'redis'] as const).map(svc => (
+          {(['apache', 'nginx', 'mysql', 'postgres', 'mongodb', 'php', 'redis'] as const).map(svc => (
             <label key={svc} className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"

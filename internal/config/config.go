@@ -23,11 +23,13 @@ type Config struct {
 	WWWPath  string `json:"www_path"`
 	LogPath  string `json:"log_path"`
 
-	Apache ServiceConfig `json:"apache"`
-	Nginx  ServiceConfig `json:"nginx"`
-	MySQL  ServiceConfig `json:"mysql"`
-	PHP    ServiceConfig `json:"php"`
-	Redis  ServiceConfig `json:"redis"`
+	Apache   ServiceConfig `json:"apache"`
+	Nginx    ServiceConfig `json:"nginx"`
+	MySQL    ServiceConfig `json:"mysql"`
+	Postgres ServiceConfig `json:"postgres"`
+	MongoDB  ServiceConfig `json:"mongodb"`
+	PHP      ServiceConfig `json:"php"`
+	Redis    ServiceConfig `json:"redis"`
 
 	AutoStart      bool   `json:"auto_start"`
 	Theme          string `json:"theme"` // "light" | "dark"
@@ -42,6 +44,22 @@ func (c *Config) MySQLDataDir(version string) string {
 		version = "default"
 	}
 	return filepath.Join(c.DataPath, "mysql", version)
+}
+
+// PostgresDataDir trả về thư mục data cho PostgreSQL.
+func (c *Config) PostgresDataDir(version string) string {
+	if version == "" {
+		version = "default"
+	}
+	return filepath.Join(c.DataPath, "postgres", version)
+}
+
+// MongoDBDataDir trả về thư mục data cho MongoDB.
+func (c *Config) MongoDBDataDir(version string) string {
+	if version == "" {
+		version = "default"
+	}
+	return filepath.Join(c.DataPath, "mongodb", version)
 }
 
 func DefaultConfig() *Config {
@@ -72,6 +90,18 @@ func DefaultConfig() *Config {
 			Path:        filepath.Join(bin, "mysql", "bin"),
 			Version:     "8.0",
 			AutoRecover: true,
+		},
+		Postgres: ServiceConfig{
+			Enabled: false,
+			Port:    5432,
+			Path:    filepath.Join(bin, "postgres", "bin"),
+			Version: "17",
+		},
+		MongoDB: ServiceConfig{
+			Enabled: false,
+			Port:    27017,
+			Path:    filepath.Join(bin, "mongodb", "bin"),
+			Version: "8.0",
 		},
 		PHP: ServiceConfig{
 			Enabled: true,
@@ -140,6 +170,8 @@ func (c *Config) EnsureDirs() {
 		c.Apache.Path,
 		c.Nginx.Path,
 		c.MySQL.Path,
+		c.Postgres.Path,
+		c.MongoDB.Path,
 		c.PHP.Path,
 		c.Redis.Path,
 
@@ -147,6 +179,8 @@ func (c *Config) EnsureDirs() {
 		filepath.Join(c.LogPath, "apache"),
 		filepath.Join(c.LogPath, "nginx"),
 		filepath.Join(c.LogPath, "mysql"),
+		filepath.Join(c.LogPath, "postgres"),
+		filepath.Join(c.LogPath, "mongodb"),
 		filepath.Join(c.LogPath, "php"),
 		filepath.Join(c.LogPath, "redis"),
 

@@ -14,32 +14,6 @@
       }
     ]
   },
-  "mysql": {
-    "versions": [
-      {
-        "version": "8.0.41",
-        "platforms": {
-          "windows": {
-            "exe_name": "mysqld.exe",
-            "url": "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.41-winx64.zip",
-            "zip_strip": "mysql-8.0.41-winx64/",
-            "exe_sub_dir": "bin"
-          }
-        }
-      },
-      {
-        "version": "5.7.44",
-        "platforms": {
-          "windows": {
-            "exe_name": "mysqld.exe",
-            "url": "https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.44-winx64.zip",
-            "zip_strip": "mysql-5.7.44-winx64/",
-            "exe_sub_dir": "bin"
-          }
-        }
-      }
-    ]
-  },
   "nginx": {
     "versions": [
       {
@@ -61,6 +35,150 @@
             "url": "https://nginx.org/download/nginx-1.25.5.zip",
             "zip_strip": "nginx-1.25.5/",
             "exe_sub_dir": ""
+          }
+        }
+      }
+    ]
+  },
+  "mysql": {
+    "versions": [
+      {
+        "version": "8.0.41",
+        "platforms": {
+          "windows": {
+            "exe_name": "mysqld.exe",
+            "url": "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.41-winx64.zip",
+            "zip_strip": "mysql-8.0.41-winx64/",
+            "exe_sub_dir": "bin"
+          },
+          "darwin": {
+            "exe_name": "mysqld",
+            "url": "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.41-macos14-arm64.tar.gz",
+            "zip_strip": "mysql-8.0.41-macos14-arm64/",
+            "exe_sub_dir": "bin"
+          },
+          "linux": {
+            "exe_name": "mysqld",
+            "url": "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.41-linux-glibc2.17-x86_64.tar.xz",
+            "zip_strip": "mysql-8.0.41-linux-glibc2.17-x86_64/",
+            "exe_sub_dir": "bin"
+          }
+        }
+      },
+      {
+        "version": "5.7.44",
+        "platforms": {
+          "windows": {
+            "exe_name": "mysqld.exe",
+            "url": "https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.44-winx64.zip",
+            "zip_strip": "mysql-5.7.44-winx64/",
+            "exe_sub_dir": "bin"
+          },
+          "linux": {
+            "exe_name": "mysqld",
+            "url": "https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.44-linux-glibc2.12-x86_64.tar.gz",
+            "zip_strip": "mysql-5.7.44-linux-glibc2.12-x86_64/",
+            "exe_sub_dir": "bin"
+          }
+        }
+      }
+    ]
+  },
+  "postgres": {
+    "versions": [
+      {
+        "version": "17.4",
+        "platforms": {
+          "windows": {
+            "exe_name": "postgres.exe",
+            "url": "https://get.enterprisedb.com/postgresql/postgresql-17.4-1-windows-x64-binaries.zip",
+            "zip_strip": "pgsql/",
+            "exe_sub_dir": "bin"
+          },
+          "darwin": {
+            "exe_name": "postgres",
+            "url": "https://get.enterprisedb.com/postgresql/postgresql-17.4-1-osx-binaries.zip",
+            "zip_strip": "pgsql/",
+            "exe_sub_dir": "bin"
+          },
+          "linux": {
+            "exe_name": "postgres",
+            "url": "https://get.enterprisedb.com/postgresql/postgresql-17.4-1-linux-x64-binaries.tar.gz",
+            "zip_strip": "pgsql/",
+            "exe_sub_dir": "bin"
+          }
+        }
+      },
+      {
+        "version": "16.8",
+        "platforms": {
+          "windows": {
+            "exe_name": "postgres.exe",
+            "url": "https://get.enterprisedb.com/postgresql/postgresql-16.8-1-windows-x64-binaries.zip",
+            "zip_strip": "pgsql/",
+            "exe_sub_dir": "bin"
+          },
+          "darwin": {
+            "exe_name": "postgres",
+            "url": "https://get.enterprisedb.com/postgresql/postgresql-16.8-1-osx-binaries.zip",
+            "zip_strip": "pgsql/",
+            "exe_sub_dir": "bin"
+          },
+          "linux": {
+            "exe_name": "postgres",
+            "url": "https://get.enterprisedb.com/postgresql/postgresql-16.8-1-linux-x64-binaries.tar.gz",
+            "zip_strip": "pgsql/",
+            "exe_sub_dir": "bin"
+          }
+        }
+      }
+    ]
+  },
+  "mongodb": {
+    "versions": [
+      {
+        "version": "8.0.4",
+        "platforms": {
+          "windows": {
+            "exe_name": "mongod.exe",
+            "url": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-8.0.4.zip",
+            "zip_strip": "mongodb-win32-x86_64-windows-8.0.4/",
+            "exe_sub_dir": "bin"
+          },
+          "darwin": {
+            "exe_name": "mongod",
+            "url": "https://fastdl.mongodb.org/osx/mongodb-macos-arm64-8.0.4.tgz",
+            "zip_strip": "mongodb-macos-aarch64-8.0.4/",
+            "exe_sub_dir": "bin"
+          },
+          "linux": {
+            "exe_name": "mongod",
+            "url": "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2204-8.0.4.tgz",
+            "zip_strip": "mongodb-linux-x86_64-ubuntu2204-8.0.4/",
+            "exe_sub_dir": "bin"
+          }
+        }
+      },
+      {
+        "version": "7.0.16",
+        "platforms": {
+          "windows": {
+            "exe_name": "mongod.exe",
+            "url": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-7.0.16.zip",
+            "zip_strip": "mongodb-win32-x86_64-windows-7.0.16/",
+            "exe_sub_dir": "bin"
+          },
+          "darwin": {
+            "exe_name": "mongod",
+            "url": "https://fastdl.mongodb.org/osx/mongodb-macos-arm64-7.0.16.tgz",
+            "zip_strip": "mongodb-macos-aarch64-7.0.16/",
+            "exe_sub_dir": "bin"
+          },
+          "linux": {
+            "exe_name": "mongod",
+            "url": "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2204-7.0.16.tgz",
+            "zip_strip": "mongodb-linux-x86_64-ubuntu2204-7.0.16/",
+            "exe_sub_dir": "bin"
           }
         }
       }

@@ -19,6 +19,8 @@ import {
   ChevronLeft,
   Server,
   Database,
+  HardDrive,
+  Leaf,
   Code2,
   Zap,
   Layers,
@@ -29,11 +31,13 @@ interface Props {
 }
 
 const SERVICE_META: Record<string, { label: string; icon: React.ReactNode; defaultOn: boolean }> = {
-  apache: { label: 'Apache', icon: <Server size={20} />, defaultOn: true },
-  nginx:  { label: 'Nginx',  icon: <Zap size={20} />,    defaultOn: false },
-  mysql:  { label: 'MySQL',  icon: <Database size={20} />, defaultOn: true },
-  php:    { label: 'PHP',    icon: <Code2 size={20} />,   defaultOn: true },
-  redis:  { label: 'Redis',  icon: <Layers size={20} />,  defaultOn: false },
+  apache:   { label: 'Apache',     icon: <Server size={20} />,    defaultOn: true },
+  nginx:    { label: 'Nginx',      icon: <Zap size={20} />,       defaultOn: false },
+  mysql:    { label: 'MySQL',      icon: <Database size={20} />,  defaultOn: true },
+  postgres: { label: 'PostgreSQL', icon: <HardDrive size={20} />, defaultOn: false },
+  mongodb:  { label: 'MongoDB',    icon: <Leaf size={20} />,      defaultOn: false },
+  php:      { label: 'PHP',        icon: <Code2 size={20} />,     defaultOn: true },
+  redis:    { label: 'Redis',      icon: <Layers size={20} />,    defaultOn: false },
 }
 
 export default function OnboardingWizard({ onComplete }: Props) {

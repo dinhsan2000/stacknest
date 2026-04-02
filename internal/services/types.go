@@ -4,11 +4,13 @@ package services
 type ServiceName string
 
 const (
-	ServiceApache ServiceName = "apache"
-	ServiceNginx  ServiceName = "nginx"
-	ServiceMySQL  ServiceName = "mysql"
-	ServicePHP    ServiceName = "php"
-	ServiceRedis  ServiceName = "redis"
+	ServiceApache   ServiceName = "apache"
+	ServiceNginx    ServiceName = "nginx"
+	ServiceMySQL    ServiceName = "mysql"
+	ServicePostgres ServiceName = "postgres"
+	ServiceMongoDB  ServiceName = "mongodb"
+	ServicePHP      ServiceName = "php"
+	ServiceRedis    ServiceName = "redis"
 )
 
 // ServiceStatus trạng thái của service

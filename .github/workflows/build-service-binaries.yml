@@ -1,0 +1,228 @@
+name: Build Service Binaries
+
+# Manually trigger to build and upload service binaries for all platforms.
+# Creates a GitHub Release with prebuilt binaries for Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, Redis.
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (e.g. binaries-v1)"
+        required: true
+        default: "binaries-v1"
+
+env:
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  # ── Apache ───────────────────────────────────────────────────────────────────
+  apache-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Apache from source
+        run: |
+          sudo apt-get update && sudo apt-get install -y build-essential libapr1-dev libaprutil1-dev libpcre3-dev libssl-dev
+          curl -fsSL https://dlcdn.apache.org/httpd/httpd-2.4.63.tar.gz | tar xz
+          cd httpd-2.4.63
+          ./configure --prefix=/opt/apache --enable-so --enable-ssl --enable-rewrite --enable-mods-shared=all
+          make -j$(nproc)
+          make install DESTDIR=${{ runner.temp }}/install
+          cd ${{ runner.temp }}/install/opt
+          tar czf ${{ runner.temp }}/apache-2.4.63-linux-x64.tar.gz apache/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apache-linux
+          path: ${{ runner.temp }}/apache-2.4.63-linux-x64.tar.gz
+
+  apache-macos:
+    runs-on: macos-14  # Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Apache from source
+        run: |
+          brew install apr apr-util pcre2 openssl
+          curl -fsSL https://dlcdn.apache.org/httpd/httpd-2.4.63.tar.gz | tar xz
+          cd httpd-2.4.63
+          ./configure --prefix=/opt/apache \
+            --enable-so --enable-ssl --enable-rewrite --enable-mods-shared=all \
+            --with-apr=$(brew --prefix apr) \
+            --with-apr-util=$(brew --prefix apr-util) \
+            --with-ssl=$(brew --prefix openssl)
+          make -j$(sysctl -n hw.ncpu)
+          make install DESTDIR=${{ runner.temp }}/install
+          cd ${{ runner.temp }}/install/opt
+          tar czf ${{ runner.temp }}/apache-2.4.63-macos-arm64.tar.gz apache/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apache-macos
+          path: ${{ runner.temp }}/apache-2.4.63-macos-arm64.tar.gz
+
+  # ── Nginx ────────────────────────────────────────────────────────────────────
+  nginx-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Nginx from source
+        run: |
+          sudo apt-get update && sudo apt-get install -y build-essential libpcre3-dev zlib1g-dev libssl-dev
+          curl -fsSL https://nginx.org/download/nginx-1.26.3.tar.gz | tar xz
+          cd nginx-1.26.3
+          ./configure --prefix=/opt/nginx --with-http_ssl_module --with-http_v2_module --with-http_realip_module
+          make -j$(nproc)
+          make install DESTDIR=${{ runner.temp }}/install
+          cd ${{ runner.temp }}/install/opt
+          tar czf ${{ runner.temp }}/nginx-1.26.3-linux-x64.tar.gz nginx/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nginx-linux
+          path: ${{ runner.temp }}/nginx-1.26.3-linux-x64.tar.gz
+
+  nginx-macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Nginx from source
+        run: |
+          brew install pcre2 openssl
+          curl -fsSL https://nginx.org/download/nginx-1.26.3.tar.gz | tar xz
+          cd nginx-1.26.3
+          ./configure --prefix=/opt/nginx \
+            --with-http_ssl_module --with-http_v2_module --with-http_realip_module \
+            --with-cc-opt="-I$(brew --prefix openssl)/include -I$(brew --prefix pcre2)/include" \
+            --with-ld-opt="-L$(brew --prefix openssl)/lib -L$(brew --prefix pcre2)/lib"
+          make -j$(sysctl -n hw.ncpu)
+          make install DESTDIR=${{ runner.temp }}/install
+          cd ${{ runner.temp }}/install/opt
+          tar czf ${{ runner.temp }}/nginx-1.26.3-macos-arm64.tar.gz nginx/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nginx-macos
+          path: ${{ runner.temp }}/nginx-1.26.3-macos-arm64.tar.gz
+
+  # ── PHP ──────────────────────────────────────────────────────────────────────
+  php-linux:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        version: ["8.3.16", "8.2.28"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build PHP from source
+        run: |
+          sudo apt-get update && sudo apt-get install -y build-essential autoconf bison re2c \
+            libxml2-dev libsqlite3-dev libssl-dev libcurl4-openssl-dev libpng-dev libjpeg-dev \
+            libonig-dev libzip-dev libreadline-dev pkg-config
+          curl -fsSL https://www.php.net/distributions/php-${{ matrix.version }}.tar.gz | tar xz
+          cd php-${{ matrix.version }}
+          ./configure --prefix=/opt/php \
+            --enable-fpm --enable-mbstring --enable-zip --enable-bcmath --enable-intl \
+            --enable-opcache --enable-gd --enable-soap \
+            --with-openssl --with-curl --with-zlib --with-pdo-mysql --with-mysqli \
+            --with-jpeg --with-zip --with-readline
+          make -j$(nproc)
+          make install DESTDIR=${{ runner.temp }}/install
+          cd ${{ runner.temp }}/install/opt
+          tar czf ${{ runner.temp }}/php-${{ matrix.version }}-linux-x64.tar.gz php/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: php-${{ matrix.version }}-linux
+          path: ${{ runner.temp }}/php-${{ matrix.version }}-linux-x64.tar.gz
+
+  php-macos:
+    runs-on: macos-14
+    strategy:
+      matrix:
+        version: ["8.3.16", "8.2.28"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build PHP from source
+        run: |
+          brew install autoconf bison re2c libxml2 openssl curl libpng libjpeg oniguruma libzip readline pkg-config
+          export PATH="$(brew --prefix bison)/bin:$PATH"
+          curl -fsSL https://www.php.net/distributions/php-${{ matrix.version }}.tar.gz | tar xz
+          cd php-${{ matrix.version }}
+          ./configure --prefix=/opt/php \
+            --enable-fpm --enable-mbstring --enable-zip --enable-bcmath \
+            --enable-opcache --enable-gd --enable-soap \
+            --with-openssl=$(brew --prefix openssl) \
+            --with-curl=$(brew --prefix curl) \
+            --with-zlib --with-pdo-mysql --with-mysqli \
+            --with-jpeg --with-zip --with-readline=$(brew --prefix readline)
+          make -j$(sysctl -n hw.ncpu)
+          make install DESTDIR=${{ runner.temp }}/install
+          cd ${{ runner.temp }}/install/opt
+          tar czf ${{ runner.temp }}/php-${{ matrix.version }}-macos-arm64.tar.gz php/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: php-${{ matrix.version }}-macos
+          path: ${{ runner.temp }}/php-${{ matrix.version }}-macos-arm64.tar.gz
+
+  # ── Redis ────────────────────────────────────────────────────────────────────
+  redis-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Redis from source
+        run: |
+          curl -fsSL https://download.redis.io/releases/redis-7.2.7.tar.gz | tar xz
+          cd redis-7.2.7
+          make -j$(nproc) PREFIX=/opt/redis
+          make install PREFIX=${{ runner.temp }}/install/redis
+          cd ${{ runner.temp }}/install
+          tar czf ${{ runner.temp }}/redis-7.2.7-linux-x64.tar.gz redis/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: redis-linux
+          path: ${{ runner.temp }}/redis-7.2.7-linux-x64.tar.gz
+
+  redis-macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Redis from source
+        run: |
+          curl -fsSL https://download.redis.io/releases/redis-7.2.7.tar.gz | tar xz
+          cd redis-7.2.7
+          make -j$(sysctl -n hw.ncpu) PREFIX=/opt/redis
+          make install PREFIX=${{ runner.temp }}/install/redis
+          cd ${{ runner.temp }}/install
+          tar czf ${{ runner.temp }}/redis-7.2.7-macos-arm64.tar.gz redis/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: redis-macos
+          path: ${{ runner.temp }}/redis-7.2.7-macos-arm64.tar.gz
+
+  # ── Create Release ───────────────────────────────────────────────────────────
+  release:
+    needs: [apache-linux, apache-macos, nginx-linux, nginx-macos, php-linux, php-macos, redis-linux, redis-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.event.inputs.release_tag }}"
+
+          # Flatten artifacts into single dir
+          mkdir -p release-assets
+          find artifacts/ -type f \( -name '*.tar.gz' -o -name '*.zip' \) -exec cp {} release-assets/ \;
+
+          ls -la release-assets/
+
+          # Create release (or update if exists)
+          gh release create "$TAG" \
+            --repo "${{ github.repository }}" \
+            --title "Service Binaries $TAG" \
+            --notes "Prebuilt service binaries for Stacknest (Apache, Nginx, PHP, Redis). MySQL/PostgreSQL/MongoDB use official upstream binaries." \
+            --latest=false \
+            release-assets/* || \
+          gh release upload "$TAG" \
+            --repo "${{ github.repository }}" \
+            --clobber \
+            release-assets/*

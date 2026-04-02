@@ -1,13 +1,16 @@
 package downloader
 
 import (
+	"archive/tar"
 	"archive/zip"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -100,30 +103,40 @@ func exeDirFor(vDir, exeSubDir string) string {
 }
 
 // ActiveExeDir trả về thư mục chứa executable của phiên bản đang active.
-// Nếu chưa đặt active version, fallback về phiên bản đầu tiên trong catalog.
-// Trả về chuỗi rỗng nếu service không tồn tại trong catalog.
+// Thứ tự ưu tiên:
+//  1. Downloaded binary trong binPath/{service}/{version}/
+//  2. System binary (macOS: Homebrew, Linux: apt/yum) — chỉ trên non-Windows
+//
+// Trả về chuỗi rỗng nếu không tìm thấy binary nào.
 func ActiveExeDir(binPath, service string) string {
+	// Try downloaded binary first
 	cat, ok := Catalog[service]
-	if !ok || len(cat.Versions) == 0 {
-		return ""
-	}
-	avs := LoadActiveVersions(binPath)
-	version := avs[service]
-	if version == "" {
-		version = cat.Versions[0].Version
-	}
-	for _, v := range cat.Versions {
-		if v.Version == version {
-			return exeDirFor(versionDir(binPath, service, version), v.ExeSubDir)
+	if ok && len(cat.Versions) > 0 {
+		avs := LoadActiveVersions(binPath)
+		version := avs[service]
+		if version == "" {
+			version = cat.Versions[0].Version
+		}
+		for _, v := range cat.Versions {
+			if v.Version == version {
+				dir := exeDirFor(versionDir(binPath, service, version), v.ExeSubDir)
+				exePath := filepath.Join(dir, cat.ExeName)
+				if _, err := os.Stat(exePath); err == nil {
+					return dir
+				}
+			}
 		}
 	}
-	return ""
+
+	// Fallback: detect system-installed binary (macOS/Linux)
+	return FindSystemBinary(service)
 }
 
-// GetStatus trả về trạng thái tất cả phiên bản của tất cả services theo thứ tự cố định
+// GetStatus trả về trạng thái tất cả phiên bản của tất cả services theo thứ tự cố định.
+// Bao gồm cả system-installed binary (macOS/Linux) nếu không có downloaded version.
 func GetStatus(binPath string) []ServiceVersionStatus {
 	avs := LoadActiveVersions(binPath)
-	order := []string{"apache", "mysql", "php", "redis", "nginx"}
+	order := []string{"apache", "mysql", "postgres", "mongodb", "php", "redis", "nginx"}
 	result := make([]ServiceVersionStatus, 0, len(order))
 	for _, svc := range order {
 		cat, ok := Catalog[svc]
@@ -131,7 +144,9 @@ func GetStatus(binPath string) []ServiceVersionStatus {
 			continue
 		}
 		activeVer := avs[svc]
-		versions := make([]VersionStatus, 0, len(cat.Versions))
+		versions := make([]VersionStatus, 0, len(cat.Versions)+1)
+
+		hasInstalled := false
 		for _, vspec := range cat.Versions {
 			vDir := versionDir(binPath, svc, vspec.Version)
 			eDir := exeDirFor(vDir, vspec.ExeSubDir)
@@ -139,6 +154,7 @@ func GetStatus(binPath string) []ServiceVersionStatus {
 			installed := false
 			if _, err := os.Stat(exePath); err == nil {
 				installed = true
+				hasInstalled = true
 			}
 			versions = append(versions, VersionStatus{
 				Version:   vspec.Version,
@@ -147,6 +163,20 @@ func GetStatus(binPath string) []ServiceVersionStatus {
 				ExePath:   exePath,
 			})
 		}
+
+		// On macOS/Linux: show system binary if no downloaded version exists
+		if !hasInstalled {
+			if sysDir := FindSystemBinary(svc); sysDir != "" {
+				sysVer := DetectSystemVersion(svc, sysDir)
+				versions = append([]VersionStatus{{
+					Version:   sysVer,
+					Installed: true,
+					Active:    activeVer == "" || activeVer == sysVer,
+					ExePath:   sysDir,
+				}}, versions...)
+			}
+		}
+
 		result = append(result, ServiceVersionStatus{
 			Service:  svc,
 			Versions: versions,
@@ -174,7 +204,16 @@ func Download(ctx context.Context, service, version, binPath string, onProgress 
 
 	destDir := versionDir(binPath, service, version)
 
-	tmp, err := os.CreateTemp("", "stacknest-*.zip")
+	// Determine temp file extension from URL
+	ext := ".zip"
+	urlLower := strings.ToLower(vspec.URL)
+	if strings.HasSuffix(urlLower, ".tar.gz") || strings.HasSuffix(urlLower, ".tgz") {
+		ext = ".tar.gz"
+	} else if strings.HasSuffix(urlLower, ".tar.xz") {
+		ext = ".tar.xz"
+	}
+
+	tmp, err := os.CreateTemp("", "stacknest-*"+ext)
 	if err != nil {
 		return fmt.Errorf("tạo temp file: %w", err)
 	}
@@ -190,7 +229,16 @@ func Download(ctx context.Context, service, version, binPath string, onProgress 
 	if err := os.MkdirAll(destDir, 0755); err != nil {
 		return fmt.Errorf("tạo thư mục: %w", err)
 	}
-	return extractZip(tmpPath, destDir, vspec.ZipStrip)
+
+	// Extract based on archive type
+	switch ext {
+	case ".tar.gz":
+		return extractTarGz(tmpPath, destDir, vspec.ZipStrip)
+	case ".tar.xz":
+		return extractTarXz(tmpPath, destDir, vspec.ZipStrip)
+	default:
+		return extractZip(tmpPath, destDir, vspec.ZipStrip)
+	}
 }
 
 // Delete xóa binary đã cài của service/version.
@@ -318,3 +366,112 @@ func writeZipEntry(f *zip.File, target string) error {
 	_, err = io.Copy(dst, rc)
 	return err
 }
+
+// extractTarGz extracts a .tar.gz archive, stripping prefix from paths.
+func extractTarGz(archivePath, destDir, stripPrefix string) error {
+	f, err := os.Open(archivePath)
+	if err != nil {
+		return fmt.Errorf("open archive: %w", err)
+	}
+	defer f.Close()
+
+	gz, err := gzip.NewReader(f)
+	if err != nil {
+		return fmt.Errorf("gzip reader: %w", err)
+	}
+	defer gz.Close()
+
+	return extractTar(tar.NewReader(gz), destDir, stripPrefix)
+}
+
+// extractTarXz extracts a .tar.xz archive via external xz command.
+// Go stdlib lacks xz support, so we shell out to xz/unxz.
+func extractTarXz(archivePath, destDir, stripPrefix string) error {
+	// Decompress xz to tar first
+	tarPath := strings.TrimSuffix(archivePath, ".xz")
+	if tarPath == archivePath {
+		tarPath = archivePath + ".tar"
+	}
+	defer os.Remove(tarPath)
+
+	// Use xz -dk (decompress, keep original)
+	cmd := execCommand("xz", "-dk", archivePath)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("xz decompress failed: %s: %w", string(out), err)
+	}
+
+	f, err := os.Open(tarPath)
+	if err != nil {
+		return fmt.Errorf("open tar: %w", err)
+	}
+	defer f.Close()
+
+	return extractTar(tar.NewReader(f), destDir, stripPrefix)
+}
+
+// extractTar reads entries from a tar reader and writes them to destDir.
+func extractTar(tr *tar.Reader, destDir, stripPrefix string) error {
+	cleanDest := filepath.Clean(destDir) + string(os.PathSeparator)
+
+	for {
+		header, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("tar read: %w", err)
+		}
+
+		relPath := filepath.ToSlash(header.Name)
+		if stripPrefix != "" {
+			if !strings.HasPrefix(relPath, stripPrefix) {
+				continue
+			}
+			relPath = strings.TrimPrefix(relPath, stripPrefix)
+		}
+		if relPath == "" || relPath == "." {
+			continue
+		}
+
+		target := filepath.Join(destDir, filepath.FromSlash(relPath))
+
+		// Prevent path traversal
+		if !strings.HasPrefix(filepath.Clean(target)+string(os.PathSeparator), cleanDest) &&
+			filepath.Clean(target) != filepath.Clean(destDir) {
+			continue
+		}
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			os.MkdirAll(target, 0755) //nolint:errcheck
+		case tar.TypeReg:
+			if err := writeTarEntry(tr, target, header.FileInfo().Mode()); err != nil {
+				return fmt.Errorf("extract %s: %w", relPath, err)
+			}
+		case tar.TypeSymlink:
+			os.Remove(target) //nolint:errcheck
+			os.Symlink(header.Linkname, target) //nolint:errcheck
+		}
+	}
+	return nil
+}
+
+func writeTarEntry(r io.Reader, target string, mode os.FileMode) error {
+	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+		return err
+	}
+	// Preserve executable bit
+	if mode == 0 {
+		mode = 0644
+	}
+	dst, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+	_, err = io.Copy(dst, r)
+	return err
+}
+
+// execCommand wraps exec.Command — allows testing to stub it out.
+var execCommand = exec.Command

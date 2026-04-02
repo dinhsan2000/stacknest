@@ -48,6 +48,12 @@ func LogPaths(logRoot string) map[string][]string {
 		"mysql": {
 			filepath.Join(logRoot, "mysql", "mysql_error.log"),
 		},
+		"postgres": {
+			filepath.Join(logRoot, "postgres", "postgres.log"),
+		},
+		"mongodb": {
+			filepath.Join(logRoot, "mongodb", "mongod.log"),
+		},
 		"php": {
 			filepath.Join(logRoot, "php", "php_error.log"),
 		},

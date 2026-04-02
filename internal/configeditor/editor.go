@@ -46,6 +46,10 @@ func (m *Manager) GetConfigFiles(service string) []ConfigFile {
 		return m.mysqlConfigs()
 	case "php":
 		return m.phpConfigs()
+	case "postgres":
+		return m.postgresConfigs()
+	case "mongodb":
+		return m.mongodbConfigs()
 	default:
 		return nil
 	}
@@ -160,8 +164,11 @@ func (m *Manager) isAllowedPath(path string) bool {
 			"/usr/local/etc/nginx/",
 			"/opt/homebrew/etc/nginx/",
 			"/etc/mysql/",
+			"/etc/postgresql/",
 			"/usr/local/etc/",
+			"/usr/local/var/postgres/",
 			"/opt/homebrew/etc/",
+			"/opt/homebrew/var/postgres/",
 			"/etc/php/",
 		}
 		for _, prefix := range systemPrefixes {
@@ -353,6 +360,73 @@ func (m *Manager) phpConfigs() []ConfigFile {
 			if _, err := os.Stat(p); err == nil {
 				dir := filepath.Base(filepath.Dir(p))
 				configs = append(configs, m.configFile("php", dir+"/php.ini", p, "ini"))
+			}
+		}
+	}
+	return configs
+}
+
+func (m *Manager) postgresConfigs() []ConfigFile {
+	// Quét bin/postgres/{version}/data/postgresql.conf và pg_hba.conf
+	var configs []ConfigFile
+	base := filepath.Join(m.rootPath, "bin", "postgres")
+	if entries, err := os.ReadDir(base); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() {
+				continue
+			}
+			for _, name := range []string{"postgresql.conf", "pg_hba.conf"} {
+				p := filepath.Join(base, e.Name(), "data", name)
+				if _, err := os.Stat(p); err == nil {
+					configs = append(configs, m.configFile("postgres", name+" ("+e.Name()+")", p, "ini"))
+				}
+			}
+		}
+	}
+
+	// Fallback system paths (non-Windows)
+	if runtime.GOOS != "windows" {
+		for _, p := range []string{
+			"/etc/postgresql/17/main/postgresql.conf",
+			"/etc/postgresql/16/main/postgresql.conf",
+			"/usr/local/var/postgres/postgresql.conf",
+			"/opt/homebrew/var/postgres/postgresql.conf",
+		} {
+			if _, err := os.Stat(p); err == nil {
+				configs = append(configs, m.configFile("postgres", filepath.Base(p), p, "ini"))
+			}
+		}
+	}
+	return configs
+}
+
+func (m *Manager) mongodbConfigs() []ConfigFile {
+	// MongoDB dùng mongod.cfg (Windows) hoặc mongod.conf (Unix)
+	var configs []ConfigFile
+	base := filepath.Join(m.rootPath, "bin", "mongodb")
+	if entries, err := os.ReadDir(base); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() {
+				continue
+			}
+			for _, name := range []string{"mongod.cfg", "mongod.conf"} {
+				p := filepath.Join(base, e.Name(), "bin", name)
+				if _, err := os.Stat(p); err == nil {
+					configs = append(configs, m.configFile("mongodb", name+" ("+e.Name()+")", p, "yaml"))
+				}
+			}
+		}
+	}
+
+	// Fallback system paths (non-Windows)
+	if runtime.GOOS != "windows" {
+		for _, p := range []string{
+			"/etc/mongod.conf",
+			"/usr/local/etc/mongod.conf",
+			"/opt/homebrew/etc/mongod.conf",
+		} {
+			if _, err := os.Stat(p); err == nil {
+				configs = append(configs, m.configFile("mongodb", filepath.Base(p), p, "yaml"))
 			}
 		}
 	}
