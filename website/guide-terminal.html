@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Terminal Guide for Stacknest - Use built-in terminal for command-line operations">
+    <title>Terminal - Stacknest Guide</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #0F172A 100%);
+            background-attachment: fixed;
+            color: #F1F5F9;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
+
+        .guide-content {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 0.75rem;
+            padding: 2rem;
+        }
+
+        code {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            color: #93c5fd;
+            font-size: 0.875rem;
+        }
+
+        .step-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen pt-20">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold">S</span>
+                </div>
+                <span class="text-xl font-bold font-display">Stacknest Guides</span>
+            </div>
+            <div class="hidden md:flex gap-8">
+                <a href="/" class="hover:text-blue-400">Home</a>
+                <a href="/docs.html" class="hover:text-blue-400">Docs</a>
+                <a href="/download.html" class="hover:text-blue-400">Download</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <div class="mb-12">
+            <h1 class="text-5xl font-bold font-display mb-4">💻 Terminal Guide</h1>
+            <p class="text-xl text-slate-300">Use the built-in terminal for command-line operations without leaving Stacknest.</p>
+        </div>
+
+        <div class="guide-content space-y-8">
+            <!-- What is Terminal -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">What is the Built-In Terminal?</h2>
+                <p class="text-slate-200 mb-4">The Terminal tab provides a command-line interface directly within Stacknest:</p>
+                <ul class="list-disc list-inside space-y-2 text-slate-300 ml-4">
+                    <li>Run shell commands without opening a separate terminal window</li>
+                    <li>Navigate your project directories</li>
+                    <li>Run build scripts, tests, and deployments</li>
+                    <li>Interact with databases via CLI</li>
+                    <li>Execute PHP, Node.js, Python, or other interpreters</li>
+                    <li>All in one integrated interface</li>
+                </ul>
+                <p class="text-slate-400 text-sm mt-4">💡 No need to alt-tab between Stacknest and external terminal windows.</p>
+            </section>
+
+            <!-- Accessing Terminal -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Accessing the Terminal</h2>
+
+                <div class="step-box">
+                    <h3 class="font-bold mb-3 text-lg">Method 1: Click Terminal Tab</h3>
+                    <p class="text-slate-300">Click <strong>"Terminal"</strong> in the left sidebar to open the terminal.</p>
+                </div>
+
+                <div class="step-box">
+                    <h3 class="font-bold mb-3 text-lg">Method 2: Keyboard Shortcut</h3>
+                    <p class="text-slate-300">Press <code>Ctrl+Shift+T</code> (Windows/Linux) or <code>Cmd+Shift+T</code> (macOS) to open terminal quickly.</p>
+                </div>
+
+                <div class="step-box">
+                    <h3 class="font-bold mb-3 text-lg">Using the Terminal</h3>
+                    <p class="text-slate-300">Once open:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4 mt-2">
+                        <li>Click in the terminal to focus it</li>
+                        <li>Type your command</li>
+                        <li>Press Enter to execute</li>
+                        <li>Output appears immediately in the terminal</li>
+                        <li>Scroll to see command history</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Common Commands -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Common Commands</h2>
+
+                <div class="space-y-4">
+                    <div class="bg-slate-800/50 p-4 rounded">
+                        <h3 class="font-bold mb-2">📁 Navigation</h3>
+                        <div class="space-y-2 text-sm text-slate-300">
+                            <p><code>pwd</code> — Show current directory path</p>
+                            <p><code>ls</code> (Mac/Linux) or <code>dir</code> (Windows) — List files in directory</p>
+                            <p><code>cd path/to/directory</code> — Change directory</p>
+                            <p><code>cd ..</code> — Go up one directory</p>
+                            <p><code>cd ~</code> — Go to home directory</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/50 p-4 rounded">
+                        <h3 class="font-bold mb-2">📝 File Operations</h3>
+                        <div class="space-y-2 text-sm text-slate-300">
+                            <p><code>cat filename</code> — View file contents</p>
+                            <p><code>mkdir foldername</code> — Create new folder</p>
+                            <p><code>touch filename</code> — Create empty file</p>
+                            <p><code>cp source destination</code> — Copy file</p>
+                            <p><code>mv source destination</code> — Move/rename file</p>
+                            <p><code>rm filename</code> — Delete file</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/50 p-4 rounded">
+                        <h3 class="font-bold mb-2">⚙️ Utility Commands</h3>
+                        <div class="space-y-2 text-sm text-slate-300">
+                            <p><code>php -v</code> — Check PHP version</p>
+                            <p><code>php -S localhost:8000</code> — Start PHP built-in server</p>
+                            <p><code>mysql -u root -p</code> — Connect to MySQL</p>
+                            <p><code>npm install</code> — Install Node.js dependencies</p>
+                            <p><code>composer install</code> — Install PHP dependencies</p>
+                            <p><code>clear</code> — Clear terminal screen</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/50 p-4 rounded">
+                        <h3 class="font-bold mb-2">🐛 Git Commands</h3>
+                        <div class="space-y-2 text-sm text-slate-300">
+                            <p><code>git status</code> — Check repository status</p>
+                            <p><code>git add .</code> — Stage changes</p>
+                            <p><code>git commit -m "message"</code> — Commit changes</p>
+                            <p><code>git push</code> — Push to remote</p>
+                            <p><code>git pull</code> — Pull from remote</p>
+                            <p><code>git log</code> — View commit history</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Running Scripts -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Running Scripts and Tools</h2>
+
+                <div class="bg-slate-800/50 p-4 rounded mb-4">
+                    <h3 class="font-bold mb-2">🚀 Running Build Tools</h3>
+                    <p class="text-slate-300 mb-2">Run your project build commands:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4">
+                        <li><code>npm run build</code> — Build JavaScript project</li>
+                        <li><code>npm run dev</code> — Start development server</li>
+                        <li><code>composer dump-autoload</code> — Rebuild PHP autoloader</li>
+                        <li><code>php artisan migrate</code> — Run Laravel migrations</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded mb-4">
+                    <h3 class="font-bold mb-2">🧪 Running Tests</h3>
+                    <p class="text-slate-300 mb-2">Execute test suites directly:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4">
+                        <li><code>npm test</code> — Run JavaScript tests</li>
+                        <li><code>phpunit</code> — Run PHP unit tests</li>
+                        <li><code>pytest</code> — Run Python tests</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded">
+                    <h3 class="font-bold mb-2">🔍 Checking Syntax</h3>
+                    <p class="text-slate-300 mb-2">Validate code before deployment:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4">
+                        <li><code>php -l filename.php</code> — Check PHP syntax</li>
+                        <li><code>node -c script.js</code> — Check JavaScript syntax</li>
+                        <li><code>python -m py_compile file.py</code> — Check Python syntax</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Terminal Features -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Terminal Features</h2>
+
+                <div class="space-y-4">
+                    <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">📋 Copy/Paste</h3>
+                        <p class="text-slate-300 mb-2">Work with terminal output:</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4">
+                            <li>Right-click to select and copy terminal output</li>
+                            <li>Paste commands from clipboard</li>
+                            <li>Use Ctrl+C to copy/interrupt commands</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">⌨️ Command History</h3>
+                        <p class="text-slate-300 mb-2">Access previous commands:</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4">
+                            <li>Press ↑ Arrow key to see previous commands</li>
+                            <li>Press ↓ Arrow key to go forward</li>
+                            <li>Type partial command and press ↑ to search</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">🔄 Multiple Commands</h3>
+                        <p class="text-slate-300 mb-2">Run multiple commands:</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4">
+                            <li><code>command1 && command2</code> — Run command2 only if command1 succeeds</li>
+                            <li><code>command1 ; command2</code> — Run command2 regardless of command1 result</li>
+                            <li><code>command1 | command2</code> — Pipe output of command1 to command2</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">⏱️ Background Process</h3>
+                        <p class="text-slate-300 mb-2">Run long-running commands:</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4">
+                            <li><code>command &</code> — Run command in background</li>
+                            <li>Terminal stays responsive while process runs</li>
+                            <li>Output still appears in terminal</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tips and Tricks -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Terminal Tips & Tricks</h2>
+
+                <div class="space-y-3">
+                    <div class="bg-green-500/10 border-l-4 border-green-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">💡 Quick Tips</h3>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 text-sm">
+                            <li>Type first few letters of command, then press Tab for autocomplete</li>
+                            <li><code>clear</code> — Clear terminal screen for better readability</li>
+                            <li><code>alias</code> — Create shortcuts for long commands</li>
+                            <li>Use quotes around paths with spaces: <code>"path/with spaces"</code></li>
+                            <li><code>--help</code> — Most commands show help with this flag</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-green-500/10 border-l-4 border-green-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">🔐 Security Tips</h3>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 text-sm">
+                            <li>Don't paste unknown commands from internet directly</li>
+                            <li>Be careful with <code>rm</code> command — deleted files are permanent</li>
+                            <li>Use <code>--dry-run</code> flag to preview what commands will do</li>
+                            <li>Always backup before running batch operations</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Troubleshooting Terminal</h2>
+
+                <div class="space-y-3">
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">❌ Command not found</h3>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 text-sm">
+                            <li>The tool/command may not be installed</li>
+                            <li>Check spelling of command</li>
+                            <li>Install the missing tool (e.g., <code>npm install</code>)</li>
+                            <li>Add tool to system PATH if needed</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">❌ Permission denied</h3>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 text-sm">
+                            <li>You may not have permission to access the file/directory</li>
+                            <li>Use <code>chmod</code> to change file permissions</li>
+                            <li>Or run with <code>sudo</code> (use carefully!)</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">❌ Command stuck/not responding</h3>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 text-sm">
+                            <li>Press Ctrl+C to stop the running command</li>
+                            <li>If that doesn't work, close and reopen terminal</li>
+                            <li>The command may be waiting for input (check the terminal)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
+                <h3 class="font-bold text-lg mb-3">💡 Pro Tips</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                    <li>Keep terminal open while developing for quick command execution</li>
+                    <li>Use terminal for git operations instead of GUI clients</li>
+                    <li>Run build and test commands from terminal to save time</li>
+                    <li>Create aliases for frequently used commands to work faster</li>
+                    <li>Use terminal output in logs for debugging complex issues</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-20 border-t border-slate-700 py-8 px-4 bg-slate-900/20">
+        <div class="max-w-4xl mx-auto text-center text-slate-500 text-sm">
+            <p>© 2026 Stacknest. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

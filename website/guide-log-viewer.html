@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Log Viewer Guide for Stacknest - View and analyze service logs">
+    <title>Log Viewer - Stacknest Guide</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #0F172A 100%);
+            background-attachment: fixed;
+            color: #F1F5F9;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
+
+        .guide-content {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 0.75rem;
+            padding: 2rem;
+        }
+
+        code {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            color: #93c5fd;
+            font-size: 0.875rem;
+        }
+
+        .step-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen pt-20">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold">S</span>
+                </div>
+                <span class="text-xl font-bold font-display">Stacknest Guides</span>
+            </div>
+            <div class="hidden md:flex gap-8">
+                <a href="/" class="hover:text-blue-400">Home</a>
+                <a href="/docs.html" class="hover:text-blue-400">Docs</a>
+                <a href="/download.html" class="hover:text-blue-400">Download</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <div class="mb-12">
+            <h1 class="text-5xl font-bold font-display mb-4">📋 Log Viewer Guide</h1>
+            <p class="text-xl text-slate-300">Monitor service logs in real-time to debug issues and track performance.</p>
+        </div>
+
+        <div class="guide-content space-y-8">
+            <!-- What is Log Viewer -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">What is the Log Viewer?</h2>
+                <p class="text-slate-200 mb-4">The Log Viewer shows you real-time and historical logs from all your services:</p>
+                <ul class="list-disc list-inside space-y-2 text-slate-300 ml-4">
+                    <li>Real-time log streaming as services generate output</li>
+                    <li>Color-coded log levels (INFO, WARNING, ERROR)</li>
+                    <li>Search logs for specific errors or messages</li>
+                    <li>Filter logs by service</li>
+                    <li>Save and export logs for analysis</li>
+                    <li>Track performance and system events</li>
+                </ul>
+                <p class="text-slate-400 text-sm mt-4">💡 Logs help you diagnose issues when services fail to start or behave unexpectedly.</p>
+            </section>
+
+            <!-- Accessing Log Viewer -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Accessing the Log Viewer</h2>
+
+                <div class="step-box">
+                    <h3 class="font-bold mb-3 text-lg">Step 1: Open Logs Tab</h3>
+                    <p class="text-slate-300">Click <strong>"Logs"</strong> in the left sidebar.</p>
+                </div>
+
+                <div class="step-box">
+                    <h3 class="font-bold mb-3 text-lg">Step 2: Select Service</h3>
+                    <p class="text-slate-300">Choose which service's logs you want to view:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4 mt-2">
+                        <li>Apache HTTP Server</li>
+                        <li>Nginx</li>
+                        <li>MySQL</li>
+                        <li>PostgreSQL</li>
+                        <li>MongoDB</li>
+                        <li>PHP</li>
+                        <li>Redis</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <h3 class="font-bold mb-3 text-lg">Step 3: View Logs</h3>
+                    <p class="text-slate-300">The log viewer displays logs in real-time:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4 mt-2">
+                        <li>New log entries appear automatically</li>
+                        <li>Latest entries are shown at the bottom</li>
+                        <li>Colored by log level (different colors for errors, warnings)</li>
+                        <li>Scroll up to see older entries</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Understanding Log Levels -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Understanding Log Levels</h2>
+                <p class="text-slate-200 mb-4">Logs are categorized by importance level:</p>
+
+                <div class="space-y-3">
+                    <div class="bg-green-500/10 border-l-4 border-green-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">ℹ️ INFO</h3>
+                        <p class="text-slate-300 text-sm">Informational messages about normal operations. You don't need to take action.</p>
+                        <p class="text-slate-400 text-sm mt-1">Example: "Server started successfully"</p>
+                    </div>
+
+                    <div class="bg-yellow-500/10 border-l-4 border-yellow-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">⚠️ WARNING</h3>
+                        <p class="text-slate-300 text-sm">Something unexpected happened, but the service continues running. May indicate a problem.</p>
+                        <p class="text-slate-400 text-sm mt-1">Example: "Deprecated function used"</p>
+                    </div>
+
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">❌ ERROR</h3>
+                        <p class="text-slate-300 text-sm">Something failed, but the service may continue running. Needs investigation.</p>
+                        <p class="text-slate-400 text-sm mt-1">Example: "Failed to connect to database"</p>
+                    </div>
+
+                    <div class="bg-purple-500/10 border-l-4 border-purple-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">🔥 CRITICAL</h3>
+                        <p class="text-slate-300 text-sm">Severe error that may cause service to crash. Requires immediate action.</p>
+                        <p class="text-slate-400 text-sm mt-1">Example: "Out of memory"</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Using Log Features -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Using Log Viewer Features</h2>
+
+                <div class="bg-slate-800/50 p-4 rounded mb-4">
+                    <h3 class="font-bold mb-2">🔍 Searching Logs</h3>
+                    <p class="text-slate-300 mb-2">Find specific errors or messages:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-300 ml-2">
+                        <li>Use the search box at the top of the log viewer</li>
+                        <li>Type keyword (error name, function name, file path)</li>
+                        <li>Logs are filtered to show only matching entries</li>
+                        <li>Matching text is highlighted in the logs</li>
+                    </ol>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded mb-4">
+                    <h3 class="font-bold mb-2">⏸️ Pause/Resume Logging</h3>
+                    <p class="text-slate-300 mb-2">Control log streaming:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4">
+                        <li>Click the <strong>"Pause"</strong> button to stop receiving new log entries</li>
+                        <li>Useful for reading specific error messages before they scroll away</li>
+                        <li>Click <strong>"Resume"</strong> to continue watching</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded mb-4">
+                    <h3 class="font-bold mb-2">📥 Clear Logs</h3>
+                    <p class="text-slate-300">Clear old logs from the display:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-300 ml-2 mt-2">
+                        <li>Click the <strong>"Clear"</strong> button</li>
+                        <li>This removes logs from view (they're still stored on disk)</li>
+                        <li>Useful when logs become cluttered</li>
+                    </ol>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded">
+                    <h3 class="font-bold mb-2">💾 Export Logs</h3>
+                    <p class="text-slate-300">Save logs for later analysis:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-300 ml-2 mt-2">
+                        <li>Click the <strong>"Export"</strong> button</li>
+                        <li>Choose export format (TXT or CSV)</li>
+                        <li>Log file is saved to your computer</li>
+                        <li>Share with team or save for troubleshooting</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Debugging with Logs -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Debugging with Logs</h2>
+
+                <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded mb-4">
+                    <h3 class="font-bold mb-2">🔧 Service Won't Start</h3>
+                    <p class="text-slate-300 mb-2">When a service fails to start:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-300 ml-2">
+                        <li>Open the Logs tab</li>
+                        <li>Select the failing service</li>
+                        <li>Look for ERROR or CRITICAL messages</li>
+                        <li>Read the error message carefully — it usually explains the problem</li>
+                        <li>Common issues: port already in use, permission denied, config error</li>
+                    </ol>
+                </div>
+
+                <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
+                    <h3 class="font-bold mb-2">⚠️ Website Shows 500 Error</h3>
+                    <p class="text-slate-300 mb-2">When your web application crashes:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-300 ml-2">
+                        <li>Check Apache or Nginx error log (look for PHP errors)</li>
+                        <li>Also check application log files if available</li>
+                        <li>Search logs for the time the error occurred</li>
+                        <li>Look for stack traces or error messages in the output</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Common Log Messages -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Common Log Messages</h2>
+
+                <div class="space-y-3">
+                    <div class="bg-green-500/10 border-l-4 border-green-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">✅ "Server started successfully"</h3>
+                        <p class="text-slate-300 text-sm">Service is running normally. No action needed.</p>
+                    </div>
+
+                    <div class="bg-yellow-500/10 border-l-4 border-yellow-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">⚠️ "Port 80 already in use"</h3>
+                        <p class="text-slate-300 text-sm">Another application is using the port. Stop the other app or change the port in config.</p>
+                    </div>
+
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">❌ "Permission denied"</h3>
+                        <p class="text-slate-300 text-sm">Check file/folder permissions. Service doesn't have access to required files.</p>
+                    </div>
+
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">❌ "Connection refused"</h3>
+                        <p class="text-slate-300 text-sm">Can't connect to database. Ensure MySQL/PostgreSQL is running on correct port.</p>
+                    </div>
+
+                    <div class="bg-purple-500/10 border-l-4 border-purple-500 p-4 rounded">
+                        <h3 class="font-bold mb-1">🔥 "Out of memory"</h3>
+                        <p class="text-slate-300 text-sm">Service ran out of memory. Stop some services or increase available RAM.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
+                <h3 class="font-bold text-lg mb-3">💡 Pro Tips</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                    <li>Always check logs when something doesn't work as expected</li>
+                    <li>Use search to find specific errors quickly</li>
+                    <li>Export logs before uninstalling services for troubleshooting</li>
+                    <li>Keep logs open in a separate window while developing/testing</li>
+                    <li>ERROR and CRITICAL messages usually point directly to the problem</li>
+                    <li>Google error messages if you can't understand them</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-20 border-t border-slate-700 py-8 px-4 bg-slate-900/20">
+        <div class="max-w-4xl mx-auto text-center text-slate-500 text-sm">
+            <p>© 2026 Stacknest. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Service Management Guide for Stacknest - Start, stop, and manage local services">
+    <title>Service Management - Stacknest Guide</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #0F172A 100%);
+            background-attachment: fixed;
+            color: #F1F5F9;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
+
+        .guide-content {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 0.75rem;
+            padding: 2rem;
+        }
+
+        .service-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        code {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            color: #93c5fd;
+            font-size: 0.875rem;
+        }
+
+        .status-running { color: #4ade80; }
+        .status-stopped { color: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen pt-20">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold">S</span>
+                </div>
+                <span class="text-xl font-bold font-display">Stacknest Guides</span>
+            </div>
+            <div class="hidden md:flex gap-8">
+                <a href="/" class="hover:text-blue-400">Home</a>
+                <a href="/docs.html" class="hover:text-blue-400">Docs</a>
+                <a href="/download.html" class="hover:text-blue-400">Download</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <div class="mb-12">
+            <h1 class="text-5xl font-bold font-display mb-4">Service Management Guide</h1>
+            <p class="text-xl text-slate-300">Manage Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, and Redis from one dashboard.</p>
+        </div>
+
+        <div class="guide-content space-y-8">
+            <!-- Understanding the Dashboard -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Understanding the Dashboard</h2>
+                <p class="text-slate-200 mb-4">The Dashboard is where you control all your local services. Each service shows:</p>
+
+                <div class="service-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h4 class="font-bold text-lg">MySQL</h4>
+                            <p class="text-sm text-slate-400">Database: Relational</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="status-running font-bold">● Running</p>
+                            <p class="text-sm text-slate-400">Port 3306</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-sm">Stop</button>
+                        <button class="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded text-sm">Restart</button>
+                    </div>
+                </div>
+
+                <p class="text-slate-300 mt-4">Each service displays:</p>
+                <ul class="list-disc list-inside space-y-2 text-slate-300 ml-4">
+                    <li><strong>Status:</strong> Green (running) or Red (stopped)</li>
+                    <li><strong>Port:</strong> Default port for the service</li>
+                    <li><strong>Buttons:</strong> Start, Stop, Restart</li>
+                    <li><strong>Checkbox:</strong> Include in "Start All" action</li>
+                </ul>
+            </section>
+
+            <!-- Starting Services -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Starting Services</h2>
+                <p class="text-slate-200 mb-4">There are two ways to start services:</p>
+
+                <div class="space-y-4">
+                    <div class="bg-slate-800/50 p-4 rounded">
+                        <h3 class="font-bold mb-2">🚀 Start Individual Service</h3>
+                        <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-2">
+                            <li>Find the service in the Dashboard (e.g., Apache)</li>
+                            <li>Click the <strong>Start</strong> button</li>
+                            <li>Wait for status to change to <span class="status-running">● Running</span></li>
+                        </ol>
+                        <p class="text-slate-400 text-sm mt-2">⏱️ Starting usually takes 2-5 seconds depending on the service.</p>
+                    </div>
+
+                    <div class="bg-slate-800/50 p-4 rounded">
+                        <h3 class="font-bold mb-2">▶️ Start All Selected Services</h3>
+                        <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-2">
+                            <li>Check the boxes for services you want to include</li>
+                            <li>Click <strong>"Start All"</strong> button at the top</li>
+                            <li>All checked services will start in sequence</li>
+                        </ol>
+                        <p class="text-slate-400 text-sm mt-2">💡 Tip: Your "Start All" preferences are saved automatically.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stopping & Restarting -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Stopping & Restarting</h2>
+
+                <div class="space-y-4">
+                    <div class="bg-slate-800/50 p-4 rounded">
+                        <h3 class="font-bold mb-2">⏹️ Stop a Service</h3>
+                        <p class="text-slate-300">Click the <strong>Stop</strong> button. The service will gracefully shut down.</p>
+                        <p class="text-slate-400 text-sm mt-2">⚠️ Stopping a database may cause data loss if not properly flushed. Always stop gracefully.</p>
+                    </div>
+
+                    <div class="bg-slate-800/50 p-4 rounded">
+                        <h3 class="font-bold mb-2">🔄 Restart a Service</h3>
+                        <p class="text-slate-300">Click <strong>Restart</strong> to stop and immediately start the service. Use this when:</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300 ml-4 mt-2">
+                            <li>Configuration changes need to take effect</li>
+                            <li>Service is acting up or stuck</li>
+                            <li>You updated the service version</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Supported Services -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Supported Services</h2>
+                <p class="text-slate-200 mb-4">Stacknest supports the following services:</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="service-card">
+                        <h4 class="font-bold mb-2">Apache HTTP Server</h4>
+                        <p class="text-sm text-slate-400">Default port: <code>80</code> / <code>443</code></p>
+                        <p class="text-sm text-slate-300 mt-2">Web server with virtual host support</p>
+                    </div>
+
+                    <div class="service-card">
+                        <h4 class="font-bold mb-2">Nginx</h4>
+                        <p class="text-sm text-slate-400">Default port: <code>80</code> / <code>443</code></p>
+                        <p class="text-sm text-slate-300 mt-2">High-performance web server</p>
+                    </div>
+
+                    <div class="service-card">
+                        <h4 class="font-bold mb-2">MySQL</h4>
+                        <p class="text-sm text-slate-400">Default port: <code>3306</code></p>
+                        <p class="text-sm text-slate-300 mt-2">Relational database</p>
+                    </div>
+
+                    <div class="service-card">
+                        <h4 class="font-bold mb-2">PostgreSQL</h4>
+                        <p class="text-sm text-slate-400">Default port: <code>5432</code></p>
+                        <p class="text-sm text-slate-300 mt-2">Advanced SQL database</p>
+                    </div>
+
+                    <div class="service-card">
+                        <h4 class="font-bold mb-2">MongoDB</h4>
+                        <p class="text-sm text-slate-400">Default port: <code>27017</code></p>
+                        <p class="text-sm text-slate-300 mt-2">NoSQL document database</p>
+                    </div>
+
+                    <div class="service-card">
+                        <h4 class="font-bold mb-2">PHP</h4>
+                        <p class="text-sm text-slate-400">Built-in server mode</p>
+                        <p class="text-sm text-slate-300 mt-2">Server-side scripting language</p>
+                    </div>
+
+                    <div class="service-card">
+                        <h4 class="font-bold mb-2">Redis</h4>
+                        <p class="text-sm text-slate-400">Default port: <code>6379</code></p>
+                        <p class="text-sm text-slate-300 mt-2">In-memory cache/data store</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section>
+                <h2 class="text-2xl font-bold mb-4">Troubleshooting Service Issues</h2>
+
+                <div class="space-y-4">
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">❌ Service won't start</h3>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300">
+                            <li>Check if the port is already in use (use Log Viewer to see errors)</li>
+                            <li>Ensure the service is properly installed on your system</li>
+                            <li>Try restarting Stacknest itself</li>
+                            <li>Check system firewall settings</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">❌ Service crashes after starting</h3>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300">
+                            <li>Click the <strong>Logs</strong> tab to see error messages</li>
+                            <li>Check if configuration files are correct (Config Editor)</li>
+                            <li>Look for missing dependencies or corrupted files</li>
+                            <li>Try updating to the latest service version (Binaries tab)</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-yellow-500/10 border-l-4 border-yellow-500 p-4 rounded">
+                        <h3 class="font-bold mb-2">⚠️ Port conflict</h3>
+                        <p class="text-slate-300 mb-2">Two services trying to use the same port:</p>
+                        <ol class="list-decimal list-inside space-y-1 text-slate-300 ml-2">
+                            <li>Stop one of the conflicting services</li>
+                            <li>Or change the port in Config Editor</li>
+                            <li>Or use different services (e.g., Nginx instead of Apache)</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tips -->
+            <div class="bg-blue-500/10 border-l-4 border-blue-500 p-4 rounded">
+                <h3 class="font-bold text-lg mb-3">💡 Pro Tips</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                    <li>Always stop services before shutting down your computer</li>
+                    <li>Use Restart instead of Stop/Start for faster operation</li>
+                    <li>Check the Logs tab when a service behaves unexpectedly</li>
+                    <li>Save your "Start All" preferences to quickly start your dev environment</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-20 border-t border-slate-700 py-8 px-4 bg-slate-900/20">
+        <div class="max-w-4xl mx-auto text-center text-slate-500 text-sm">
+            <p>© 2026 Stacknest. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
