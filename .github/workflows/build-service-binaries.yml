@@ -201,13 +201,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/download-artifact@v4
         with:
           path: artifacts/
 
-      - name: Generate release notes and create release
+      - name: Create or update release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -217,69 +215,16 @@ jobs:
           mkdir -p release-assets
           find artifacts/ -type f \( -name '*.tar.gz' -o -name '*.zip' \) -exec cp {} release-assets/ \;
 
-          echo "📦 Built Binaries:"
-          ls -lh release-assets/ | tail -n +2 | awk '{print "  - " $9 " (" $5 ")"}'
-
-          # Generate detailed release notes
-          RELEASE_NOTES=$(cat <<'EOF'
-## 🎉 Stacknest Service Binaries Release
-
-### 📦 Included Services
-
-**Apache** (2.4.63)
-- ✅ Linux (x86_64)
-- ✅ macOS (arm64)
-
-**Nginx** (1.26.3, 1.25.5)
-- ✅ Linux (x86_64)
-- ✅ macOS (arm64)
-
-**PHP** (8.3.16, 8.2.28)
-- ✅ Linux (x86_64)
-- ✅ macOS (arm64)
-
-**Redis** (7.2.7, 5.0.14)
-- ✅ Linux (x86_64)
-- ✅ macOS (arm64)
-
-### 📋 Notes
-
-- **MySQL, PostgreSQL, MongoDB**: Use official upstream binaries (configured in catalog.json)
-- **System Fallback**: On macOS/Linux, system-installed versions are automatically detected if binaries aren't downloaded
-- All binaries are compiled with SSL/TLS support enabled
-- See `catalog.json` for download URLs and version details
-
-### 🚀 Usage
-
-1. Configure download paths in Stacknest app settings
-2. Select desired versions to download
-3. Click "Download" to fetch and extract binaries
-4. Service binaries are stored in: `bin/{service}/{version}/`
-
-### 📝 Build Information
-
-- **Build Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
-- **Workflow**: build-service-binaries
-- **Repository**: ${{ github.repository }}
-
-EOF
-          )
+          ls -la release-assets/
 
           # Create release (or update if exists)
-          if gh release view "$TAG" &>/dev/null; then
-            echo "Release $TAG already exists, uploading artifacts..."
-            gh release upload "$TAG" \
-              --repo "${{ github.repository }}" \
-              --clobber \
-              release-assets/*
-          else
-            echo "Creating new release $TAG..."
-            gh release create "$TAG" \
-              --repo "${{ github.repository }}" \
-              --title "Stacknest Service Binaries $TAG" \
-              --notes "$RELEASE_NOTES" \
-              --latest=false \
-              release-assets/*
-          fi
-
-          echo "✅ Release complete: https://github.com/${{ github.repository }}/releases/tag/$TAG"
+          gh release create "$TAG" \
+            --repo "${{ github.repository }}" \
+            --title "Service Binaries $TAG" \
+            --notes "Prebuilt service binaries for Stacknest (Apache, Nginx, PHP, Redis). MySQL/PostgreSQL/MongoDB use official upstream binaries." \
+            --latest=false \
+            release-assets/* || \
+          gh release upload "$TAG" \
+            --repo "${{ github.repository }}" \
+            --clobber \
+            release-assets/*
