@@ -4,7 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Stacknest - Cross-platform desktop app for managing local development services. Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, Redis. All in one place.">
+    <meta name="keywords" content="development tools, local environment manager, Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, Redis, desktop app, DevOps, web development">
+    <meta name="author" content="Stacknest">
+    <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#0F172A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Stacknest">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stacknests.org/">
+    <meta property="og:title" content="Stacknest - Local Development Environment Manager">
+    <meta property="og:description" content="Manage Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, and Redis from one beautiful desktop app. No terminal wizardry required.">
+    <meta property="og:image" content="https://stacknests.org/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Stacknest">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://stacknests.org/">
+    <meta property="twitter:title" content="Stacknest - Local Development Environment Manager">
+    <meta property="twitter:description" content="Manage Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, and Redis from one beautiful desktop app.">
+    <meta property="twitter:image" content="https://stacknests.org/og-image.png">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://stacknests.org/">
+
+    <!-- Preload critical resources -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Stacknest",
+      "description": "Cross-platform desktop app for managing local development services",
+      "url": "https://stacknests.org",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": ["Windows", "macOS", "Linux"],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Stacknest"
+      },
+      "featureList": [
+        "Service Dashboard",
+        "Binary Management",
+        "SSL Certificates",
+        "Config Editor",
+        "Virtual Hosts",
+        "Log Viewer",
+        "Database Tools",
+        "Embedded Terminal",
+        "System Tray"
+      ]
+    }
+    </script>
+
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Stacknest",
+      "url": "https://stacknests.org",
+      "logo": "https://stacknests.org/logo.png",
+      "description": "Cross-platform development environment manager",
+      "sameAs": [
+        "https://github.com/stacknest"
+      ]
+    }
+    </script>
+
     <title>Stacknest - Local Development Environment Manager</title>
 
     <!-- Google Fonts -->
@@ -517,6 +596,90 @@
             <p class="text-sm text-slate-400">Version 1.0.0 • <a href="#" class="text-blue-400 hover:text-blue-300">View Changelog</a> • <a href="#" class="text-blue-400 hover:text-blue-300">System Requirements</a></p>
         </div>
     </section>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is Stacknest free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Stacknest is completely free and open source. No hidden costs or limitations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which platforms are supported?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Stacknest works on Windows, macOS, and Linux. Download the installer for your platform."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to install services separately?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Stacknest can manage system-installed services or use prebuilt binaries. Choose what works for you."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I report bugs or request features?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Visit our GitHub repository at github.com/your-org/stacknest to report issues and contribute."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use Stacknest in production?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Stacknest is designed for local development. For production, use dedicated servers or cloud platforms."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Breadcrumb Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://stacknests.org"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Features",
+          "item": "https://stacknests.org#features"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Download",
+          "item": "https://stacknests.org#download"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "FAQ",
+          "item": "https://stacknests.org#faq"
+        }
+      ]
+    }
+    </script>
 
     </main>
 
