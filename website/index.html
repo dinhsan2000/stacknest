@@ -401,9 +401,9 @@
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center gap-8">
-                <a href="#features" class="hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg rounded px-2 py-1">Features</a>
-                <a href="#screenshots" class="hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg rounded px-2 py-1">Gallery</a>
-                <a href="#faq" class="hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg rounded px-2 py-1">FAQ</a>
+                <a href="/" class="text-blue-400 hover:text-blue-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg rounded px-2 py-1">Home</a>
+                <a href="/docs.html" class="hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg rounded px-2 py-1">Docs</a>
+                <a href="/download.html" class="hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg rounded px-2 py-1">Download</a>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -413,18 +413,28 @@
                 </svg>
             </button>
 
-            <a href="#download" class="btn-primary text-sm hidden sm:block">Download</a>
+            <a href="/download.html" class="btn-primary text-sm hidden sm:block">Download</a>
         </div>
 
         <!-- Mobile Navigation Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-slate-900/95 backdrop-blur-sm border-t border-slate-700">
             <div class="px-4 py-4 space-y-3">
-                <a href="#features" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">Features</a>
-                <a href="#screenshots" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">Gallery</a>
-                <a href="#faq" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">FAQ</a>
-                <a href="#download" class="block btn-primary text-center mt-2">Download</a>
+                <a href="/" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">Home</a>
+                <a href="/docs.html" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">Docs</a>
+                <a href="/download.html" class="block px-4 py-2 hover:bg-slate-800 rounded transition-colors">Download</a>
+                <a href="/download.html" class="block btn-primary text-center mt-2">Download</a>
             </div>
         </div>
+
+        <script>
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+                const menu = document.getElementById('mobile-menu');
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                this.setAttribute('aria-expanded', !isExpanded);
+                menu.classList.toggle('hidden');
+            });
+        </script>
     </nav>
 
     <main>
