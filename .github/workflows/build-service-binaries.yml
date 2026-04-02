@@ -1,4 +1,4 @@
-name: Build Service Binaries
+name: Build Binaries
 
 # Manually trigger to build and upload service binaries for all platforms.
 # Creates a GitHub Release with prebuilt binaries for Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, Redis.
