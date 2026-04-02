@@ -22,7 +22,7 @@ jobs:
       - name: Build Apache from source
         run: |
           sudo apt-get update && sudo apt-get install -y build-essential libapr1-dev libaprutil1-dev libpcre3-dev libssl-dev
-          curl -fsSL https://dlcdn.apache.org/httpd/httpd-2.4.63.tar.gz | tar xz
+          curl -fsSL https://archive.apache.org/dist/httpd/httpd-2.4.63.tar.gz | tar xz
           cd httpd-2.4.63
           ./configure --prefix=/opt/apache --enable-so --enable-ssl --enable-rewrite --enable-mods-shared=all
           make -j$(nproc)
@@ -41,7 +41,7 @@ jobs:
       - name: Build Apache from source
         run: |
           brew install apr apr-util pcre2 openssl
-          curl -fsSL https://dlcdn.apache.org/httpd/httpd-2.4.63.tar.gz | tar xz
+          curl -fsSL https://archive.apache.org/dist/httpd/httpd-2.4.63.tar.gz | tar xz
           cd httpd-2.4.63
           ./configure --prefix=/opt/apache \
             --enable-so --enable-ssl --enable-rewrite --enable-mods-shared=all \
