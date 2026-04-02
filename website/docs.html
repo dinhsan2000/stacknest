@@ -31,6 +31,9 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -240,18 +243,51 @@
         });
     </script>
 
-    <main>
+    <main id="app">
     <!-- Hero Section -->
     <section class="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div class="max-w-4xl mx-auto text-center">
             <h1 class="text-5xl sm:text-6xl font-bold font-display mb-6">Documentation</h1>
             <p class="text-xl text-slate-300 mb-8">Complete guides, tutorials, and API references to get the most out of Stacknest.</p>
 
-            <div class="search-box max-w-2xl mx-auto mb-12">
-                <svg class="absolute left-3 top-3 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                <input type="search" placeholder="Search documentation..." class="pl-8">
+            <div class="relative max-w-2xl mx-auto mb-12">
+                <div class="search-box">
+                    <svg class="absolute left-3 top-3 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input
+                        v-model="searchQuery"
+                        type="search"
+                        placeholder="Search documentation..."
+                        class="pl-8"
+                        @input="performSearch"
+                    >
+                </div>
+
+                <!-- Search Results Dropdown -->
+                <div v-if="searchQuery && searchResults.length > 0" class="absolute top-full left-0 right-0 mt-2 bg-slate-900/95 border border-slate-700 rounded-lg shadow-xl z-40">
+                    <div class="max-h-96 overflow-y-auto">
+                        <a
+                            v-for="result in searchResults"
+                            :key="result.id"
+                            :href="result.url"
+                            class="block px-4 py-3 hover:bg-slate-800 border-b border-slate-700 last:border-0 transition-colors group"
+                        >
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-blue-400 group-hover:text-blue-300 transition-colors">{{ result.title }}</h4>
+                                    <p class="text-sm text-slate-400 mt-1">{{ result.description }}</p>
+                                </div>
+                                <span class="ml-2 px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded whitespace-nowrap">{{ result.category }}</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- No Results Message -->
+                <div v-if="searchQuery && searchResults.length === 0" class="absolute top-full left-0 right-0 mt-2 bg-slate-900/95 border border-slate-700 rounded-lg p-4 text-center text-slate-400 z-40">
+                    No results found for "{{ searchQuery }}"
+                </div>
             </div>
         </div>
     </section>
@@ -495,5 +531,69 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    searchQuery: '',
+                    searchResults: [],
+                    docs: [
+                        // Getting Started
+                        { id: 1, title: 'Installation Guide', description: 'Step-by-step installation for Windows, macOS, and Linux', category: 'Getting Started', url: '#' },
+                        { id: 2, title: 'System Requirements', description: 'Hardware and software requirements for Stacknest', category: 'Getting Started', url: '#' },
+                        { id: 3, title: 'First Project Setup', description: 'Create your first local development project', category: 'Getting Started', url: '#' },
+                        { id: 4, title: 'Platform-Specific Guides', description: 'OS-specific setup instructions', category: 'Getting Started', url: '#' },
+                        { id: 5, title: 'Keyboard Shortcuts', description: 'Quick keyboard shortcuts for faster workflow', category: 'Getting Started', url: '#' },
+
+                        // Features & Usage
+                        { id: 6, title: 'Dashboard Overview', description: 'Understanding the main dashboard interface', category: 'Features', url: '#' },
+                        { id: 7, title: 'Service Management', description: 'Start, stop, and manage services', category: 'Features', url: '#' },
+                        { id: 8, title: 'Virtual Hosts', description: 'Create and manage virtual hosts', category: 'Features', url: '#' },
+                        { id: 9, title: 'SSL Certificates', description: 'Generate and manage SSL certificates', category: 'Features', url: '#' },
+                        { id: 10, title: 'Log Viewer', description: 'View and analyze service logs in real-time', category: 'Features', url: '#' },
+
+                        // Configuration
+                        { id: 11, title: 'Settings', description: 'Configure Stacknest preferences', category: 'Configuration', url: '#' },
+                        { id: 12, title: 'Service Configuration', description: 'Edit service-specific configuration files', category: 'Configuration', url: '#' },
+                        { id: 13, title: 'Database Setup', description: 'Configure database services and connections', category: 'Configuration', url: '#' },
+                        { id: 14, title: 'PHP Versions', description: 'Switch between different PHP versions', category: 'Configuration', url: '#' },
+                        { id: 15, title: 'Custom Ports', description: 'Configure custom ports for services', category: 'Configuration', url: '#' },
+
+                        // Advanced
+                        { id: 16, title: 'API Reference', description: 'Complete API documentation', category: 'Advanced', url: '#' },
+                        { id: 17, title: 'Plugin Development', description: 'Create custom plugins and extensions', category: 'Advanced', url: '#' },
+                        { id: 18, title: 'Performance Tips', description: 'Optimize Stacknest performance', category: 'Advanced', url: '#' },
+                        { id: 19, title: 'Troubleshooting', description: 'Common issues and solutions', category: 'Advanced', url: '#' },
+                        { id: 20, title: 'FAQ', description: 'Frequently asked questions', category: 'Advanced', url: '#' },
+
+                        // Additional pages
+                        { id: 21, title: 'Managing Services', description: 'Learn how to manage Apache, Nginx, MySQL, PostgreSQL, MongoDB, PHP, Redis', category: 'User Guides', url: '#' },
+                        { id: 22, title: 'Virtual Hosts Setup', description: 'Create and manage virtual hosts for projects', category: 'User Guides', url: '#' },
+                        { id: 23, title: 'Config Editor', description: 'Edit service configurations with syntax highlighting', category: 'User Guides', url: '#' },
+                        { id: 24, title: 'Database Management', description: 'Browse and manage databases with Adminer or HeidiSQL', category: 'User Guides', url: '#' },
+                        { id: 25, title: 'Terminal Usage', description: 'Use the built-in PTY terminal', category: 'User Guides', url: '#' }
+                    ]
+                };
+            },
+            methods: {
+                performSearch() {
+                    if (!this.searchQuery.trim()) {
+                        this.searchResults = [];
+                        return;
+                    }
+
+                    const query = this.searchQuery.toLowerCase();
+                    this.searchResults = this.docs.filter(doc => {
+                        return doc.title.toLowerCase().includes(query) ||
+                               doc.description.toLowerCase().includes(query) ||
+                               doc.category.toLowerCase().includes(query);
+                    }).slice(0, 8); // Show max 8 results
+                }
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
